@@ -1,0 +1,124 @@
+<ion-header>
+    <ion-toolbar color="primary">
+        <ion-buttons slot="start">
+            <ion-back-button class="show-back-button" (click)="goBack()"></ion-back-button>
+        </ion-buttons>
+        <ion-buttons slot="end">
+            <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+        <ion-title>Profile</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content>
+    <ion-card>
+        <ion-item>
+            <ion-avatar slot="start">
+                <img src="{{ (currentUser | async)?.profilePictureUrl  }}">
+                <!--img [src]="post.image"-->
+            </ion-avatar>
+
+            <ion-label>
+                <h2>{{ (currentUser | async)?.name  }}</h2>
+                    <!-- <h2 *ngIf="(currentUser | async); let user">{{ user.name }} Username</h2> -->
+                    <p *ngIf="(currentUser | async); let user">{{ calculateAge(user.birthday) }} years old</p>
+            </ion-label>
+            <ion-label side="end">
+                <!--<div class="fileUpload btn btn-primary">
+                    <span>Select profile picture</span>
+                   
+                </div>-->
+
+                <ion-button color="secondary" (click)="uploadBtn.click()" float-right>
+                    Upload picture
+               </ion-button>
+                <input  #uploadBtn id="uploadBtn"
+                id="uploadBtn"
+                type="file"
+                class="upload"
+                (change)="uploadFile($event.target.files)"/>
+           </ion-label>
+        </ion-item>
+
+          
+    <div *ngIf="percentage | async as pct">
+        Progress: {{ pct | number }}%
+        <ion-progress-bar value="{{ pct / 100 }}"></ion-progress-bar>
+    </div>
+    <div *ngIf="snapshot | async as snap">
+        File Size: {{ snap.totalBytes | fileSizePipe }} Transfered:
+        {{ snap.bytesTransferred | fileSizePipe }}
+        <div *ngIf="snapshot && snap.bytesTransferred != snap.totalBytes">
+            <ion-button
+                    color="warning"
+                    size="small"
+                    (click)="task.pause()"
+                    class="button is-warning"
+            >Pause
+            </ion-button
+            >
+            <ion-button
+                    size="small"
+                    (click)="task.resume()"
+                    class="button is-info"
+            >Resume
+            </ion-button
+            >
+            <ion-button
+                    color="danger"
+                    size="small"
+                    (click)="task.cancel()"
+                    class="button is-danger"
+            >Cancel
+            </ion-button
+            >
+        </div>
+    </div>
+    </ion-card>
+
+
+
+    <ion-card>
+        <ion-list-header>
+            Goals
+        </ion-list-header>
+        <ion-list *ngFor="let goal of (goals | async)">
+
+            <ion-item>
+                <ion-label side="start">
+                    <h3> {{goal.duration}} </h3>
+                    <p> {{goal.type}}</p>
+                </ion-label>
+                <ion-label class="ion-text-right">
+                    <h3>{{goal.current}} / {{goal.target}} min</h3>
+                </ion-label>
+            </ion-item>
+            
+            <ng-container *ngIf="goal.type == 'moderate'" >
+            <ion-progress-bar color="secondary" [value]="goal.relative"></ion-progress-bar>
+            </ng-container>
+            <ion-progress-bar *ngIf="goal.type == 'vigorous'" color="primary" [value]="goal.relative"></ion-progress-bar> 
+            <ion-progress-bar *ngIf="goal.type == 'weight training'" color="tertiary" [value]="goal.relative"></ion-progress-bar>
+
+           
+        </ion-list>
+    </ion-card>
+
+    <ion-card>
+        <ion-list>
+            <ion-list-header>
+                Activities
+            </ion-list-header>
+            <ion-item *ngFor="let activity of (displayedActivities | async)">
+                <ion-label>
+                    <h3>{{ activity.startTime | date:'dd.MM.' }} {{activity.getDuration()}} minutes </h3>
+
+                    <p>{{activity.type}}-{{activity.intensity}}</p>
+                </ion-label>
+            </ion-item>
+        </ion-list>
+
+        <ion-button *ngIf="(activities | async)?.length > 5" expand="block" color="secondary" (click)="loadMoreActivities()">Read more</ion-button>
+
+    </ion-card>
+</ion-content>

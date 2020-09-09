@@ -1,0 +1,31 @@
+<ion-list>
+    <ion-item>
+        <ion-label>Title</ion-label>
+        <ion-input [(ngModel)]="challenge.title" placeholder="Title" text-right></ion-input>
+    </ion-item>
+    <ion-item>
+        <ion-label>Description</ion-label>
+        <ion-input [(ngModel)]="challenge.description" placeholder="Description" text-right></ion-input>
+    </ion-item>
+    <ion-item>
+        <ion-label>Start</ion-label>
+        <ion-datetime [(ngModel)]="startTime" placeholder="Start Time" (ionChange)="convertStartDate()"
+                      text-right></ion-datetime>
+    </ion-item>
+    <ion-item>
+        <ion-label>End</ion-label>
+        <ion-datetime [(ngModel)]="endTime" placeholder="End Time" (ionChange)="convertEndDate()"
+                      text-right></ion-datetime>
+    </ion-item>
+    <ion-item>
+        <ion-label>Prize</ion-label>
+        <ion-input [(ngModel)]="challenge.price" placeholder="Prize" text-right></ion-input>
+    </ion-item>
+    <ion-item>
+        <ion-button (click)="addChallenge()" color="secondary" slot="end" float-right>Create</ion-button>
+    </ion-item>
+    <label *ngIf='(challenge.startTime.getTime() - challenge.endTime.getTime()) > 0' class="error-message">End date has
+        to be after start date</label>
+
+
+</ion-list>

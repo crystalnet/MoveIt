@@ -1,0 +1,88 @@
+<ion-header>
+    <ion-toolbar color="primary">
+        <ion-buttons slot="start">
+            <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+        <ion-title>Articles</ion-title>
+    </ion-toolbar>
+
+        <ion-button color="secondary" padding (click)="presentPopover($event)"float-right>Create Article</ion-button>
+
+    <br><br><br>
+
+    <ion-row>
+        <ion-col size="2">
+            <ion-list>
+                <ion-list-header>
+                    <ion-label>Title</ion-label>
+                </ion-list-header>
+            </ion-list>
+        </ion-col>
+        <ion-col size="3">
+            <ion-list>
+                <ion-list-header>
+                    <ion-label>Description</ion-label>
+                </ion-list-header>
+            </ion-list>
+        </ion-col>
+        <ion-col size="3">
+            <ion-list>
+                <ion-list-header>
+                    <ion-label>Link</ion-label>
+                </ion-list-header>
+            </ion-list>
+        </ion-col>
+        <ion-col size="2">
+            <ion-list>
+                <ion-list-header>
+                    <ion-label>Image</ion-label>
+                </ion-list-header>
+            </ion-list>
+        </ion-col>
+    </ion-row>
+</ion-header>
+
+<ion-content>
+
+
+    <ion-row class="ion-align-items-center" *ngFor="let article of articles">
+        <ion-col size="2">
+            <ion-list>
+                <ion-item><ion-textarea [(ngModel)]="article.title"></ion-textarea> </ion-item>
+            </ion-list>
+        </ion-col>
+
+        <ion-col size="3">
+            <ion-list>
+                <ion-item text-wrap><ion-textarea [(ngModel)]="article.content" text-wrap></ion-textarea></ion-item>
+            </ion-list>
+        </ion-col>
+
+        <ion-col size="3">
+            <ion-list>
+                <ion-item><ion-textarea [(ngModel)]="article.link" text-wrap></ion-textarea></ion-item>
+            </ion-list>
+        </ion-col>
+
+        <ion-col size="2">
+           <!-- <ion-list>
+                <ion-item><ion-textarea [(ngModel)]="article.picture"></ion-textarea>-->
+                    <ion-button color="secondary" (click)="uploadBtn.click()" float-right>
+                        Select picture
+                   </ion-button>
+                    <!--<span>Upload picture</span>-->
+                    <input
+                            id="uploadBtn"
+                            type="file"
+                            class="upload"
+                            (change)="uploadFile($event.target.files, article.id)"
+                    /><!--</ion-item>
+            </ion-list>-->
+        </ion-col>
+        <ion-col size="2">
+        <ion-button color="secondary" (click)="editArticle(article)">Save</ion-button>
+        <ion-button color="secondary" (click)="deleteArticle(article)"><ion-icon name="trash"></ion-icon></ion-button>
+        </ion-col>
+    </ion-row>
+
+</ion-content>

@@ -1,0 +1,22 @@
+.center {
+    display: block;
+    margin: auto;
+    width: 80%;
+   }
+
+   .error-message{
+    margin: 13px;
+    color: red;
+    display:flex;
+    //vertical-align: middle;
+   }
+
+   .success-message{
+    margin: 13px;
+    color: green;
+    display:flex;
+   }
+
+   .icon{
+       margin-right: 4px;
+   }

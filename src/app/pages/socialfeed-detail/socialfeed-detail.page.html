@@ -1,0 +1,116 @@
+<ion-header>
+    <ion-toolbar color="primary">
+        <ion-buttons slot="start">
+            <ion-back-button class="show-back-button" (click)="goBack()"></ion-back-button>
+        </ion-buttons>
+        <ion-buttons slot="end">
+            <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+        <ion-title>Socialfeed</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content class="cards-bg social-cards">
+    <!--
+    <ion-button type="button" (click)='newPost()'>New Post</ion-button>
+    <ion-button type="button" (click)='editPost()'>Edit Post</ion-button>
+    <ion-button type="button" (click)='like()'>Like</ion-button>
+    <ion-button type="button" (click)='unlike()'>Unlike</ion-button>
+    <ion-button type="button" (click)='getPost()'>Get Post</ion-button>
+    <ion-button type="button" (click)='getAllPosts()'>Get All Posts</ion-button>
+    <ion-button type="button" (click)='newComment()'>New Comment</ion-button>
+    <ion-button type="button" (click)='editComment()'>Edit Comment</ion-button>
+    <ion-button type="button" (click)='getComment()'>Get Comment</ion-button>
+    <ion-button type="button" (click)='getAllComments()'>Get All Comments</ion-button>
+    -->
+
+    <ion-card>
+        <ion-card-header>
+           <h2> What's up?</h2>
+        </ion-card-header>
+        <form>
+            <ion-item id="form">
+                <ion-input name="post" type="text" [(ngModel)]="postText"
+                           placeholder="Create your own post"></ion-input>
+                <ion-icon name="send" id="icons" (click)="newPost(postText)" float-right></ion-icon>
+            </ion-item>
+        </form>
+    </ion-card>
+
+
+    <ion-card *ngFor="let post of (displayedPosts | async); let i = index;">
+
+        <ion-item>
+            <ion-avatar slot="start">
+                <img src="{{post.profilePictureUrl | async}}" (click)="viewProfile(i)">
+                <!--img [src]="post.image"-->
+            </ion-avatar>
+            <ion-label id="{{post.id}}" name="userPlace">
+                <h3 (click)="viewProfile(i)">{{ post.username | async}}</h3>
+                <p (click)="viewProfile(i)">
+                    <ion-icon name="time"></ion-icon>
+                    {{ post.createdAt | date:'dd. MMM on HH:mm' }}
+                </p>
+            </ion-label>
+        </ion-item>
+        <!--<img src="../assets/Laufschuhe.jpg">-->
+
+        <ion-card-content>
+            {{post.content}}
+        </ion-card-content>
+
+
+        <ion-row>
+       
+            <ion-col center text-center>
+                <ng-container *ngIf="post.likes.includes(user.id); else running">
+                <ion-button id="like" color="secondary" type="button" (click)='like(i)'>
+                    <ion-icon name="thumbs-up"  id="icons"></ion-icon>
+                    {{post.likes?.length || 0}} Likes
+                </ion-button>
+            </ng-container>
+            <ng-template #running>
+                <ion-button id="like" color="primary" type="button" (click)='like(i)'>
+                    <ion-icon name="thumbs-up" id="icons"></ion-icon>
+                    {{post.likes?.length || 0}} Likes
+                </ion-button>
+            </ng-template>    
+            </ion-col>
+
+            <ion-col center text-center>
+                <ion-button id="comment" type="button">
+                    <ion-icon name="text" id="icons"></ion-icon>
+                    {{post.comments?.length || 0}} Comments
+                </ion-button>
+            </ion-col>
+        </ion-row>
+        <div *ngIf="post.comments?.length != 0">
+            <div *ngFor="let c of post.comments; let i = index">                
+                <ion-item lines="none" *ngIf="i < (post.commentPage * 3)">
+                    <!--<ion-label><h3>{{ (post.usernames[i] | async)}}</h3> -->
+                        <ion-label><h3>{{ c.user}}</h3>
+                        <p>{{c.text}}</p></ion-label>
+                </ion-item>
+            </div>
+            <p class="more" id="showAll" (click)="nextCommentPage(post)">Show all comments</p>
+            <!--
+              <ion-item>
+              <ion-label><p id="allComments">all comments</p></ion-label>
+            </ion-item>
+            -->
+        </div>
+        <ion-row>
+            <form>
+                <ion-item id="form">
+                    <ion-input name="comment" type="text" [(ngModel)]="commentText[i]"
+                               placeholder="Your comment..."></ion-input>
+                    <ion-icon id="icons" name="send" (click)="newComment(post, commentText[i], i)"></ion-icon>
+                </ion-item>
+            </form>
+        </ion-row>
+    </ion-card>
+    <ion-button expand="block" color="secondary" (click)="loadMorePosts()">Read more</ion-button>
+
+
+</ion-content>
+

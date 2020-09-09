@@ -1,0 +1,14 @@
+<ion-list>
+  <ion-item>
+    <ion-label>Group</ion-label>
+    <ion-input [(ngModel)]="group.name" placeholder="Enter group"></ion-input>
+  </ion-item>
+  <ion-item *ngFor="let feature of features">
+    <ion-label>{{ feature.val }}</ion-label>
+    <ion-checkbox [(ngModel)]="feature.isChecked"></ion-checkbox>
+  </ion-item>
+
+  <ion-item>
+    <ion-button (click)="createGroup()" color="secondary"  slot="end" float-right>Create</ion-button>
+  </ion-item>
+</ion-list>
