@@ -50,21 +50,21 @@ export class AdminDashboardAppconfigPage implements OnInit {
         const that = this;
         this.userService.getGroups().subscribe(val => {
             console.log(val);
-            this.allGroups = val,
-                this.allGroups.forEach(function(group) {
-                    //  group.featureVector = this.features;
+            this.allGroups = val;
+            this.allGroups.forEach((group) => {
+                //  group.featureVector = this.features;
 
-                    that.features.forEach(function(feature) {
-                        feature = {
-                            val: feature.val,
-                            isChecked: group.featureVector.includes(feature.val),
-                        };
-                        that.checkedFeature.push(feature);
-                    });
-                    group.featureVector = that.checkedFeature;
-                    that.checkedFeature = [];
-
+                that.features.forEach((feature) => {
+                    feature = {
+                        val: feature.val,
+                        isChecked: group.featureVector.includes(feature.val),
+                    };
+                    that.checkedFeature.push(feature);
                 });
+                group.featureVector = that.checkedFeature;
+                that.checkedFeature = [];
+
+            });
         });
         //  this.otps.subscribe(val => console.log(val));
     }
@@ -151,11 +151,11 @@ export class AdminDashboardAppconfigPage implements OnInit {
 
     editGroup(group: Group) {
 
-        const checkFeatures = group.featureVector.filter(function(feature) {
+        const checkFeatures = group.featureVector.filter((feature) => {
             return feature.isChecked;
         });
 
-        group.featureVector = checkFeatures.map(function(feature) {
+        group.featureVector = checkFeatures.map((feature) => {
             return feature.val;
         });
 

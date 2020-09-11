@@ -22,15 +22,16 @@ export class AdminDashboardChallengesPage implements OnInit {
     today: Date = new Date();
 
 
-    constructor(private rewardsService: RewardsService, private challService: ChallengeService, public popoverController: PopoverController, private userService: UserService, public toastController: ToastController) {
+    constructor(private rewardsService: RewardsService, private challService: ChallengeService, public popoverController: PopoverController,
+                private userService: UserService, public toastController: ToastController) {
         this.challService.getAllAvailableChallenges().subscribe(data => {
             this.challenges = data;
             console.log(this.challenges);
-            this.challenges.forEach(function (challenge) {
+            this.challenges.forEach((challenge) => {
 
                 challenge.startTimeIso = challenge.startTime.toISOString();
                 challenge.endTimeIso = challenge.endTime.toISOString();
-            })
+            });
         });
 
         this.userService.getUsers().subscribe(data => this.users = data);
