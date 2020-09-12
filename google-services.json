@@ -30,6 +30,14 @@
             {
               "client_id": "743283522973-e3g2b0cnk8bkpgfash7f0ub9ce60at8g.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "743283522973-br18bp94nd3bbbkff1vp2rv5hpj2c1vk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "de.uni-mannheim.mtp.moveit",
+                "app_store_id": "1500410619"
+              }
             }
           ]
         }

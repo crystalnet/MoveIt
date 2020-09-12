@@ -35,7 +35,8 @@ export class TrackingService {
     }
 
     logAction(actionLog: ActionLog) {
-        return this.fireDatabase.database.ref('/tracking/' + firebase.auth().currentUser.uid + '/actionLogs').push(actionLog.toFirebaseObject());
+        return this.fireDatabase.database.ref('/tracking/' + firebase.auth().currentUser.uid + '/actionLogs')
+            .push(actionLog.toFirebaseObject());
     }
 
     logReaction(notification: string, response: string) {

@@ -22,8 +22,7 @@ import {AngularFireAuthGuardModule} from '@angular/fire/auth-guard';
 import { Health } from '@ionic-native/health/ngx';
 import { IonicStorageModule } from '@ionic/storage';
 
-import { FCM } from '@ionic-native/fcm/ngx';
-
+import { FCM } from 'cordova-plugin-fcm-with-dependecy-updated/ionic/ngx';
 
 const firebaseConfig = {
     apiKey: 'AIzaSyAeeexHFSp2HevDoOi7MdzCLdgET6QtMg4',

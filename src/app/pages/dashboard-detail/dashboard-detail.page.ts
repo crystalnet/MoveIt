@@ -1,10 +1,8 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {UserService} from 'src/app/services/user/user.service';
 import {Observable} from 'rxjs';
-import {TrackingService} from '../../services/tracking/tracking.service';
-import {ViewLog} from '../../model/viewLog';
 
-import {FCM} from '@ionic-native/fcm/ngx';
+import {FCM} from 'cordova-plugin-fcm-with-dependecy-updated/ionic/ngx';
 
 @Component({
     selector: 'app-dashboard-detail',
@@ -40,21 +38,9 @@ export class DashboardDetailPage implements OnInit {
     socialB = false;
     rewardsB = false;
 
-    constructor(private userService: UserService, private fcm: FCM, ) {
-
+    constructor(private userService: UserService) {
         this.group = userService.getUsergroup();
         this.group.subscribe(group => this.updateGroup(group));
-
-        this.fcm.getToken().then(token => {
-            console.log(token);
-            this.userService.changeUserToken(token);
-        });
-        this.fcm.onTokenRefresh().subscribe(token => {
-            console.log(token);
-            this.userService.changeUserToken(token);
-        });
-
-
     }
 
     ngOnInit() {

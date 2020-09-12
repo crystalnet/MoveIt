@@ -1,11 +1,16 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router, RouterEvent} from '@angular/router';
+import {Platform} from '@ionic/angular';
 
 import {AuthenticateService} from '../../services/authentication/authentication.service';
 import {Observable} from 'rxjs';
 import {UserService} from 'src/app/services/user/user.service';
 import {TrackingService} from '../../services/tracking/tracking.service';
 import {ViewLog} from '../../model/viewLog';
+import {ActionLog} from '../../model/actionLog';
+import {FCM} from 'cordova-plugin-fcm-with-dependecy-updated/ionic/ngx';
+import {AlertController, NavController} from '@ionic/angular';
+import {INotificationPayload} from 'cordova-plugin-fcm-with-dependecy-updated';
 
 @Component({
     selector: 'app-menu',
@@ -14,8 +19,14 @@ import {ViewLog} from '../../model/viewLog';
 })
 export class MenuPage implements OnInit, OnDestroy {
 
-    constructor(private router: Router, private auth: AuthenticateService, private userService: UserService,
-                private trackingService: TrackingService) {
+    public hasPermission: boolean;
+    public token: string;
+    public pushPayload: INotificationPayload;
+
+
+    constructor(private router: Router, private auth: AuthenticateService, private userService: UserService, private fcm: FCM,
+                private navCtrl: NavController, public alertController: AlertController, private trackingService: TrackingService,
+                private platform: Platform) {
         this.router.events.subscribe((event: RouterEvent) => {
             if (event && event.url) {
                 this.selectedPath = event.url;
@@ -25,8 +36,9 @@ export class MenuPage implements OnInit, OnDestroy {
         this.username = userService.getUsername(); // The username is just the observable
         // If a new value is received, we have to manually update the pages object so that Angular notices the change
         this.username.subscribe(username => this.updatePages(username));
-    }
 
+        this.initializeFCM();
+    }
 
     pages = [
         {
@@ -34,7 +46,6 @@ export class MenuPage implements OnInit, OnDestroy {
             url: '/menu/dashboard'
         }
     ];
-
 
     username: Observable<string>;
     selectedPath = '';
@@ -53,7 +64,6 @@ export class MenuPage implements OnInit, OnDestroy {
         this.auth.logoutUser();
     }
 
-
     /**
      * Update the pages of the menu
      *
@@ -64,5 +74,99 @@ export class MenuPage implements OnInit, OnDestroy {
      */
     updatePages(username) {
         this.pages.push({title: username, url: '/menu/profile'});
+    }
+
+    initializeFCM() {
+        this.platform.ready().then(() => {
+            console.log('FCM: setup started');
+
+            if (!this.platform.is('cordova')) {
+                return;
+            }
+            console.log('FCM: In cordova platform');
+
+            console.log('FCM: getting current token');
+            this.fcm.getToken().then(
+                result => {
+                    console.log(result);
+                    this.token = result;
+                    this.userService.changeUserToken(result);
+                },
+                err => console.log(err)
+            ).finally(() => console.log('getToken result: ', this.token));
+
+            console.log('FCM: Subscribing to token updates');
+            this.fcm.onTokenRefresh().subscribe((newToken) => {
+                this.token = newToken;
+                this.userService.changeUserToken(newToken);
+                console.log('onTokenRefresh received event with: ', newToken);
+            });
+
+            // Only necessary for iOS
+            this.fcm.requestPushPermission().then(
+                result => {
+                    console.log(result);
+                    this.hasPermission = result;
+                },
+                err => console.log(err)
+            ).finally(() => console.log('getToken result: ', this.token));
+
+            console.log('Subscribing to new notifications');
+            this.fcm.onNotification().subscribe((payload) => {
+                this.pushPayload = payload;
+                console.log('onNotification received event with: ', payload);
+                this.handleNotification(payload);
+            });
+
+
+            this.fcm.getInitialPushPayload().then(
+                payload => {
+                    console.log(payload);
+                    this.pushPayload = payload;
+                    this.handleNotification(payload);
+                },
+                err => console.log(err)
+            ).finally(() => console.log('getInitialPushPayload result: ', this.pushPayload));
+        });
+    }
+
+    async handleNotification(payload) {
+        if (!payload) {
+            return;
+        }
+
+        if (payload.wasTapped) {
+            console.log('Received in background ' + payload);
+            this.trackingService.logAction(new ActionLog('entered-app-from-notification', payload.type));
+        } else {
+            console.log('Received in foreground ' + payload);
+        }
+        const alert = await this.alertController.create({
+            header: payload.header,
+            message: payload.text,
+            buttons: [
+                {
+                    text: 'Like It!',
+                    handler: () => {
+                        this.trackingService.setReaction(payload.id, payload.type, 'positive').then(
+                            res => console.log(res),
+                            err => console.log(err)
+                        );
+                        console.log('Confirm Cancel: blah');
+                    }
+                }, {
+                    text: 'Naaah',
+                    handler: () => {
+                        this.trackingService.setReaction(payload.id, payload.type, 'negative').then(
+                            res => console.log(res),
+                            err => console.log(err)
+                        );
+                        console.log('Confirm Okay');
+                    }
+                }
+            ]
+        });
+        await this.navCtrl.navigateForward(payload.target);
+        await alert.present();
     }
 }
