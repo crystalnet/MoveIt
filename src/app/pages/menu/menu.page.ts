@@ -81,6 +81,7 @@ export class MenuPage implements OnInit, OnDestroy {
             console.log('FCM: setup started');
 
             if (!this.platform.is('cordova')) {
+                console.log('FCM: platform is ', this.platform);
                 return;
             }
             console.log('FCM: In cordova platform');
@@ -118,7 +119,7 @@ export class MenuPage implements OnInit, OnDestroy {
                 this.handleNotification(payload);
             });
 
-
+            console.log('Subscribing to initial push notifications');
             this.fcm.getInitialPushPayload().then(
                 payload => {
                     console.log(payload);
@@ -141,27 +142,28 @@ export class MenuPage implements OnInit, OnDestroy {
         } else {
             console.log('Received in foreground ' + payload);
         }
+        console.log(payload);
         const alert = await this.alertController.create({
             header: payload.header,
             message: payload.text,
             buttons: [
                 {
-                    text: 'Like It!',
-                    handler: () => {
-                        this.trackingService.setReaction(payload.id, payload.type, 'positive').then(
-                            res => console.log(res),
-                            err => console.log(err)
-                        );
-                        console.log('Confirm Cancel: blah');
-                    }
-                }, {
-                    text: 'Naaah',
+                    text: payload.rejectButtonText,
                     handler: () => {
                         this.trackingService.setReaction(payload.id, payload.type, 'negative').then(
                             res => console.log(res),
                             err => console.log(err)
                         );
-                        console.log('Confirm Okay');
+                        console.log('Notification dismissed');
+                    }
+                }, {
+                    text: payload.confirmButtonText,
+                    handler: () => {
+                        this.trackingService.setReaction(payload.id, payload.type, 'positive').then(
+                            res => console.log(res),
+                            err => console.log(err)
+                        );
+                        console.log('Notification accepted');
                     }
                 }
             ]

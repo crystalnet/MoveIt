@@ -18,48 +18,37 @@ export class AdminDashboardNotificationsPage implements OnInit {
     body: any;
     title2: any;
     body2: any;
+    target2: any;
     user: any;
+    confirmButtonText: string;
+    rejectButtonText: string;
 
     constructor(private notificationService: NotificationService, private userService: UserService,
                 public toastController: ToastController) {
 
         this.userService.getUsers().subscribe(data => this.users = data);
-        // this.notification = new Notification();
-        /* his.notifications = [
-            {
-                title: 'Good Weather',
-                trigger: 'Above 18°',
-                description: 'The weather is good for a walk today',
-                option1: 'OK!',
-                option2: 'Thumbs up!',
-                options: ['OK', 'Thumbs up'],
-                groups: ['Group 1', 'Group 2', 'Group 3']
-            },
-            {
-                title: 'Good Weather',
-                trigger: 'Above 18°',
-                description: 'The weather is good for a walk today',
-                option1: 'OK!',
-                option2: 'Thumbs up!',
-                options: ['OK', 'Thumbs up'],
-                groups: ['Group 1', 'Group 2', 'Group 3']
-            }
-        ];-->*/
+        this.title2 = 'New message';
+        this.body2 = 'You received a new message';
+        this.target2 = 'menu/leaderboard/leaderboard/detail';
+        this.confirmButtonText = 'Nice';
+        this.rejectButtonText = 'Dismiss';
     }
 
-    sendNotification(title: any, body: any, userId: string) {
-        console.log(userId);
-
-        this.notificationService.sendUserNotification(userId, title, body, 'manualNotification', 'menu/progress/progress/detail').then(
-            res => console.log(res),
-            err => console.log(err)
-        );
+    sendNotification() {
+        this.notificationService.sendUserNotification(this.user, this.title2, this.body2, 'manualNotification', this.target2,
+            this.confirmButtonText, this.rejectButtonText)
+            .then(
+                res => console.log(res),
+                err => console.log(err)
+            );
         this.title2 = '';
         this.body2 = '';
         this.user = '';
+        this.target2 = '';
+        this.confirmButtonText = '';
+        this.rejectButtonText = '';
 
         this.presentToast();
-
     }
 
     async presentToast() {

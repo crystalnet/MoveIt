@@ -14,7 +14,7 @@ let admin = require('firebase-admin');
 
 admin.initializeApp(functions.config().firebase);
 
-exports.scheduledFunction = functions.pubsub.schedule('every 15 minutes from 6:00 to 3:00').onRun((context) => {
+exports.scheduledFunction = functions.pubsub.schedule('every 15 minutes from 6:00 to 3:00').onRun((context: any) => {
     console.log('This will be run every 15 minutes!');
     return null;
 });
@@ -68,6 +68,8 @@ exports.sendNotification = functions.https.onCall((data: any, context: any) => {
     const id = data.id || (new Date()).getTime();
     const type = data.type || '';
     const target = data.target || '';
+    const confirmButtonText = data.confirmButtonText || '';
+    const rejectButtonText = data.rejectButtonText || '';
     // Authentication / user information is automatically added to the request.
     // const uid = context.auth.uid;
     // const name = context.auth.token.name || null;
@@ -96,7 +98,9 @@ exports.sendNotification = functions.https.onCall((data: any, context: any) => {
             text: body,
             type: type,
             id: id,
-            target: target
+            target: target,
+            confirmButtonText: confirmButtonText,
+            rejectButtonText: rejectButtonText
         }
     };
 

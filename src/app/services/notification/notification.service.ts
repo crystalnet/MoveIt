@@ -10,7 +10,8 @@ export class NotificationService {
     constructor(private db: AngularFireDatabase) {
     }
 
-    sendUserNotification(uid: string, title: string, body: string, type: string, target: string) {
+    sendUserNotification(uid: string, title: string, body: string, type?: string, target?: string,
+                         confirmButtonText?: string, rejectButtonText?: string) {
         return new Promise((reject, resolve) => {
             const sendNotification = firebase.functions().httpsCallable('sendNotification');
 
@@ -25,8 +26,10 @@ export class NotificationService {
                         title,
                         body,
                         type,
+                        target: target || '',
+                        confirmButtonText: confirmButtonText || 'OK',
+                        rejectButtonText: rejectButtonText || 'Cancel',
                         uid,
-                        target,
                         id: (new Date()).getTime().toString()
                     };
                     console.log(data);
