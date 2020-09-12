@@ -10,7 +10,7 @@ export class NotificationService {
     constructor(private db: AngularFireDatabase) {
     }
 
-    sendUserNotification(uid: string, title: string, body: string, type: string) {
+    sendUserNotification(uid: string, title: string, body: string, type: string, target: string) {
         return new Promise((reject, resolve) => {
             const sendNotification = firebase.functions().httpsCallable('sendNotification');
 
@@ -26,6 +26,7 @@ export class NotificationService {
                         body,
                         type,
                         uid,
+                        target,
                         id: (new Date()).getTime().toString()
                     };
                     console.log(data);
@@ -50,13 +51,11 @@ export class NotificationService {
                 return true;
             }
 
-            if (wins.weeklyModerate.slice(-1)[0] < startOfWeek.getTime()
+            return wins.weeklyModerate.slice(-1)[0] < startOfWeek.getTime()
                 || (wins.weeklyVigorous.slice(-1)[0] < startOfWeek.getTime())
-                || (wins.weeklyWeight.slice(-1)[0] < startOfWeek.getTime())) {
-                return true;
-            }
+                || (wins.weeklyWeight.slice(-1)[0] < startOfWeek.getTime());
 
-            return false;
+
         }
 
         return new Promise((reject, resolve) => {
@@ -77,7 +76,7 @@ export class NotificationService {
                                     if (sendNotification) {
                                         if ('token' in users[user]) {
                                             console.log('sending notification to ' + user);
-                                            this.sendUserNotification(user, title, body, 'goalReminder').then(
+                                            this.sendUserNotification(user, title, body, 'goalReminder', '').then(
                                                 res => console.log(res),
                                                 err => reject(err)
                                             );

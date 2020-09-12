@@ -20,7 +20,8 @@ export class AdminDashboardNotificationsPage implements OnInit {
     body2: any;
     user: any;
 
-    constructor(private notificationService: NotificationService, private userService: UserService, public toastController: ToastController) {
+    constructor(private notificationService: NotificationService, private userService: UserService,
+                public toastController: ToastController) {
 
         this.userService.getUsers().subscribe(data => this.users = data);
         // this.notification = new Notification();
@@ -49,7 +50,7 @@ export class AdminDashboardNotificationsPage implements OnInit {
     sendNotification(title: any, body: any, userId: string) {
         console.log(userId);
 
-        this.notificationService.sendUserNotification(userId, title, body, 'manualNotification').then(
+        this.notificationService.sendUserNotification(userId, title, body, 'manualNotification', 'menu/progress/progress/detail').then(
             res => console.log(res),
             err => console.log(err)
         );
@@ -62,7 +63,7 @@ export class AdminDashboardNotificationsPage implements OnInit {
     }
 
     async presentToast() {
-        const controller = await this.toastController.create({
+        await this.toastController.create({
             color: 'dark',
             duration: 2000,
             message: 'Notification sent successfully!',
