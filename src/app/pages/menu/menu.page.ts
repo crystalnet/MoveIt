@@ -44,6 +44,10 @@ export class MenuPage implements OnInit, OnDestroy {
         {
             title: 'Dashboard',
             url: '/menu/dashboard'
+        },
+        {
+            title: 'Information',
+            url: '/menu/information'
         }
     ];
 
@@ -73,7 +77,7 @@ export class MenuPage implements OnInit, OnDestroy {
      * @param username the new username
      */
     updatePages(username) {
-        this.pages.push({title: username, url: '/menu/profile'});
+        this.pages.push({title: 'My Profile', url: '/menu/profile'});
     }
 
     initializeFCM() {

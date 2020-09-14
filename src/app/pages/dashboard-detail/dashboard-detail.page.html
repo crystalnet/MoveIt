@@ -1,35 +1,31 @@
 <ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="end">
-      <ion-menu-button></ion-menu-button>
-  </ion-buttons>
-    <ion-title>Dashboard</ion-title>
-  </ion-toolbar>
+    <ion-toolbar color="primary">
+        <ion-buttons slot="end">
+            <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+        <ion-title>Dashboard</ion-title>
+    </ion-toolbar>
 </ion-header>
 
 
- <ion-content scroll-y="false" class="card-background-page">
-
-  <div *ngIf="rewardsB == false && leaderboardB == false && socialB == false">
-    <ion-img width="20" src="../assets/Logo.png" >
-    </ion-img>
-    <div class="ion-text-center">
-
-      <h2>You like to....</h2>
-    <h1>MoveIt!!</h1>
+<ion-content scroll-y="false" class="card-background-page">
+    <div *ngIf="rewardsB == false && leaderboardB == false && socialB == false">
+        <ion-img src="../assets/Logo.png">
+        </ion-img>
+        <div class="ion-text-center">
+            <h2>You like to....</h2>
+            <h1>MoveIt!!</h1>
+        </div>
     </div>
-    
-  </div>
 
-  <ion-card *ngFor="let item of allServices" [routerLink]='item.routerLink'>
-    <img [src]="item.image"/>
-    <h2 class="card-title">{{item.label}}</h2>
-  </ion-card>
+    <ion-card *ngFor="let item of allServices" [routerLink]='item.routerLink'>
+        <img [src]="item.image"/>
+        <h2 class="card-title">{{item.label}}</h2>
+    </ion-card>
 
-  <!--<ion-button size="small" fill="outline" routerLink="/menu/credits">Credits</ion-button>-->
+    <!--<ion-button size="small" fill="outline" routerLink="/menu/credits">Credits</ion-button>-->
 
 </ion-content>
-
 
 
 <!--<ion-row *ngFor="let row of allservices">
