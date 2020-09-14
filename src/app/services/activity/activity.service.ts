@@ -168,7 +168,7 @@ export class ActivityService {
                         'activity', 'distance'
                     ]).then(res => {
                             console.log(res);
-                            // permission succesfull
+                            // permission successful
                             // get a the date when API is last time read
                             return this.storage.get('lastDate').then((lastDate: Date) => {
                                     console.log('last time read at :', lastDate);
@@ -189,14 +189,11 @@ export class ActivityService {
                                         dataType: 'activity',
                                     }).then((value: []) => {
                                         console.log('Value of Health Data loaded: ', value);
-                                        if (value.length > 0) {
-                                            this.storage.set('lastDate', endDate);
-                                        }
+                                        this.storage.set('lastDate', endDate);
                                         resolve(Activity.fromFitApi(value));
                                     }).catch((e: any) => {
                                         console.log('HealthData ERROR:---' + e);
-                                        // TODO: reject(e);
-                                        resolve([]);
+                                        reject(e);
                                     });
                                 },
                                 err => reject(err));

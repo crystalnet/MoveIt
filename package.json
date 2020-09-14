@@ -27,9 +27,7 @@
     "@ionic/angular": "^5.0.0",
     "@ionic/storage": "^2.3.1",
     "chart.js": "^2.9.3",
-    "cordova-android": "^8.1.0",
     "cordova-plugin-fcm-with-dependecy-updated": "^7.3.1",
-    "cordova-plugin-health": "^1.1.5",
     "cordova-plugin-ionic-webview": "^5.0.0",
     "cordova-sqlite-storage": "^5.0.1",
     "firebase": "^7.19.1",
@@ -50,6 +48,7 @@
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "^12.11.1",
     "codelyzer": "^6.0.0",
+    "cordova-android": "^9.0.0",
     "cordova-plugin-device": "^2.0.2",
     "cordova-plugin-ionic-keyboard": "^2.2.0",
     "cordova-plugin-splashscreen": "^5.0.2",
@@ -85,7 +84,8 @@
       },
       "cordova-plugin-health": {
         "HEALTH_READ_PERMISSION": "App needs read access",
-        "HEALTH_WRITE_PERMISSION": "App needs write access"
+        "HEALTH_WRITE_PERMISSION": "App needs write access",
+        "GMS_VERSION": "19.0.0"
       }
     },
     "platforms": [

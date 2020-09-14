@@ -16,6 +16,8 @@ $RECYCLE.BIN/
 *.log
 log.txt
 npm-debug.log*
+google-services.json
+GoogleService-Info.plist
 
 /.firebase
 /.idea

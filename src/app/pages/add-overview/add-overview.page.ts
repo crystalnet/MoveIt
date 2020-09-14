@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Location} from '@angular/common';
 import {ActivityService} from '../../services/activity/activity.service';
+import {ToastController} from '@ionic/angular';
 
 @Component({
     selector: 'app-add-overview',
@@ -10,8 +11,12 @@ import {ActivityService} from '../../services/activity/activity.service';
 export class AddOverviewPage implements OnInit {
     lastDate: Date;
 
-    constructor(private location: Location, private activityService: ActivityService) {
-        activityService.getLastDate().then(
+    constructor(private location: Location, private activityService: ActivityService, private toastController: ToastController) {
+        this.updateLastSynchronized();
+    }
+
+    updateLastSynchronized() {
+        this.activityService.getLastDate().then(
             res => this.lastDate = res,
             err => console.log(err));
     }
@@ -24,9 +29,33 @@ export class AddOverviewPage implements OnInit {
     }
 
     synchronizeActivities() {
-      this.activityService.synchronizeApi().then(
-          res => console.log(res),
-          err => console.log(err)
-      );
+        console.log('Synchronizing activities');
+        this.activityService.synchronizeApi().then(
+            res => {
+                console.log(res);
+                this.presentAlert('Activities have been synchronized');
+                this.updateLastSynchronized();
+            },
+            err => {
+                console.log(err);
+                this.presentAlert('Activities could not be fetched. See logs for more info.');
+            }
+        );
+    }
+
+    async presentAlert(text) {
+        await this.toastController.create({
+            color: 'dark',
+            duration: 2000,
+            message: text,
+            buttons: [
+                {
+                    text: 'Done',
+                    role: 'cancel'
+                }
+            ]
+        }).then(toast => {
+            toast.present();
+        });
     }
 }
