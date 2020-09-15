@@ -1,6 +1,6 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {NavController} from '@ionic/angular';
+import {IonSlides, NavController} from '@ionic/angular';
 
 import {AuthenticateService} from '../../services/authentication/authentication.service';
 import {User} from '../../model/user';
@@ -11,10 +11,11 @@ import {User} from '../../model/user';
     styleUrls: ['./registration.page.scss'],
 })
 export class RegistrationPage implements OnInit {
-
     validationsForm: FormGroup;
     errorMessage = '';
     successMessage = '';
+
+    @ViewChild('slides', {static: false}) slides: IonSlides;
 
     validationMessages = {
         email: [
@@ -32,7 +33,11 @@ export class RegistrationPage implements OnInit {
         gender: [{type: 'required', message: 'Please choose your gender'}],
         degree: [{type: 'required', message: 'Please select a degree'}],
         occupation: [{type: 'required', message: 'Please select an occupation'}],
-        terms: [{type: 'required', message: 'Please accept the terms'}]
+        terms: [{type: 'required', message: 'Please accept the terms'}],
+        time1: [{type: 'required', message: 'Please choose a time'}],
+        time2: [{type: 'required', message: 'Please choose a time'}],
+        time3: [{type: 'required', message: 'Please choose a time'}],
+        time4: [{type: 'required', message: 'Please choose a time'}]
     };
     birthday: Date;
     maxDate: number = new Date().getFullYear() - 18;
@@ -60,7 +65,11 @@ export class RegistrationPage implements OnInit {
             degree: new FormControl('', Validators.required),
             occupation: new FormControl('', Validators.required),
             terms: new FormControl('', Validators.requiredTrue),
-            code: new FormControl('', Validators.required)
+            code: new FormControl('', Validators.required),
+            time1: new FormControl('', Validators.required),
+            time2: new FormControl('', Validators.required),
+            time3: new FormControl('', Validators.required),
+            time4: new FormControl('', Validators.required)
         });
         this.validationsForm.get('terms').setValue(false);
     }
@@ -78,6 +87,7 @@ export class RegistrationPage implements OnInit {
         user.profilePictureUrl = 'https://firebasestorage.googleapis.com/v0/b/moveit-2019.appspot.com/o/profilePic%2FdefaultPic?alt=media&token=77281e2a-9855-4b8a-b8dc-74ee60092cc4';
         user.birthday = new Date(value.birthday);
         user.birthday.setHours(0, 0, 0, 0);
+        user.times = [value.time1, value.time2, value.time3, value.time4];
         this.authService.registerUser(value.code, value.email, value.password, user)
             .then(res => {
                 console.log(res);
@@ -100,6 +110,14 @@ export class RegistrationPage implements OnInit {
 
     goLoginPage() {
         this.navCtrl.navigateBack('');
+    }
+
+    slidePrev() {
+        this.slides.slidePrev();
+    }
+
+    slideNext() {
+        this.slides.slideNext();
     }
 
 }

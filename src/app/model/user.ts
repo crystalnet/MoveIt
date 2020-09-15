@@ -10,6 +10,7 @@ interface FireBaseObject {
     gender: string;
     degree: string;
     occupation: string;
+    times: Array<any>;
     profilePictureUrl: string;
     token: string;
 }
@@ -23,7 +24,7 @@ export class User {
      *
      */
     constructor(id?: string, name?: string, challengesActive?: Array<any>, group?: string, type?: string,
-                birthday?: Date, gender?: string, degree?: string, occupation?: string, profilePictureUrl?: string) {
+                birthday?: Date, gender?: string, degree?: string, occupation?: string, times?: Array<any>, profilePictureUrl?: string) {
         // Each parameter is optional, if it's not there, set the default value
         this.id = id || '-1';
         this.name = name || 'No username';
@@ -34,6 +35,7 @@ export class User {
         this.gender = gender;
         this.degree = degree;
         this.occupation = gender;
+        this.times = [];
         this.profilePictureUrl = profilePictureUrl || '';
     }
     id: string;
@@ -45,6 +47,7 @@ export class User {
     gender: string;
     degree: string;
     occupation: string;
+    times: Array<any>;
     profilePictureUrl: string;
     token: string;
 
@@ -59,6 +62,7 @@ export class User {
             firebaseObject.gender || '',
             firebaseObject.degree || '',
             firebaseObject.occupation || '',
+            firebaseObject.times || [],
             firebaseObject.profilePictureUrl || ''
         );
     }
@@ -82,6 +86,7 @@ export class User {
             gender: this.gender,
             degree: this.degree,
             occupation: this.occupation,
+            times: this.times,
             profilePictureUrl: this.profilePictureUrl,
         };
     }
