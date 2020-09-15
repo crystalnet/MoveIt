@@ -8,6 +8,8 @@ interface FireBaseObject {
     type: string;
     birthday: string;
     gender: string;
+    degree: string;
+    occupation: string;
     profilePictureUrl: string;
     token: string;
 }
@@ -21,15 +23,17 @@ export class User {
      *
      */
     constructor(id?: string, name?: string, challengesActive?: Array<any>, group?: string, type?: string,
-                birthday?: Date, gender?: string, profilePictureUrl?: string) {
+                birthday?: Date, gender?: string, degree?: string, occupation?: string, profilePictureUrl?: string) {
         // Each parameter is optional, if it's not there, set the default value
         this.id = id || '-1';
         this.name = name || 'No username';
         this.challengesActive = challengesActive || [];
         this.group = group || '-1';
         this.type = type || 'user';
-        this.birthday = birthday || new Date(2019, 0O5, 0O5, 17, 23, 42, 0);
+        this.birthday = birthday || new Date();
         this.gender = gender;
+        this.degree = degree;
+        this.occupation = gender;
         this.profilePictureUrl = profilePictureUrl || '';
     }
     id: string;
@@ -39,6 +43,8 @@ export class User {
     type: string;
     birthday: Date;
     gender: string;
+    degree: string;
+    occupation: string;
     profilePictureUrl: string;
     token: string;
 
@@ -51,6 +57,8 @@ export class User {
             firebaseObject.type || '',
             new Date(firebaseObject.birthday) || new Date(),
             firebaseObject.gender || '',
+            firebaseObject.degree || '',
+            firebaseObject.occupation || '',
             firebaseObject.profilePictureUrl || ''
         );
     }
@@ -72,6 +80,8 @@ export class User {
             type: this.type,
             birthday: this.birthday.toDateString(),
             gender: this.gender,
+            degree: this.degree,
+            occupation: this.occupation,
             profilePictureUrl: this.profilePictureUrl,
         };
     }

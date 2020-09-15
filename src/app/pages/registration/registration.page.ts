@@ -30,9 +30,11 @@ export class RegistrationPage implements OnInit {
         ],
         birthday: [{type: 'required', message: 'Please set a birthday'}],
         gender: [{type: 'required', message: 'Please choose your gender'}],
+        degree: [{type: 'required', message: 'Please select a degree'}],
+        occupation: [{type: 'required', message: 'Please select an occupation'}],
         terms: [{type: 'required', message: 'Please accept the terms'}]
     };
-    bday: Date;
+    birthday: Date;
     maxDate: number = new Date().getFullYear() - 18;
 
     constructor(
@@ -52,24 +54,27 @@ export class RegistrationPage implements OnInit {
                 Validators.minLength(5),
                 Validators.required
             ])),
-            username: new FormControl('', Validators.required),
-            // surname: new FormControl('', Validators.required),
+            name: new FormControl('', Validators.required),
             birthday: new FormControl('', Validators.required),
             gender: new FormControl('', Validators.required),
+            degree: new FormControl('', Validators.required),
+            occupation: new FormControl('', Validators.required),
             terms: new FormControl('', Validators.requiredTrue),
             code: new FormControl('', Validators.required)
         });
+        this.validationsForm.get('terms').setValue(false);
     }
 
     tryRegister(value) {
-        if (this.calculateAge(this.bday) < 18) {
-            return;
-        }
+        // if (this.calculateAge(this.birthday) < 18) {
+        //     return;
+        // }
 
-        // TODO check if terms are accepted
         const user = new User();
-        user.name = value.username;
+        user.name = value.name;
         user.gender = value.gender;
+        user.degree = value.degree;
+        user.occupation = value.occupation;
         user.profilePictureUrl = 'https://firebasestorage.googleapis.com/v0/b/moveit-2019.appspot.com/o/profilePic%2FdefaultPic?alt=media&token=77281e2a-9855-4b8a-b8dc-74ee60092cc4';
         user.birthday = new Date(value.birthday);
         user.birthday.setHours(0, 0, 0, 0);
@@ -87,8 +92,8 @@ export class RegistrationPage implements OnInit {
     }
 
     calculateAge(birthday: Date) {
-        this.bday = new Date(birthday);
-        const timeDiff = Math.abs(Date.now() - this.bday.getTime());
+        this.birthday = new Date(birthday);
+        const timeDiff = Math.abs(Date.now() - this.birthday.getTime());
         return Math.floor((timeDiff / (1000 * 3600 * 24)) / 365.25);
 
     }
