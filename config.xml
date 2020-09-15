@@ -3,7 +3,7 @@
     <name>MoveIt</name>
     <description>An awesome new health app.</description>
     <author email="konschmi@mail.uni-mannheim.de" href="https://github.com/crystalneth">Konstantin Schmidt</author>
-    <content original-src="index.html" src="http://localhost:8100" />
+    <content src="index.html" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
@@ -103,5 +103,4 @@
     <plugin name="cordova-plugin-device" spec="2.0.2" />
     <plugin name="cordova-plugin-splashscreen" spec="5.0.2" />
     <plugin name="cordova-plugin-ionic-keyboard" spec="^2.0.5" />
-    <allow-navigation href="http://localhost:8100" sessionid="dfbead21" />
 </widget>

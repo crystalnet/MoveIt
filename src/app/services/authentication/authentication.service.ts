@@ -34,30 +34,22 @@ export class AuthenticateService {
                                 user.id = userCredential.user.uid;
                                 user.group = group;
                                 user.profilePictureUrl = 'https://firebasestorage.googleapis.com/v0/b/moveit-2019.appspot.com/o/profilePic%2FdefaultPic?alt=media&token=77281e2a-9855-4b8a-b8dc-74ee60092cc4';
-                                this.removeOTP(otp);
+                                const promises = [];
+                                promises.push(this.removeOTP(otp));
                                 // Try to create the user on the database
-                                this.db.database.ref('/challengesStatus/' + user.id + '/won/default').set('default');
-                                this.registerOnDatabase(user).then(
-                                    // If this is successful, resolve the promise
-                                    () => {
-                                        this.goalService.initializeUserGoals().then(
-                                            () => {
-                                                this.rewardsService.initializeTrophies().then(
-                                                    () => resolve(userCredential),
-                                                    err => reject(err)
-                                                );
-                                            },
-                                            err => reject(err)
-                                        );
-                                    },
-                                    // If it's not successful, the user was created with the auth service but not in the database
+                                promises.push(this.db.database.ref('/challengesStatus/' + user.id + '/won/default').set('default'));
+                                promises.push(this.registerOnDatabase(user));
+                                promises.push(this.goalService.initializeUserGoals());
+                                promises.push(this.rewardsService.initializeTrophies());
+                                promises.push(this.addUserTimesToSchedule(user));
+                                Promise.all(promises).then(
+                                    () => resolve(),
                                     err => reject(err)
                                 );
                             },
-                            err => reject(err));
-                },
-                err => reject(err)
-            );
+                            err => reject(err)
+                        );
+                });
         });
     }
 
@@ -79,11 +71,18 @@ export class AuthenticateService {
     }
 
     removeOTP(otp: string) {
-        return this.db.database.ref(/otps/ + otp).remove();
+        return this.db.database.ref('/otps/' + otp).remove();
     }
 
     registerOnDatabase(user: User) {
         return this.db.object<any>('/users/' + user.id).set(user.toFirebaseObject());
+    }
+
+    addUserTimesToSchedule(user: User) {
+        for (const t of user.times) {
+            const time = new Date(t);
+            this.db.database.ref('/times/' + time.getHours() + '/' + time.getMinutes()).push(user.id);
+        }
     }
 
     loginUser(value) {
@@ -110,4 +109,3 @@ export class AuthenticateService {
         });
     }
 }
-
