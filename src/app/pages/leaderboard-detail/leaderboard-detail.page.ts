@@ -52,8 +52,8 @@ export class LeaderboardDetailPage implements OnInit {
 
     currentUser: User;
 
-    constructor(private router: Router, private challService: ChallengeService, private goalService: GoalService, private trophyService: TrophyService, private userService: UserService,
-                private location: Location) {
+    constructor(private router: Router, private challService: ChallengeService, private goalService: GoalService,
+                private trophyService: TrophyService, private userService: UserService, private location: Location) {
     }
 
     /**
@@ -101,10 +101,8 @@ export class LeaderboardDetailPage implements OnInit {
     }
 
     updateGroup(group) {
-
         this.config = this.userService.getGroupconfig(group);
         this.config.subscribe(config => this.setPages(config));
-
     }
 
     setPages(config) {
@@ -121,18 +119,13 @@ export class LeaderboardDetailPage implements OnInit {
     async pushTrophyObjects(result) {
         const testArray = new Array<LeaderboardObject>();
 
-        for (let i = 0; i < result.length; i++) {
-            const oneResult = result[i];
-            if (oneResult) {
-
-                const entity1 = await new LeaderboardObject(oneResult.id, oneResult.won.length, this.userService);
-
+        for (const element of result) {
+            if (element) {
+                const entity1 = await new LeaderboardObject(element.id, element.won.length, this.userService);
                 console.log(entity1);
-
                 testArray.push(entity1);
             }
         }
-
         this.trophiesList = testArray;
         this.sortArrays();
     }
@@ -144,14 +137,10 @@ export class LeaderboardDetailPage implements OnInit {
     async pushChallengeObjects(result) {
         const testArray = new Array<LeaderboardObject>();
 
-        for (let i = 0; i < result.length; i++) {
-            const oneResult = result[i];
-            if (oneResult) {
-
-                const entity1 = await new LeaderboardObject(oneResult.id, oneResult.won.length - 1, this.userService);
-
+        for (const element of result) {
+            if (element) {
+                const entity1 = await new LeaderboardObject(element.id, element.won.length - 1, this.userService);
                 console.log(entity1);
-
                 testArray.push(entity1);
             }
         }
@@ -166,24 +155,17 @@ export class LeaderboardDetailPage implements OnInit {
      */
     pushMinuteObjects(result) {
         const testArray = new Array<LeaderboardObject>();
-        const testArray2 = new Array<LeaderboardObject>();
 
-        for (let i = 0; i < result.length; i++) {
-            const oneResult = result[i];
-            console.log(oneResult);
-            if (oneResult) {
-                if (oneResult.type === 'weekly') {
-
-                    const entity1 = new LeaderboardObject(oneResult.id, oneResult.activity, this.userService);
-
+        for (const element of result) {
+            console.log(element);
+            if (element) {
+                if (element.type === 'weekly') {
+                    const entity1 = new LeaderboardObject(element.id, element.activity, this.userService);
                     testArray.push(entity1);
-
                 }
             }
         }
-
         this.activitiesModerate = testArray;
-
         this.sortArrays();
     }
 
@@ -211,9 +193,7 @@ export class LeaderboardDetailPage implements OnInit {
         return Math.floor((timeDiff / (1000 * 3600 * 24)) / 365.25);
     }
 
-
     goBack() {
         this.location.back();
     }
-
 }
