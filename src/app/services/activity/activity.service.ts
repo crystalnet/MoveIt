@@ -27,21 +27,18 @@ export class ActivityService {
     }
 
     /**
-     * Creates a new activity in firebase from an activity objects
+     * Creates a new activity in firebase from an activity object
      *
      * @param activity an existing activity object
      */
     createActivity(activity: Activity) {
         return new Promise<any>((resolve, reject) => {
-
-
-            this.synchronizeApi().then(
+            this.synchronizeApi(false).then(
                 () => {
                     this.writeActivitytoFirebase(activity).then(
                         // Returns the activity with the new id
                         () => {
                             this.writeFitnessApi(activity);
-                            this.updateLastDate();
                             const message = 'Look, I did ' + activity.getDuration() + ' minutes of ' + activity.type;
                             this.runUpdates(activity, message).then(
                                 () => resolve(activity),
@@ -53,7 +50,6 @@ export class ActivityService {
                 },
                 err => reject(err)
             );
-
         });
     }
 
@@ -207,18 +203,27 @@ export class ActivityService {
     }
 
 
-    synchronizeApi() {
+    synchronizeApi(runUpdates = true) {
         return new Promise<any>((resolve, reject) => {
             this.readFitnessApi().then((activities: Activity[]) => {
+                    const promises = [];
                     for (const activity of activities) {
-                        this.writeActivitytoFirebase(activity).then(
-                            () => null,
-                            err => reject(err)
-                        );
+                        promises.push(this.writeActivitytoFirebase(activity));
                     }
-
-                    this.runUpdates().then(
-                        () => resolve(),
+                    Promise.all(promises).then(
+                        () => {
+                            this.updateLastDate();
+                            if (runUpdates) {
+                                this.runUpdates().then(
+                                    () => {
+                                        resolve();
+                                    },
+                                    err => reject(err)
+                                );
+                            } else {
+                                resolve();
+                            }
+                        },
                         err => reject(err)
                     );
                 },
@@ -248,16 +253,19 @@ export class ActivityService {
             'activity', 'distance' // we only need read and write permission
         ])
             .then(
-                res => console.log(res))
+                res => {
+                    console.log(res);
+                    this.health.store({
+                        startDate: activity.startTime,
+                        endDate: activity.endTime,
+                        dataType: 'activity',
+                        value: activity.type,
+                        sourceName: 'MoveIt_test',
+                        sourceBundleId: 'com.moveitproject.www',
+                    })
+                        .then(res2 => console.log('Response of API while writing' + res2))
+                        .catch(e => console.log('Response of API while writing ERROR:' + e));
+                })
             .catch(e => console.log(e));
-        this.health.store({
-            startDate: activity.startTime,
-            endDate: activity.endTime,
-            dataType: 'activity',
-            value: activity.type,
-            sourceName: 'MoveIt_test',
-            sourceBundleId: 'com.moveitproject.www',
-        }).then(res => console.log('Response of API while writing' + res))
-            .catch(e => console.log('Response of API while writing ERROR:' + e));
     }
 }

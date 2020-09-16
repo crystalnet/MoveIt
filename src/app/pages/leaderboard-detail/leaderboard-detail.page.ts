@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {Location} from '@angular/common';
 
 
-import {Observable} from 'rxjs';
+import {combineLatest, Observable} from 'rxjs';
 
 import {GoalService} from '../../services/goal/goal.service';
 
@@ -22,7 +22,7 @@ import {ChallengeService} from '../../services/challenges/challenge.service';
 
 import {UserService} from '../../services/user/user.service';
 
-import {Router, NavigationExtras} from '@angular/router';
+import {NavigationExtras, Router} from '@angular/router';
 
 
 @Component({
@@ -48,9 +48,13 @@ export class LeaderboardDetailPage implements OnInit {
     challengeList: Array<LeaderboardObject>;
     challengesObserve: Observable<ChallengesArray[]>;
 
+    goalWinsList: Array<LeaderboardObject>;
+    goalProgressList: Array<LeaderboardObject>;
+
     tempUsername: string;
 
     currentUser: User;
+    userObservable: Observable<any>;
 
     constructor(private router: Router, private challService: ChallengeService, private goalService: GoalService,
                 private trophyService: TrophyService, private userService: UserService, private location: Location) {
@@ -60,35 +64,36 @@ export class LeaderboardDetailPage implements OnInit {
      * first get all important observables with the corresponding database queries
      */
     ngOnInit() {
-        // Observable1
-        this.activitiesObserve = this.goalService.getAllOtherAvailableGoals();
-
-        // Observable2
-        this.trophiesObserve = this.trophyService.getListOfAllUserAndTherWonTrophies();
-
-        this.challengesObserve = this.challService.getListOfAllUserAndTheirWonChallenges();
-
-        // Observable1 in action
-        this.activitiesObserve.subscribe(result => {
-            this.pushMinuteObjects(result);
-
-            // Observable2 in action
-            this.trophiesObserve.subscribe(result2 => {
-                this.pushTrophyObjects(result2);
-
-                this.challengesObserve.subscribe(result3 => {
-                    this.pushChallengeObjects(result3);
-
-                });
-
-            });
-
-        });
         // set chart active if rewards group is assigned to group
         this.group = this.userService.getUsergroup();
         this.group.subscribe(group => this.updateGroup(group));
 
-        this.userService.getUser().subscribe(user => this.currentUser = user);
+        this.userObservable = this.userService.getUser();
+        this.userObservable.subscribe(user => this.currentUser = user);
+
+        // Observable1
+        this.activitiesObserve = this.goalService.getAllOtherAvailableGoals();
+
+        // Observable1 in action
+        this.activitiesObserve.subscribe(result => {
+            this.pushMinuteObjects(result);
+        });
+
+        if (this.rewards) {
+            // Observable2
+            this.trophiesObserve = this.trophyService.getListOfAllUserAndTherWonTrophies();
+            this.trophiesObserve.subscribe(result2 => {
+                this.pushTrophyObjects(result2);
+            });
+
+            this.challengesObserve = this.challService.getListOfAllUserAndTheirWonChallenges();
+            this.challengesObserve.subscribe(result3 => {
+                this.pushChallengeObjects(result3);
+            });
+        }
+
+        this.generateGoalWinsList();
+        this.generateGoalProgressList();
     }
 
     viewProfile(counter, list) {
@@ -126,8 +131,7 @@ export class LeaderboardDetailPage implements OnInit {
                 testArray.push(entity1);
             }
         }
-        this.trophiesList = testArray;
-        this.sortArrays();
+        this.trophiesList = this.sortArrays(testArray);
     }
 
     /**
@@ -145,8 +149,7 @@ export class LeaderboardDetailPage implements OnInit {
             }
         }
 
-        this.challengeList = testArray;
-        this.sortArrays();
+        this.challengeList = this.sortArrays(testArray);
     }
 
     /**
@@ -157,7 +160,6 @@ export class LeaderboardDetailPage implements OnInit {
         const testArray = new Array<LeaderboardObject>();
 
         for (const element of result) {
-            console.log(element);
             if (element) {
                 if (element.type === 'weekly') {
                     const entity1 = new LeaderboardObject(element.id, element.activity, this.userService);
@@ -165,26 +167,69 @@ export class LeaderboardDetailPage implements OnInit {
                 }
             }
         }
-        this.activitiesModerate = testArray;
-        this.sortArrays();
+        this.activitiesModerate = this.sortArrays(testArray);
+    }
+
+    generateGoalProgressList() {
+        const moderateObservable = this.goalService.getLeaderboardGoals('weeklyModerate', 'relative');
+        const vigorousObservable = this.goalService.getLeaderboardGoals('weeklyVigorous', 'relative');
+
+        combineLatest(moderateObservable, vigorousObservable)
+            .subscribe(result => {
+                const moderateList = result[0];
+                const vigorousList = result[1];
+                const combinedList = moderateList;
+
+                if (vigorousList && moderateList) {
+                    for (const user of Object.keys(vigorousList)) {
+                        if (user in Object.keys(combinedList)) {
+                            combinedList[user] += vigorousList[user];
+                        }
+                        combinedList[user] = vigorousList[user];
+                    }
+
+                    const testarray = Object.keys(combinedList)
+                        .map(uid => new LeaderboardObject(uid, combinedList[uid] > 0 ? combinedList[uid] / 2 : 0, this.userService));
+                    this.goalProgressList = this.sortArrays(testarray);
+                    console.log(this.goalProgressList);
+                }
+            });
+    }
+
+    generateGoalWinsList() {
+        const moderateObservable = this.goalService.getLeaderboardGoals('dailyModerate', 'nWins');
+        const vigorousObservable = this.goalService.getLeaderboardGoals('dailyVigorous', 'nWins');
+
+        combineLatest(moderateObservable, vigorousObservable)
+            .subscribe(result => {
+                const moderateList = result[0];
+                const vigorousList = result[1];
+                const combinedList = moderateList;
+
+                if (vigorousList && moderateList) {
+                    for (const user of Object.keys(vigorousList)) {
+                        if (user in Object.keys(combinedList)) {
+                            combinedList[user] += vigorousList[user];
+                        }
+                        combinedList[user] = vigorousList[user];
+                    }
+
+                    const testarray = Object.keys(combinedList)
+                        .map(uid => new LeaderboardObject(uid, combinedList[uid], this.userService));
+                    this.goalWinsList = this.sortArrays(testarray);
+                    console.log(this.goalWinsList);
+                }
+            });
     }
 
     /**
      * this method sorts all arrays for the leaderboard visualization
      */
-    sortArrays() {
-        if (this.activitiesModerate !== undefined) {
-            this.activitiesModerate.sort((a, b) => a.compareTo(b));
+    sortArrays(array) {
+        if (array !== undefined) {
+            array.sort((a, b) => a.compareTo(b));
         }
-
-        if (this.trophiesList !== undefined) {
-            this.trophiesList.sort((a, b) => a.compareTo(b));
-        }
-
-        if (this.challengeList !== undefined) {
-            this.challengeList.sort((a, b) => a.compareTo(b));
-        }
-
+        return array;
     }
 
     calculateAge(birthday: Date) {

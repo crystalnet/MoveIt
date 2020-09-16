@@ -72,8 +72,15 @@ export class GoalService {
      */
     updateGoal(goal: Goal) {
         return new Promise<any>((resolve, reject) => {
-            this.fireDatabase.database.ref('/goals/' + firebase.auth().currentUser.uid + '/' + goal.name).set(goal.toFirebaseObject()).then(
-                res => resolve(res),
+            const promises = [];
+            promises.push(this.fireDatabase.database
+                .ref('/goals/' + firebase.auth().currentUser.uid + '/' + goal.name).set(goal.toFirebaseObject()));
+            promises.push(this.fireDatabase.database
+                .ref('/leaderboard/relative/' + goal.name + '/' + firebase.auth().currentUser.uid).set(goal.relative));
+            promises.push(this.fireDatabase.database
+                .ref('/leaderboard/absolute/' + goal.name + '/' + firebase.auth().currentUser.uid).set(goal.current));
+            Promise.all(promises).then(
+                () => resolve(),
                 err => reject(err)
             );
         });
@@ -107,7 +114,7 @@ export class GoalService {
      */
     getGoals() {
         const ref = this.fireDatabase.list<Goal>('/goals/' + firebase.auth().currentUser.uid);
-        // Retrieve an array, but with its metadata. This is necesary to have the key available
+        // Retrieve an array, but with its metadata. This is necessary to have the key available
         // An array of Goals is reconstructed using the fromFirebaseObject method
         return ref.snapshotChanges().pipe(
             map(goals => goals.map(goalPayload => (Goal.fromFirebaseObject(goalPayload.key, goalPayload.payload.val())))));
@@ -115,7 +122,7 @@ export class GoalService {
 
     getGoalsFromUser(userId: string) {
         const ref = this.fireDatabase.list<Goal>('/goals/' + userId);
-        // Retrieve an array, but with its metadata. This is necesary to have the key available
+        // Retrieve an array, but with its metadata. This is necessary to have the key available
         // An array of Goals is reconstructed using the fromFirebaseObject method
         return ref.snapshotChanges().pipe(
             map(goals => goals.map(goalPayload => (Goal.fromFirebaseObject(goalPayload.key, goalPayload.payload.val())))));
@@ -124,6 +131,12 @@ export class GoalService {
     getAllOtherAvailableGoals() {
         return this.fireDatabase.list<GoalArray>('/goals/').snapshotChanges().pipe(
             map(goals => goals.map(goalPayload => (GoalArray.fromFirebaseObject(goalPayload.key, goalPayload.payload.val())))));
+    }
+
+    getLeaderboardGoals(goal: string, metric: string) {
+        console.log('path queried: ', '/leaderboard/' + goal + '/' + metric);
+        return this.fireDatabase.object('/leaderboard/' + metric + '/' + goal).snapshotChanges().pipe(
+            map(result => result.payload.val()));
     }
 
     /**
@@ -226,7 +239,7 @@ export class GoalService {
                     let wins = winsSnapshot.val();
                     let createPost = true;
                     if (Array.isArray(wins)) {
-                        // If the list exists, check if the goals was already won today
+                        // If the list exists, check if the goal was already won today
                         const lastWin = new Date(wins.slice(-1)[0]);
                         const startOfPeriod = this.getStartOf(goal.duration === 'weekly');
                         if (lastWin.getTime() >= startOfPeriod.getTime()) {
@@ -241,6 +254,8 @@ export class GoalService {
                         // If it doesn't exist, create a new array with the current win
                         wins = [(new Date()).getTime()];
                     }
+                    this.fireDatabase.database.ref('/leaderboard/' + '/nWins/' + goal.name + firebase.auth().currentUser.uid)
+                        .set(wins.length).catch(err => console.log(err));
                     if (createPost) {
                         this.fireDatabase.database.ref('/wins/' + firebase.auth().currentUser.uid + '/' + goal.name)
                             .set(wins).then(
