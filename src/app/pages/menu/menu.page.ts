@@ -40,16 +40,17 @@ export class MenuPage implements OnInit, OnDestroy {
         this.initializeFCM();
     }
 
-    pages = [
-        {
-            title: 'Dashboard',
-            url: '/menu/dashboard'
-        },
-        {
-            title: 'Information',
-            url: '/menu/information'
-        }
-    ];
+    // pages = [
+    //     {
+    //         title: 'Dashboard',
+    //         url: '/menu/dashboard'
+    //     },
+    //     {
+    //         title: 'Information',
+    //         url: '/menu/information'
+    //     }
+    // ];
+    pages = [];
 
     username: Observable<string>;
     selectedPath = '';

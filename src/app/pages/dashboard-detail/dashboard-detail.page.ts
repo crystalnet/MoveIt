@@ -2,8 +2,6 @@ import {Component, OnInit} from '@angular/core';
 import {UserService} from 'src/app/services/user/user.service';
 import {Observable} from 'rxjs';
 
-import {FCM} from 'cordova-plugin-fcm-with-dependecy-updated/ionic/ngx';
-
 @Component({
     selector: 'app-dashboard-detail',
     templateUrl: './dashboard-detail.page.html',
@@ -28,6 +26,12 @@ export class DashboardDetailPage implements OnInit {
     rewards = {
         label: 'Rewards',
         routerLink: '/menu/rewards',
+        image: './assets/rewards2.png'
+    };
+
+    information = {
+        label: 'Information',
+        routerLink: '/menu/information',
         image: './assets/rewards2.png'
     };
 
@@ -86,6 +90,7 @@ export class DashboardDetailPage implements OnInit {
                 }
             }
         }
+        this.allServices.push(this.information); // Information is visible for all users and therefore always added
     }
 
 }
