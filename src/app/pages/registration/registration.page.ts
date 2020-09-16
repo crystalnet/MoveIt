@@ -40,7 +40,7 @@ export class RegistrationPage implements OnInit {
         time4: [{type: 'required', message: 'Please choose a time'}]
     };
     birthday: Date;
-    maxDate: number = new Date().getFullYear() - 18;
+    maxDate: number = new Date().getFullYear() - 10;
 
     constructor(
         private navCtrl: NavController,
@@ -105,7 +105,6 @@ export class RegistrationPage implements OnInit {
         this.birthday = new Date(birthday);
         const timeDiff = Math.abs(Date.now() - this.birthday.getTime());
         return Math.floor((timeDiff / (1000 * 3600 * 24)) / 365.25);
-
     }
 
     goLoginPage() {

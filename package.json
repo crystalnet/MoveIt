@@ -2,7 +2,7 @@
   "name": "moveit",
   "version": "0.0.1",
   "author": "Konstantin Schmidt",
-  "homepage": "https://github.com/crystalneth/",
+  "homepage": "https://github.com/crystalnet/",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
