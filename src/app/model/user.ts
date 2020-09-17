@@ -38,6 +38,7 @@ export class User {
         this.times = [];
         this.profilePictureUrl = profilePictureUrl || '';
     }
+
     id: string;
     name: string;
     challengesActive: Array<any>;
@@ -65,6 +66,11 @@ export class User {
             firebaseObject.times || [],
             firebaseObject.profilePictureUrl || ''
         );
+    }
+
+    getAge() {
+        const now = new Date();
+        return now.getFullYear() - this.birthday.getFullYear();
     }
 
     /**

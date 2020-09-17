@@ -23,6 +23,7 @@ export class SocialfeedDetailPage implements OnInit {
     now = new Date();
     post: Post;
     user: User;
+    userObservable: Observable<any>;
     displayedPosts: Observable<any[]>;
 
 
@@ -44,7 +45,8 @@ export class SocialfeedDetailPage implements OnInit {
             return pseudoPost;
         })));
         this.posts.subscribe(r => console.log(r));
-        this.userService.getUser().subscribe(user => this.user = user);
+        this.userObservable = this.userService.getUser();
+        this.userObservable.subscribe(user => this.user = user);
 
         this.displayedPosts = this.posts.pipe(map(
             (data) => {

@@ -26,26 +26,25 @@
 
     <ion-card>
         <ion-card-header>
-           <h2> What's up?</h2>
+            <h2> What's up?</h2>
         </ion-card-header>
         <form>
             <ion-item id="form">
                 <ion-input name="post" type="text" [(ngModel)]="postText"
                            placeholder="Create your own post"></ion-input>
-                <ion-icon name="send" id="icons" (click)="newPost(postText)" float-right></ion-icon>
+                <ion-icon name="send" id="icons" (click)="newPost(postText)"></ion-icon>
             </ion-item>
         </form>
     </ion-card>
 
 
     <ion-card *ngFor="let post of (displayedPosts | async); let i = index;">
-
         <ion-item>
             <ion-avatar slot="start">
                 <img src="{{post.profilePictureUrl | async}}" (click)="viewProfile(i)">
                 <!--img [src]="post.image"-->
             </ion-avatar>
-            <ion-label id="{{post.id}}" name="userPlace">
+            <ion-label id="{{post.id}}">
                 <h3 (click)="viewProfile(i)">{{ post.username | async}}</h3>
                 <p (click)="viewProfile(i)">
                     <ion-icon name="time"></ion-icon>
@@ -60,35 +59,34 @@
         </ion-card-content>
 
 
-        <ion-row>
-       
-            <ion-col center text-center>
+        <ion-row *ngIf="(userObservable | async)">
+            <ion-col>
                 <ng-container *ngIf="post.likes.includes(user.id); else running">
-                <ion-button id="like" color="secondary" type="button" (click)='like(i)'>
-                    <ion-icon name="thumbs-up"  id="icons"></ion-icon>
-                    {{post.likes?.length || 0}} Likes
-                </ion-button>
-            </ng-container>
-            <ng-template #running>
-                <ion-button id="like" color="primary" type="button" (click)='like(i)'>
-                    <ion-icon name="thumbs-up" id="icons"></ion-icon>
-                    {{post.likes?.length || 0}} Likes
-                </ion-button>
-            </ng-template>    
+                    <ion-button id="like" color="secondary" type="button" (click)='like(i)'>
+                        <ion-icon name="thumbs-up" id="icons"></ion-icon>
+                        {{post.likes?.length || 0}} Likes
+                    </ion-button>
+                </ng-container>
+                <ng-template #running>
+                    <ion-button id="like" color="primary" type="button" (click)='like(i)'>
+                        <ion-icon name="thumbs-up" id="icons"></ion-icon>
+                        {{post.likes?.length || 0}} Likes
+                    </ion-button>
+                </ng-template>
             </ion-col>
 
-            <ion-col center text-center>
+            <ion-col>
                 <ion-button id="comment" type="button">
-                    <ion-icon name="text" id="icons"></ion-icon>
+                    <ion-icon name="chatbubbles" id="icons"></ion-icon>
                     {{post.comments?.length || 0}} Comments
                 </ion-button>
             </ion-col>
         </ion-row>
         <div *ngIf="post.comments?.length != 0">
-            <div *ngFor="let c of post.comments; let i = index">                
+            <div *ngFor="let c of post.comments; let i = index">
                 <ion-item lines="none" *ngIf="i < (post.commentPage * 3)">
                     <!--<ion-label><h3>{{ (post.usernames[i] | async)}}</h3> -->
-                        <ion-label><h3>{{ c.user}}</h3>
+                    <ion-label><h3>{{ c.user}}</h3>
                         <p>{{c.text}}</p></ion-label>
                 </ion-item>
             </div>
@@ -110,7 +108,5 @@
         </ion-row>
     </ion-card>
     <ion-button expand="block" color="secondary" (click)="loadMorePosts()">Read more</ion-button>
-
-
 </ion-content>
 
