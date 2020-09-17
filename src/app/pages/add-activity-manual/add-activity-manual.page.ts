@@ -2,9 +2,9 @@ import {Component, OnInit} from '@angular/core';
 import {Activity} from '../../model/activity';
 import {ActivityService} from '../../services/activity/activity.service';
 import {Location} from '@angular/common';
-import {AlertController, ToastController} from '@ionic/angular';
-import {FormGroup, FormBuilder, FormControl, Validators} from '@angular/forms';
-import {Router, NavigationExtras} from '@angular/router';
+import {ToastController} from '@ionic/angular';
+import {FormBuilder, FormGroup} from '@angular/forms';
+import {NavigationExtras, Router} from '@angular/router';
 
 // import { ConsoleReporter } from 'jasmine';
 
@@ -30,7 +30,8 @@ export class AddActivityManualPage implements OnInit {
     error = false;
 
 
-    constructor(private activityService: ActivityService, private location: Location, public toastController: ToastController, private formBuilder: FormBuilder, private router: Router) {
+    constructor(private activityService: ActivityService, private location: Location, public toastController: ToastController,
+                private formBuilder: FormBuilder, private router: Router) {
         this.activity = new Activity();
         this.location = location;
         this.types = Activity.types;
@@ -68,17 +69,16 @@ export class AddActivityManualPage implements OnInit {
     convertDate() {
         const date = this.date;
         const time = this.time;
-        console.log(this.time);
+
         const t1: any = date.split('T');
         const t2: any = time.split('T');
         const t3: any = t1[0].concat('T', t2[1]);
 
         this.activity.startTime = new Date(t3);
-        console.log(this.activity.startTime);
     }
 
     async presentAlert() {
-        const controller = await this.toastController.create({
+        await this.toastController.create({
             color: 'dark',
             duration: 2000,
             message: 'Activity added successfully!',
@@ -132,7 +132,7 @@ export class AddActivityManualPage implements OnInit {
 
         if ((this.todayA.getTime() - this.activity.startTime.getTime()) < 0) {
             this.error = true;
-            setTimeout(function() {
+            setTimeout(() => {
                 this.error = false;
             }, 3000);
             return;

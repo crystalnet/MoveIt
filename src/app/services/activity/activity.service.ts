@@ -167,7 +167,7 @@ export class ActivityService {
                             // permission successful
                             // get a the date when API is last time read
                             return this.storage.get('lastDate').then((lastDate: Date) => {
-                                    console.log('last time read at :', lastDate);
+                                    console.log('last time read at: ', lastDate);
                                     let startDate: Date;
 
                                     if (lastDate != null) {
@@ -185,7 +185,7 @@ export class ActivityService {
                                         dataType: 'activity',
                                     }).then((value: []) => {
                                         console.log('Value of Health Data loaded: ', value);
-                                        this.storage.set('lastDate', endDate);
+                                        this.updateLastDate(endDate);
                                         resolve(Activity.fromFitApi(value));
                                     }).catch((e: any) => {
                                         console.log('HealthData ERROR:---' + e);

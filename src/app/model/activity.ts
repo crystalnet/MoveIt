@@ -62,9 +62,8 @@ export class Activity {
      * This basically reconstructs the dates from the date strings
      *
      * @param id id of the activity
-     * @param firebaseObject result of the query
+     * @param activity an activity
      */
-
     static fromFirebaseObject(id: string, activity: Activity) {// firebaseObject: FireBaseObject) {
         // @ts-ignore TS2339
         return new Activity(
@@ -83,32 +82,33 @@ export class Activity {
      *
      * This basically reconstructs the dates from the date strings
      *
-     * @param ApiObject object from Fitness API
+     * @param ApiObj object from Fitness API
      */
 
-    static fromFitApi(ApiObject: Array<ApiObject>) {
-        let ActMulit = [];
+    static fromFitApi(ApiObj: Array<ApiObject>) {
+        const ActMulit = [];
         let ActSingle: Activity;
-        ApiObject.forEach(function(SingleEntry) {
-            console.log('Single Entry of Fitness API: ' + SingleEntry);
+        ApiObj.forEach((SingleEntry) => {
+            console.log('Single Entry of Fitness API: ', SingleEntry);
             // still activity will be excluded
             if (SingleEntry.value === 'still') {
                 return;
             }
-            
+
             // activities that are not defined by API will be excluded
             if (SingleEntry.value === 'other') {
                 return;
             }
-            
+
             // activities shorter then 10 minutes will be disregarded
-            let duration = Math.round((SingleEntry.endDate.getTime() - SingleEntry.startDate.getTime()) / 60000);
-            if (duration < 10) {
+            const duration = Math.round((SingleEntry.endDate.getTime() - SingleEntry.startDate.getTime()) / 60000);
+            if (duration < 10 || duration > 600) {
                 return;
             }
 
             /*
-            if (['basketball', 'biking', 'dancing','handball','football','running', 'swimming', 'volleyball', 'walking'].indexOf(SingleEntry.value) === -1){
+            if (['basketball', 'biking', 'dancing','handball','football','running', 'swimming', 'volleyball', 'walking']
+                 .indexOf(SingleEntry.value) === -1){
                 SingleEntry.value = 'other'
             };  */
 

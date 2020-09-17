@@ -22,6 +22,7 @@ export class AddOverviewPage implements OnInit {
     }
 
     ngOnInit() {
+        this.updateLastSynchronized();
     }
 
     goBack() {
