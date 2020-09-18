@@ -12,6 +12,7 @@ import {User} from 'src/app/model/user';
 export class AdminDashboardExportPage implements OnInit {
     users: Array<User>;
     groups: Array<Group>;
+    select: any;
 
     constructor(private exportService: ExportService, private userService: UserService) {
         this.userService.getGroups().subscribe(val => this.groups = val);

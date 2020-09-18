@@ -6,7 +6,7 @@
         <ion-title>Articles</ion-title>
     </ion-toolbar>
 
-        <ion-button color="secondary" padding (click)="presentPopover($event)"float-right>Create Article</ion-button>
+    <ion-button color="secondary" (click)="presentPopover($event)">Create Article</ion-button>
 
     <br><br><br>
 
@@ -43,46 +43,48 @@
 </ion-header>
 
 <ion-content>
-
-
     <ion-row class="ion-align-items-center" *ngFor="let article of articles">
         <ion-col size="2">
             <ion-list>
-                <ion-item><ion-textarea [(ngModel)]="article.title"></ion-textarea> </ion-item>
+                <ion-item>
+                    <ion-textarea [(ngModel)]="article.title"></ion-textarea>
+                </ion-item>
             </ion-list>
         </ion-col>
-
         <ion-col size="3">
             <ion-list>
-                <ion-item text-wrap><ion-textarea [(ngModel)]="article.content" text-wrap></ion-textarea></ion-item>
+                <ion-item>
+                    <ion-textarea [(ngModel)]="article.content"></ion-textarea>
+                </ion-item>
             </ion-list>
         </ion-col>
-
         <ion-col size="3">
             <ion-list>
-                <ion-item><ion-textarea [(ngModel)]="article.link" text-wrap></ion-textarea></ion-item>
+                <ion-item>
+                    <ion-textarea [(ngModel)]="article.link"></ion-textarea>
+                </ion-item>
             </ion-list>
         </ion-col>
-
         <ion-col size="2">
-           <!-- <ion-list>
-                <ion-item><ion-textarea [(ngModel)]="article.picture"></ion-textarea>-->
-                    <ion-button color="secondary" (click)="uploadBtn.click()" float-right>
-                        Select picture
-                   </ion-button>
-                    <!--<span>Upload picture</span>-->
-                    <input
-                            id="uploadBtn"
-                            type="file"
-                            class="upload"
-                            (change)="uploadFile($event.target.files, article.id)"
-                    /><!--</ion-item>
+            <!-- <ion-list>
+                 <ion-item><ion-textarea [(ngModel)]="article.picture"></ion-textarea>-->
+            <ion-button color="secondary" (click)="uploadBtn.click()">
+                Select picture
+            </ion-button>
+            <!--<span>Upload picture</span>-->
+            <input #uploadBtn
+                   id="uploadBtn"
+                   type="file"
+                   class="upload"
+                   (change)="uploadFile($event.target.files, article.id)"
+            /><!--</ion-item>
             </ion-list>-->
         </ion-col>
         <ion-col size="2">
-        <ion-button color="secondary" (click)="editArticle(article)">Save</ion-button>
-        <ion-button color="secondary" (click)="deleteArticle(article)"><ion-icon name="trash"></ion-icon></ion-button>
+            <ion-button color="secondary" (click)="editArticle(article)">Save</ion-button>
+            <ion-button color="secondary" (click)="deleteArticle(article)">
+                <ion-icon name="trash"></ion-icon>
+            </ion-button>
         </ion-col>
     </ion-row>
-
 </ion-content>

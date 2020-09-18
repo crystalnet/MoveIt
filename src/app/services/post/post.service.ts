@@ -3,6 +3,7 @@ import {AngularFireDatabase} from '@angular/fire/database';
 import {Post} from '../../model/post';
 import {Comment} from '../../model/comment';
 import * as firebase from 'firebase/app';
+import 'firebase/auth';
 import {User} from '../../model/user';
 import {first, map, switchMap} from 'rxjs/operators';
 import {UserService} from '../user/user.service';

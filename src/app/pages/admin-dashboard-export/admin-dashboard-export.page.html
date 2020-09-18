@@ -43,7 +43,7 @@
     </section>
     <br>-->
 
-    <h2 padding>Download static data!</h2>
+    <h2>Download static data!</h2>
 
     <ion-row>
         <ion-col size="4">
@@ -67,13 +67,13 @@
                     <ion-label>Data</ion-label>
                 </ion-list-header>
 
-                <ion-button color="secondary" (click)="export(select, 'all')" float-rigth>Download</ion-button>
+                <ion-button color="secondary" (click)="export(select, 'all', 'all')">Download</ion-button>
 
             </ion-list>
         </ion-col>
     </ion-row>
 
-    <h2 padding>Download data from all users!</h2>
+    <h2>Download data from all users!</h2>
 
     <ion-row>
         <ion-col size="4">
@@ -113,13 +113,13 @@
                     <ion-label>Data</ion-label>
                 </ion-list-header>
 
-                <ion-button color="secondary" (click)="export(select, 'all')" float-rigth>Download</ion-button>
+                <ion-button color="secondary" (click)="export(select, 'all', 'all')">Download</ion-button>
 
             </ion-list>
         </ion-col>
     </ion-row>
 
-    <h2 padding>Download group data!</h2>
+    <h2>Download group data!</h2>
 
 
     <ion-row>
@@ -174,16 +174,12 @@
                 </ion-item>
             </ion-list>
         </ion-col>
-
         <ion-col size="4">
-
             <ion-button color="secondary" (click)="export(group.select, 'group', group.id)">Download</ion-button>
-
         </ion-col>
     </ion-row>
 
-    <h2 padding>Download user data!</h2>
-
+    <h2>Download user data!</h2>
     <ion-row>
         <ion-col size="4">
             <ion-list>
@@ -192,7 +188,6 @@
                 </ion-list-header>
             </ion-list>
         </ion-col>
-
         <ion-col size="4">
             <ion-list>
                 <ion-list-header>
@@ -200,7 +195,6 @@
                 </ion-list-header>
             </ion-list>
         </ion-col>
-
         <ion-col size="4">
             <ion-list>
                 <ion-list-header>
@@ -212,7 +206,6 @@
 
 
     <ion-row class="ion-align-items-center" *ngFor="let user of users">
-
         <ion-col size="4">
             <ion-list>
                 <ion-item>
@@ -220,7 +213,6 @@
                 </ion-item>
             </ion-list>
         </ion-col>
-
         <ion-col size="4">
             <ion-list>
                 <ion-item>
@@ -237,8 +229,6 @@
                 </ion-item>
             </ion-list>
         </ion-col>
-
-
         <ion-col size="4">
             <ion-list>
                 <ion-button color="secondary" (click)="export(user.select, 'user', user.id)">Download</ion-button>
@@ -246,12 +236,9 @@
         </ion-col>
     </ion-row>
 
-    <h2 padding>Download the whole database!</h2>
-
+    <h2>Download the whole database!</h2>
     <ion-row>
-        <ion-button color="secondary" (click)="exportDb()" float-rigth>Download</ion-button>
+        <ion-button color="secondary" (click)="exportDb()">Download</ion-button>
     </ion-row>
-
-
 </ion-content>
 

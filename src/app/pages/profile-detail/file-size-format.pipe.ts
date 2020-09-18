@@ -12,7 +12,7 @@ export class FileSizeFormatPipe implements PipeTransform {
         throw new Error('Method not implemented.');
     }
 
-    transform(sizeInBytes: number, longForm: boolean): string {
+    transform(sizeInBytes: number, longForm: boolean = false): string {
         const units = longForm
             ? FILE_SIZE_UNITS_LONG
             : FILE_SIZE_UNITS;

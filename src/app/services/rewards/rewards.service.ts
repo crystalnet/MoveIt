@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {Trophy} from '../../model/trophy';
 import {AngularFireDatabase} from '@angular/fire/database';
 import * as firebase from 'firebase/app';
+import 'firebase/auth';
 import {Activity} from '../../model/activity';
 
 @Injectable({

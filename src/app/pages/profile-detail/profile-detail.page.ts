@@ -5,12 +5,13 @@ import {Activity} from 'src/app/model/activity';
 import {ActivityService} from 'src/app/services/activity/activity.service';
 import {Goal} from '../../model/goal';
 import {User} from '../../model/user';
-import {Observable, merge} from 'rxjs';
-import {AlertController} from '@ionic/angular';
+import {merge, Observable} from 'rxjs';
 import {AngularFireStorage, AngularFireUploadTask} from '@angular/fire/storage';
 import {AngularFirestore, AngularFirestoreCollection} from '@angular/fire/firestore';
-import {finalize, tap, map} from 'rxjs/operators';
+import {finalize, map, tap} from 'rxjs/operators';
 import * as firebase from 'firebase';
+import 'firebase/auth';
+
 import {UserService} from '../../services/user/user.service';
 
 export interface MyData {
@@ -41,7 +42,8 @@ export class ProfileDetailPage implements OnInit {
     usertestpath: string;
 
 
-    constructor(private location: Location, private userService: UserService, private goalService: GoalService, private activityService: ActivityService, public alertController: AlertController, private storage: AngularFireStorage, private database: AngularFirestore) {
+    constructor(private location: Location, private userService: UserService, private goalService: GoalService,
+                private activityService: ActivityService, private storage: AngularFireStorage, private database: AngularFirestore) {
         this.activities = this.activityService.getAllUserActivities();
         this.goals = this.goalService.getGoals();
         this.goals.subscribe(goals => this.goalStorage = goals);
@@ -60,8 +62,8 @@ export class ProfileDetailPage implements OnInit {
 
         this.displayedActivities = this.activities.pipe(map(
             (data) => {
-               // data.sort((a, b) => {
-                 //   return b.startTime.getTime() - a.startTime.getTime();
+                // data.sort((a, b) => {
+                //   return b.startTime.getTime() - a.startTime.getTime();
                 // });
                 return data.slice(0, 5);
             }
@@ -153,7 +155,6 @@ export class ProfileDetailPage implements OnInit {
                     this.userService.changeProfilePicture(
                         firebase.auth().currentUser.uid,
                         resp
-
                     );
                     this.isUploading = false;
                     this.isUploaded = true;
@@ -166,8 +167,6 @@ export class ProfileDetailPage implements OnInit {
             })
         );
     }
-
-
 
 
     ngOnInit() {

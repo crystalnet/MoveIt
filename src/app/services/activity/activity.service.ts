@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
 import * as firebase from 'firebase/app';
+import 'firebase/auth';
 import {AngularFireDatabase} from '@angular/fire/database';
 import {Activity} from '../../model/activity';
 import {first, map} from 'rxjs/operators';

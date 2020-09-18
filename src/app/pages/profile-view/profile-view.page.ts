@@ -5,11 +5,10 @@ import {Activity} from 'src/app/model/activity';
 import {ActivityService} from 'src/app/services/activity/activity.service';
 import {Goal} from '../../model/goal';
 import {User} from '../../model/user';
-import {Observable, merge} from 'rxjs';
+import {merge, Observable} from 'rxjs';
 import {AlertController} from '@ionic/angular';
 import {AngularFireStorage, AngularFireUploadTask} from '@angular/fire/storage';
 import {AngularFirestore, AngularFirestoreCollection} from '@angular/fire/firestore';
-import * as firebase from 'firebase';
 import {UserService} from '../../services/user/user.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {map} from 'rxjs/operators';
@@ -46,10 +45,12 @@ export class ProfileViewPage implements OnInit {
     displayedActivities: Observable<Activity[]>;
 
 
-    constructor(private route: ActivatedRoute, private router: Router, private location: Location, private userService: UserService, private goalService: GoalService, private activityService: ActivityService, public alertController: AlertController, private storage: AngularFireStorage, private database: AngularFirestore) {
+    constructor(private route: ActivatedRoute, private router: Router, private location: Location, private userService: UserService,
+                private goalService: GoalService, private activityService: ActivityService, public alertController: AlertController,
+                private storage: AngularFireStorage, private database: AngularFirestore) {
 
         this.route.queryParams.subscribe(params => {
-            let userid = JSON.parse(params.special);
+            const userid = JSON.parse(params.special);
             this.activities = this.activityService.getThisUsersActivities(userid);
             this.goals = this.goalService.getGoalsFromUser(userid);
             this.goals.subscribe(goals => this.goalStorage = goals);

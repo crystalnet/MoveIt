@@ -5,7 +5,6 @@ import {InformationService} from '../services/information/information.service';
 import {AngularFireStorage, AngularFireUploadTask} from '@angular/fire/storage';
 import {AngularFirestore, AngularFirestoreCollection} from '@angular/fire/firestore';
 import {Observable} from 'rxjs';
-import * as firebase from 'firebase';
 import {finalize, tap} from 'rxjs/operators';
 
 
@@ -27,7 +26,8 @@ export class ArticlesPopoverComponent implements OnInit {
     public testUrl: Observable<string>;
 
 
-    constructor(private storage: AngularFireStorage, private database: AngularFirestore, public popoverController: PopoverController, private informationService: InformationService, public toastController: ToastController) {
+    constructor(private storage: AngularFireStorage, private database: AngularFirestore, public popoverController: PopoverController,
+                private informationService: InformationService, public toastController: ToastController) {
         this.information = new Information();
         this.isUploading = false;
         this.isUploaded = false;
@@ -62,7 +62,7 @@ export class ArticlesPopoverComponent implements OnInit {
     isUploaded: boolean;
 
     async presentToast() {
-        const controller = await this.toastController.create({
+        await this.toastController.create({
             color: 'dark',
             duration: 2000,
             message: 'Article added successfully!',

@@ -2,14 +2,10 @@ import {Component, OnInit} from '@angular/core';
 import {Information} from '../../model/information';
 import {Observable, of} from 'rxjs';
 import {InformationService} from '../../services/information/information.service';
-import {AlertController, ToastController} from '@ionic/angular';
+import {PopoverController, ToastController} from '@ionic/angular';
 import {AngularFireStorage, AngularFireUploadTask} from '@angular/fire/storage';
 import {AngularFirestore, AngularFirestoreCollection} from '@angular/fire/firestore';
-import {finalize, tap, catchError} from 'rxjs/operators';
-import * as firebase from 'firebase';
-
-
-import {PopoverController} from '@ionic/angular';
+import {catchError, finalize, tap} from 'rxjs/operators';
 import {ArticlesPopoverComponent} from 'src/app/articles-popover/articles-popover.component';
 import {AngularFireDatabase} from '@angular/fire/database';
 
@@ -71,7 +67,7 @@ export class AdminDashboardArticlesPage implements OnInit {
     isUploaded: boolean;
 
     async presentToast() {
-        const controller = await this.toastController.create({
+        await this.toastController.create({
             color: 'dark',
             duration: 2000,
             message: 'Article edited successfully!',

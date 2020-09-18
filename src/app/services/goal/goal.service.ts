@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {AngularFireDatabase} from '@angular/fire/database';
 import {Goal} from '../../model/goal';
 import * as firebase from 'firebase/app';
+import 'firebase/auth';
 import {Activity} from '../../model/activity';
 import {GoalArray} from '../../model/goalArray';
 import {map} from 'rxjs/operators';

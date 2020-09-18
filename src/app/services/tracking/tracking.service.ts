@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import {AngularFireDatabase} from '@angular/fire/database';
 import * as firebase from 'firebase/app';
+import 'firebase/auth';
 import {ViewLog} from '../../model/viewLog';
 import {ActionLog} from '../../model/actionLog';
 import {Reaction} from '../../model/reaction';

@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
 import * as firebase from 'firebase/app';
+import 'firebase/auth';
 import {AngularFireDatabase} from '@angular/fire/database';
 import {Challenge} from '../../model/challenge';
 
@@ -20,6 +21,7 @@ export class ChallengeService {
      * Creates a new challenge in firebase from an activity objects
      *
      * @param challenge an existing challenge object
+     * @param participants the participants
      */
     createChallenge(challenge: Challenge, participants: object) {
         return new Promise<any>((resolve, reject) => {
