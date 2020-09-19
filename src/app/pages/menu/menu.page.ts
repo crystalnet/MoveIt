@@ -1,15 +1,13 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router, RouterEvent} from '@angular/router';
-import {Platform} from '@ionic/angular';
+import {AlertController, NavController, Platform} from '@ionic/angular';
 
 import {AuthenticateService} from '../../services/authentication/authentication.service';
 import {Observable} from 'rxjs';
 import {UserService} from 'src/app/services/user/user.service';
 import {TrackingService} from '../../services/tracking/tracking.service';
-import {ViewLog} from '../../model/viewLog';
 import {ActionLog} from '../../model/actionLog';
 import {FCM} from 'cordova-plugin-fcm-with-dependecy-updated/ionic/ngx';
-import {AlertController, NavController} from '@ionic/angular';
 import {INotificationPayload} from 'cordova-plugin-fcm-with-dependecy-updated';
 
 @Component({
@@ -54,18 +52,17 @@ export class MenuPage implements OnInit, OnDestroy {
 
     username: Observable<string>;
     selectedPath = '';
-    viewLog: ViewLog;
 
     ngOnInit() {
-        this.viewLog = this.trackingService.startRecordingViewTime('menu');
+        this.trackingService.startRecordingViewTime('menu');
     }
 
     ngOnDestroy() {
-        this.trackingService.stopRecordingViewTime(this.viewLog);
+        this.trackingService.stopRecordingViewTime('menu');
     }
 
     logout() {
-        this.trackingService.stopRecordingViewTime(this.viewLog);
+        this.trackingService.stopRecordingViewTime('menu');
         this.auth.logoutUser();
     }
 

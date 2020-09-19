@@ -1,25 +1,23 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import {TrackingService} from '../../services/tracking/tracking.service';
-import {ViewLog} from '../../model/viewLog';
 
 @Component({
     selector: 'app-dashboard',
     templateUrl: './dashboard.page.html',
     styleUrls: ['./dashboard.page.scss'],
 })
-export class DashboardPage implements OnInit, OnDestroy {
+export class DashboardPage {
 
     constructor(private trackingService: TrackingService) {
     }
 
-    viewLog: ViewLog;
-
-    ngOnInit() {
-        this.viewLog = this.trackingService.startRecordingViewTime('dashboard');
+    ionViewDidEnter() {
+        this.trackingService.startRecordingViewTime('dashboard');
+        console.log('VIEW LOADED');
     }
 
-    ngOnDestroy() {
-        this.trackingService.stopRecordingViewTime(this.viewLog);
+    ionViewDidLeave() {
+        this.trackingService.stopRecordingViewTime('dashboard');
+        console.log('VIEW LEFT');
     }
-
 }

@@ -7,7 +7,6 @@ import {ChallengeService} from '../../services/challenges/challenge.service';
 
 import {combineLatest} from 'rxjs';
 import {TrackingService} from '../../services/tracking/tracking.service';
-import {ViewLog} from '../../model/viewLog';
 
 @Component({
     selector: 'app-rewards-challenges',
@@ -20,8 +19,6 @@ export class RewardsChallengesPage implements OnInit, OnDestroy {
     activeChallenges: Array<Challenge> = [];
 
     date: Date;
-    viewLog: ViewLog;
-
 
     constructor(private challengeService: ChallengeService, private location: Location, private trackingService: TrackingService) {
         this.location = location;
@@ -57,11 +54,11 @@ export class RewardsChallengesPage implements OnInit, OnDestroy {
 
 
     ngOnDestroy() {
-        this.trackingService.stopRecordingViewTime(this.viewLog);
+        this.trackingService.stopRecordingViewTime('challenges');
     }
 
     ngOnInit() {
-        this.viewLog = this.trackingService.startRecordingViewTime('challenges');
+        this.trackingService.startRecordingViewTime('challenges');
         this.date = new Date();
     }
 

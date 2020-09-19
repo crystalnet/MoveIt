@@ -9,7 +9,6 @@ import {GoalService} from '../../services/goal/goal.service';
 import {Activity} from '../../model/activity';
 import {PopoverController} from '@ionic/angular';
 import {TrophyPopover} from 'src/app/trophy-popover/trophy-popover.component';
-import {ViewLog} from '../../model/viewLog';
 import {TrackingService} from '../../services/tracking/tracking.service';
 
 
@@ -23,7 +22,6 @@ export class RewardsTrophiesPage implements OnInit, OnDestroy {
     inactTrophies: any;
     activities: Array<Activity>;
     goals: object;
-    viewLog: ViewLog;
 
     constructor(private challService: ChallengeService, private location: Location, private rewardsService: RewardsService,
                 private activityService: ActivityService, private goalService: GoalService, public popoverController: PopoverController,
@@ -40,11 +38,11 @@ export class RewardsTrophiesPage implements OnInit, OnDestroy {
 
 
     ngOnInit() {
-        this.viewLog = this.trackingService.startRecordingViewTime('trophies');
+        this.trackingService.startRecordingViewTime('trophies');
     }
 
     ngOnDestroy() {
-        this.trackingService.stopRecordingViewTime(this.viewLog);
+        this.trackingService.stopRecordingViewTime('trophies');
     }
 
     initializeTrophies() {

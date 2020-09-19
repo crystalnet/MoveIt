@@ -1,6 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {TrackingService} from '../../services/tracking/tracking.service';
-import {ViewLog} from '../../model/viewLog';
 
 @Component({
     selector: 'app-profile',
@@ -12,14 +11,12 @@ export class ProfilePage implements OnInit, OnDestroy {
     constructor(private trackingService: TrackingService) {
     }
 
-    viewLog: ViewLog;
-
     ngOnInit() {
-        this.viewLog = this.trackingService.startRecordingViewTime('profile');
+        this.trackingService.startRecordingViewTime('profile');
     }
 
     ngOnDestroy() {
-        this.trackingService.stopRecordingViewTime(this.viewLog);
+        this.trackingService.stopRecordingViewTime('profile');
     }
 
 }
