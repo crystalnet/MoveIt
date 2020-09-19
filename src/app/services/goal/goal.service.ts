@@ -134,8 +134,8 @@ export class GoalService {
             map(goals => goals.map(goalPayload => (GoalArray.fromFirebaseObject(goalPayload.key, goalPayload.payload.val())))));
     }
 
-    getLeaderboardGoals(goal: string, metric: string) {
-        console.log('path queried: ', '/leaderboard/' + goal + '/' + metric);
+    getLeaderboardGoals(metric: string, goal: string) {
+        console.log('path queried: ', '/leaderboard/' + metric + '/' + goal);
         return this.fireDatabase.object('/leaderboard/' + metric + '/' + goal).snapshotChanges().pipe(
             map(result => result.payload.val()));
     }
@@ -147,7 +147,7 @@ export class GoalService {
         // return this.fireDatabase.list<number>('/wins/' + firebase.auth().currentUser.uid).valueChanges();
 
         const ref = this.fireDatabase.list<number>('/wins/' + firebase.auth().currentUser.uid);
-        // Retrieve an array, but with its metadata. This is necesary to have the key available
+        // Retrieve an array, but with its metadata. This is necessary to have the key available
         // An array of Goals is reconstructed using the fromFirebaseObject method
         return ref.snapshotChanges().pipe(
             map(goals => goals.map(goalPayload => (goalPayload.key))));
@@ -173,12 +173,20 @@ export class GoalService {
      */
     updateGoals(goals: Array<Goal>, activities: Array<Activity>) {
         return new Promise<any>((resolve, reject) => {
+            let weeklyModerate = 0;
+            let weeklyVigorous = 0;
             for (const goal of goals) {
                 goal.current = this.calculateGoalProgress(goal, activities);
                 this.updateGoal(goal).then(
                     res => console.log(res),
                     err => reject(err)
                 );
+
+                if (goal.type === 'weeklyModerate') {
+                    weeklyModerate = goal.current;
+                } else if (goal.type === 'weeklyVigorous') {
+                    weeklyVigorous = goal.current;
+                }
 
                 if (goal.current >= goal.target) {
                     this.winGoal(goal).then(
@@ -187,6 +195,13 @@ export class GoalService {
                     );
                 }
             }
+            this.fireDatabase.database
+                .ref('/leaderboard/absolute/' + 'weeklyActiveMinutes' + '/' + firebase.auth().currentUser.uid)
+                .set(2 * weeklyVigorous + weeklyModerate).then(
+                res => console.log(res),
+                err => console.log(err)
+            );
+
             resolve('Successfully updated goals');
         });
     }

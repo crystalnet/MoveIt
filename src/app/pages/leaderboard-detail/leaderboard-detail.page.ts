@@ -71,13 +71,13 @@ export class LeaderboardDetailPage implements OnInit {
         this.userObservable = this.userService.getUser();
         this.userObservable.subscribe(user => this.currentUser = user);
 
-        // Observable1
-        this.activitiesObserve = this.goalService.getAllOtherAvailableGoals();
-
-        // Observable1 in action
-        this.activitiesObserve.subscribe(result => {
-            this.pushMinuteObjects(result);
-        });
+        // // Observable1
+        // this.activitiesObserve = this.goalService.getAllOtherAvailableGoals();
+        //
+        // // Observable1 in action
+        // this.activitiesObserve.subscribe(result => {
+        //     this.pushMinuteObjects(result);
+        // });
 
         if (this.rewards) {
             // Observable2
@@ -92,6 +92,7 @@ export class LeaderboardDetailPage implements OnInit {
             });
         }
 
+        this.generateActiveMinutesList();
         this.generateGoalWinsList();
         this.generateGoalProgressList();
     }
@@ -170,9 +171,24 @@ export class LeaderboardDetailPage implements OnInit {
         this.activitiesModerate = this.sortArrays(testArray);
     }
 
+    generateActiveMinutesList() {
+        this.goalService.getLeaderboardGoals('absolute', 'weeklyActiveMinutes')
+            .subscribe(result => {
+                if (!result) {
+                    this.activitiesModerate = [];
+                    return;
+                }
+                console.log(result);
+                const testarray = Object.keys(result)
+                    .map(uid => new LeaderboardObject(uid, results[uid], this.userService));
+                this.activitiesModerate = testarray;
+                console.log(testarray);
+            });
+    }
+
     generateGoalProgressList() {
-        const moderateObservable = this.goalService.getLeaderboardGoals('weeklyModerate', 'relative');
-        const vigorousObservable = this.goalService.getLeaderboardGoals('weeklyVigorous', 'relative');
+        const moderateObservable = this.goalService.getLeaderboardGoals('relative', 'weeklyModerate');
+        const vigorousObservable = this.goalService.getLeaderboardGoals('relative', 'weeklyVigorous');
 
         combineLatest(moderateObservable, vigorousObservable)
             .subscribe(result => {
@@ -197,8 +213,8 @@ export class LeaderboardDetailPage implements OnInit {
     }
 
     generateGoalWinsList() {
-        const moderateObservable = this.goalService.getLeaderboardGoals('dailyModerate', 'nWins');
-        const vigorousObservable = this.goalService.getLeaderboardGoals('dailyVigorous', 'nWins');
+        const moderateObservable = this.goalService.getLeaderboardGoals('nWins', 'dailyModerate');
+        const vigorousObservable = this.goalService.getLeaderboardGoals('nWins', 'dailyVigorous');
 
         combineLatest(moderateObservable, vigorousObservable)
             .subscribe(result => {
