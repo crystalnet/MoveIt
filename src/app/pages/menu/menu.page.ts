@@ -139,10 +139,10 @@ export class MenuPage implements OnInit, OnDestroy {
         }
 
         if (payload.wasTapped) {
-            console.log('Received in background ' + payload);
+            console.log('FCM: Received in background ' + payload);
             this.trackingService.logAction(new ActionLog('entered-app-from-notification', payload.type));
         } else {
-            console.log('Received in foreground ' + payload);
+            console.log('FCM: Received in foreground ' + payload);
         }
         console.log(payload);
         const alert = await this.alertController.create({
@@ -156,7 +156,7 @@ export class MenuPage implements OnInit, OnDestroy {
                             res => console.log(res),
                             err => console.log(err)
                         );
-                        console.log('Notification dismissed');
+                        console.log('FCM: Notification dismissed');
                     }
                 }, {
                     text: payload.confirmButtonText,
@@ -165,7 +165,7 @@ export class MenuPage implements OnInit, OnDestroy {
                             res => console.log(res),
                             err => console.log(err)
                         );
-                        console.log('Notification accepted');
+                        console.log('FCM: Notification accepted');
                     }
                 }
             ]

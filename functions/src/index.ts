@@ -46,10 +46,7 @@ exports.automaticNotifications = functions.pubsub.schedule('every 15 minutes').o
                 promises.push(data.then(
                     (res: NotificationData) => {
                         const notification = new UserNotification(uid, res);
-                        return notification.getUserToken().then(
-                            () => notification.send(),
-                            (err: any) => console.log(err)
-                        );
+                        return notification.send();
                     },
                     (err: any) => console.log(err)
                 ));
@@ -86,6 +83,28 @@ function generateLeaderboardNotification(uid: string) {
 function generateSocialfeedNotification(uid: string) {
     return Promise.resolve(new NotificationData());
 }
+
+exports.progressNotification = functions.database.ref('/leaderboard/relative/weeklyModerate/{userId}')
+    .onWrite((event: any, context: any) => {
+        const before = event.before.val();
+        const after = event.after.val();
+        if (before && after && before < after) {
+            const data = new NotificationData();
+            if (before < 0.25 && after >= 0.25) {
+                data.header = 'You reached 25% of your goal!';
+            } else if (before < 0.5 && after >= 0.5) {
+                data.header = 'You reached 50% of your goal!';
+            } else if (before < 0.75 && after >= 0.75) {
+                data.header = 'You reached 75% of your goal!';
+            } else {
+                return;
+            }
+            const notification = new UserNotification(context.params.userId, data);
+            return notification.send();
+        } else {
+            return;
+        }
+    });
 
 
 exports.sendNotificationTrophyWin = functions.database.ref('/wins/{userId}').onWrite((event: any, context: any) => {
@@ -287,22 +306,39 @@ class UserNotification {
     }
 
     send() {
-        if (!this.token) {
-            console.log('No token set: ', this.token);
+        if (!this.uid) {
+            console.log('No uid set: ', this.token);
             return;
         }
-        this.generatePayload();
-        console.log(this.payload);
 
-        this.createDbEntry();
+        let promise: any = Promise.resolve(this.token);
+        if (!this.token) {
+            promise = this.getUserToken();
+        }
 
-        return admin.messaging().sendToDevice(this.token, this.payload)
-            .then(function(response: any) {
-                console.log('Successfully sent message:', response);
-            })
-            .catch(function(error: any) {
-                console.log('Error sending message:', error);
-            });
+        return promise.then(
+            (token: any) => {
+                if (!token) {
+                    console.log('Notification was not send because there is no token');
+                    return;
+                } else {
+                    this.generatePayload();
+                    console.log(this.payload);
+
+                    this.createDbEntry();
+
+                    return admin.messaging().sendToDevice(token, this.payload)
+                        .then(function(response: any) {
+                            console.log('Successfully sent message:', response);
+                        })
+                        .catch(function(error: any) {
+                            console.log('Error sending message:', error);
+                        });
+                }
+
+            },
+            (err: any) => console.log(err)
+        );
     }
 }
 

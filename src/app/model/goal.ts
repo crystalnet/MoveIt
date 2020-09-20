@@ -31,12 +31,12 @@ export class Goal {
     static durations = ['daily', 'weekly'];
     static types = ['moderate', 'vigorous', 'weight training'];
     static defaultGoals: Array<Goal> = [
-        new Goal('dailyModerate', 'daily',  'moderate',  60,  0),
+        new Goal('dailyModerate', 'daily',  'moderate',  20,  0),
         new Goal('weeklyModerate',   'weekly',  'moderate',  150,  0),
-        new Goal('dailyVigorous',    'daily',  'vigorous',  20,  0),
+        new Goal('dailyVigorous',    'daily',  'vigorous',  10,  0),
         new Goal('weeklyVigorous',    'weekly',  'vigorous',  75,  0),
-        new Goal('dailyWeight',    'daily',  'weight training',  30,  0),
-        new Goal('weeklyWeight',    'weekly',  'weight training',  120,  0)
+        new Goal('dailyWeight',    'daily',  'weight training',  10,  0),
+        new Goal('weeklyWeight',    'weekly',  'weight training',  60,  0)
     ];
     name: string;
     current: number;
