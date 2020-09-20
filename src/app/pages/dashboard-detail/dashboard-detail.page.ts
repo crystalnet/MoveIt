@@ -32,7 +32,7 @@ export class DashboardDetailPage implements OnInit {
     information = {
         label: 'Information',
         routerLink: '/menu/information',
-        image: './assets/rewards2.png'
+        image: './assets/information.png'
     };
 
     group: Observable<string>;

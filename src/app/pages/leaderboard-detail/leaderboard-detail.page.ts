@@ -180,7 +180,7 @@ export class LeaderboardDetailPage implements OnInit {
                 }
                 console.log(result);
                 const testarray = Object.keys(result)
-                    .map(uid => new LeaderboardObject(uid, results[uid], this.userService));
+                    .map(uid => new LeaderboardObject(uid, result[uid], this.userService));
                 this.activitiesModerate = testarray;
                 console.log(testarray);
             });

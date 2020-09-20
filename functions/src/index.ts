@@ -13,7 +13,7 @@ let admin = require('firebase-admin');
 
 admin.initializeApp(functions.config().firebase);
 
-exports.automaticNotifications = functions.pubsub.schedule('every 15 minutes from 6:00 to 3:00').onRun((context: any) => {
+exports.automaticNotifications = functions.pubsub.schedule('every 15 minutes').onRun((context: any) => {
     let time = new Date();
     time = new Date(time.getTime() + 120 * 60 * 1000);
     console.log('System Time: ', time);
@@ -71,11 +71,11 @@ function generateLeaderboardNotification(uid: string) {
             if (!result) {
                 return;
             }
-            const ranks = Object.keys(result).sort((a, b) => result[a] - result[b]);
-            const userRank = ranks.indexOf(uid);
+            const ranks = Object.keys(result).sort((a, b) => result[b] - result[a]);
+            const userRank = ranks.indexOf(uid) + 1;
 
             const data = new NotificationData();
-            data.header = userRank.toString() + 'to go';
+            data.header = (userRank - 1).toString() + ' to go';
             data.text = 'Your rank is ' + userRank.toString();
             return data;
         },
@@ -170,7 +170,7 @@ exports.sendNotification = functions.https.onCall((data: any, context: any) => {
     return notification.send();
 });
 
-exports.resetLeaderboard = functions.pubsub.schedule('every 24 hours').onRun((context: any) => {
+exports.resetLeaderboard = functions.pubsub.schedule('every monday 00:00').onRun((context: any) => {
     return admin.database().ref('/users/').once('value')
         .then((snap: any) => {
                 const result = snap.val();
@@ -195,7 +195,7 @@ exports.resetLeaderboard = functions.pubsub.schedule('every 24 hours').onRun((co
 
                 admin.database().ref('/leaderboard/absolute').set(goals);
                 admin.database().ref('/leaderboard/relative').set(goals);
-                admin.database().ref('/leaderboard/weeklyActiveMinutes').set(goals);
+                admin.database().ref('/leaderboard/absolute/weeklyActiveMinutes').set(goals);
 
             },
             (err: any) => console.log(err));
@@ -281,7 +281,7 @@ class UserNotification {
             response: 'negative'
         };
         admin.database().ref('/tracking/' + this.uid + '/reactions/' + this.data.id).set(dbNotification).then(
-            (res: any) => console.log(res),
+            (res: any) => console.log('created db entry', res),
             (err: any) => console.log(err)
         );
     }
