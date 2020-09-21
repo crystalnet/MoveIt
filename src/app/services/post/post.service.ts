@@ -30,16 +30,18 @@ export class PostService {
     createPost(post: Post) {
         return new Promise<any>((resolve, reject) => {
             this.user.pipe(first()).subscribe(user => {
-                const id = firebase.database().ref('/posts/' + user.group).push().key;
-                post.id = id;
                 post.group = user.group;
                 post.user = user.id;
+                const postId = post.createdAt.getTime().toString();
                 console.log(post);
 
-                this.fireDatabase.database.ref('/posts/' + user.group).child(id)
-                    .set(post.toFirebaseObject()).then(
-                    // Returns the post with the new id
-                    () => resolve(post),
+                const promises = [];
+                promises.push(this.fireDatabase.database.ref('/posts/groups/' + user.group + '/' + postId)
+                    .set(post.toFirebaseObject()));
+                promises.push(this.fireDatabase.database.ref('/posts/users/' + user.id + '/' + postId)
+                    .set(post.group));
+                return Promise.all(promises).then(
+                    res => resolve(res),
                     err => reject(err)
                 );
             });
@@ -59,7 +61,7 @@ export class PostService {
                 post.id = postId;
                 post.group = user.group;
 
-                this.fireDatabase.database.ref('/posts/' + user.group).child(postId)
+                this.fireDatabase.database.ref('/posts/groups/' + user.group).child(postId)
                     .set(post.toFirebaseObject()).then(
                     res => resolve(res),
                     err => reject(err)
@@ -131,7 +133,7 @@ export class PostService {
     getPost(postId: string) {
         return new Promise<any>((resolve, reject) => {
             this.user.pipe(first()).subscribe(user => {
-                firebase.database().ref('/posts/' + user.group).child(postId).once('value').then(
+                firebase.database().ref('/posts/groups/' + user.group).child(postId).once('value').then(
                     snapshot => {
                         const data = snapshot.val();
                         // Convert the data to an post object and return it
@@ -148,7 +150,7 @@ export class PostService {
      */
     getAllPosts() {
         return this.user.pipe(switchMap(user => {
-            const ref = this.fireDatabase.list<Post>('/posts/' + user.group, query => query.orderByChild('createdAt'));
+            const ref = this.fireDatabase.list<Post>('/posts/groups/' + user.group, query => query.orderByChild('createdAt'));
             return ref.snapshotChanges().pipe(map(posts => posts.map(
                 postSnapshot => Post.fromFirebaseObject(user.group, postSnapshot.key, postSnapshot.payload.val())).reverse()));
         }));
@@ -165,13 +167,13 @@ export class PostService {
         const comment = new Comment();
         return new Promise<any>((resolve, reject) => {
             this.user.pipe(first()).subscribe(user => {
-                const id = firebase.database().ref('/posts/' + user.group).child(postId).child('comments').push().key;
+                const id = firebase.database().ref('/posts/groups/' + user.group).child(postId).child('comments').push().key;
                 comment.id = id;
                 comment.post = postId;
                 comment.text = userComment;
                 comment.user = user.name;
 
-                this.fireDatabase.database.ref('/posts/' + user.group).child(comment.post).child('comments').child(id)
+                this.fireDatabase.database.ref('/posts/groups/' + user.group).child(comment.post).child('comments').child(id)
                     .set(comment.toFirebaseObject()).then(
                     // Returns the post with the new id
                     () => resolve(comment),
@@ -194,7 +196,7 @@ export class PostService {
             comment.id = commentId;
 
             this.user.pipe(first()).subscribe(user => {
-                this.fireDatabase.database.ref('/posts/' + user.group).child(postId).child('comments').child(commentId)
+                this.fireDatabase.database.ref('/posts/groups/' + user.group).child(postId).child('comments').child(commentId)
                     .set(comment.toFirebaseObject()).then(
                     res => resolve(res),
                     err => reject(err)
@@ -212,7 +214,7 @@ export class PostService {
     getComment(postId, commentId) {
         return new Promise<any>((resolve, reject) => {
             this.user.pipe(first()).subscribe(user => {
-                firebase.database().ref('/posts/' + user.group).child(postId).child('comments').child(commentId).once('value').then(
+                firebase.database().ref('/posts/groups/' + user.group).child(postId).child('comments').child(commentId).once('value').then(
                     snapshot => {
                         const data = snapshot.val();
                         // Convert the data to an post object and return it
@@ -231,7 +233,7 @@ export class PostService {
      */
     getAllComments(postId: string) {
         return this.user.pipe(switchMap(user => {
-            return this.fireDatabase.list<Comment>('/posts/' + user.group + '/' + postId).valueChanges();
+            return this.fireDatabase.list<Comment>('/posts/groups/' + user.group + '/' + postId).valueChanges();
         }));
     }
 

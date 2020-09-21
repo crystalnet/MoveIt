@@ -45,10 +45,11 @@
                 <!--img [src]="post.image"-->
             </ion-avatar>
             <ion-label id="{{post.id}}">
-                <h3 (click)="viewProfile(i)">{{ post.username | async}}</h3>
+                <h2 (click)="viewProfile(i)">{{ post.title }}</h2>
                 <p (click)="viewProfile(i)">
-                    <ion-icon name="time"></ion-icon>
-                    {{ post.createdAt | date:'dd. MMM on HH:mm' }}
+                    by {{ post.username | async }} at
+                    <!--ion-icon name="time"></ion-icon-->
+                    {{ post.createdAt | date:'HH:mm on dd. MMM' }}
                 </p>
             </ion-label>
         </ion-item>
@@ -62,13 +63,13 @@
         <ion-row *ngIf="(userObservable | async)">
             <ion-col>
                 <ng-container *ngIf="post.likes.includes(user.id); else running">
-                    <ion-button id="like" color="secondary" type="button" (click)='like(i)'>
+                    <ion-button id="like" color="secondary" type="button" (click)='like(post.id)'>
                         <ion-icon name="thumbs-up" id="icons"></ion-icon>
                         {{post.likes?.length || 0}} Likes
                     </ion-button>
                 </ng-container>
                 <ng-template #running>
-                    <ion-button id="like" color="primary" type="button" (click)='like(i)'>
+                    <ion-button id="like" color="primary" type="button" (click)='like(post.id)'>
                         <ion-icon name="thumbs-up" id="icons"></ion-icon>
                         {{post.likes?.length || 0}} Likes
                     </ion-button>
@@ -82,7 +83,7 @@
                 </ion-button>
             </ion-col>
         </ion-row>
-        <div *ngIf="post.comments?.length != 0">
+        <ion-list *ngIf="post.comments?.length != 0">
             <div *ngFor="let c of post.comments; let i = index">
                 <ion-item lines="none" *ngIf="i < (post.commentPage * 3)">
                     <!--<ion-label><h3>{{ (post.usernames[i] | async)}}</h3> -->
@@ -96,7 +97,7 @@
               <ion-label><p id="allComments">all comments</p></ion-label>
             </ion-item>
             -->
-        </div>
+        </ion-list>
         <ion-row>
             <form>
                 <ion-item id="form">

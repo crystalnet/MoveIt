@@ -53,6 +53,7 @@ export class SocialfeedDetailPage implements OnInit {
                 // data.sort((a, b) => {
                 //   return b.startTime.getTime() - a.startTime.getTime();
                 // });
+                console.log(data);
                 return data.slice(0, 10);
             }
         ));
@@ -111,6 +112,7 @@ export class SocialfeedDetailPage implements OnInit {
     newPost(text: string) {
         const post = new Post();
         post.content = text;
+        post.type = 'manual';
 
         this.postService.createPost(post).then(
             res => console.log(res),
@@ -137,8 +139,8 @@ export class SocialfeedDetailPage implements OnInit {
         return this.postService.getAllPosts();
     }
 
-    like(i) {
-        const liked = document.getElementsByName('userPlace')[i].id;
+    like(liked) {
+        // const liked = document.getElementsByName('userPlace')[i].id;
         this.postService.likePost(liked).then(
             res => console.log(res),
             err => console.log(err)
@@ -152,8 +154,8 @@ export class SocialfeedDetailPage implements OnInit {
         console.log(this.post);
     }
 
-    unlike(i) {
-        const unliked = document.getElementsByName('userPlace')[i].id;
+    unlike(unliked) {
+        // const unliked = document.getElementsByName('userPlace')[i].id;
         this.postService.unlikePost(unliked).then(
             res => console.log(res),
             err => console.log(err)

@@ -90,6 +90,8 @@ export class ActivityService {
                                     } else {
                                         const post = new Post();
                                         post.activity = activity.id;
+                                        post.type = 'activity';
+                                        post.title = activity.getDuration() + ' min ' + activity.type;
                                         if (message) {
                                             post.content = message;
                                         } else {

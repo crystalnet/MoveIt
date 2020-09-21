@@ -5,7 +5,9 @@ interface FireBaseObject {
     id: string;
     activity: string;
     comments: Array<Comment>;
+    title: string;
     content: string;
+    type: string;
     createdAt: Date;
     likes: Array<string>;
     user: string;
@@ -20,14 +22,16 @@ export class Post {
      * Each parameter is optional. If it's not present, a default value is used
      *
      */
-    constructor(group?: string, id?: string, activity?: string, comments?: Array<Comment>, content?: string,
-                createdAt?: Date, likes?: Array<string>, user?: string) {
+    constructor(group?: string, id?: string, activity?: string, comments?: Array<Comment>, title?: string, content?: string,
+                type?: string, createdAt?: Date, likes?: Array<string>, user?: string) {
         // Each parameter is optional, if it's not there, set the default value
         this.group = group || '';
         this.id = id || '';
         this.activity = activity || '';
         this.comments = comments || [];
-        this.content = content || 'Lorem ipsum';
+        this.title = title || 'New post';
+        this.content = content || 'Lorem ipsum dolor sit amet';
+        this.type = content || 'default';
         this.createdAt = createdAt || new Date();
         this.likes = likes || [];
         this.user = user || '';
@@ -37,7 +41,9 @@ export class Post {
     id: string;
     activity: string;
     comments: Array<Comment>;
+    title: string;
     content: string;
+    type: string;
     createdAt: Date;
     likes: Array<string>;
     user: string;
@@ -64,7 +70,9 @@ export class Post {
             id || '',
             firebaseObject.activity || '',
             comments || [],
+            firebaseObject.title || '',
             firebaseObject.content || '',
+            firebaseObject.type || 'default',
             new Date(firebaseObject.createdAt) || new Date(),
             firebaseObject.likes || [],
             firebaseObject.user || ''
@@ -113,7 +121,9 @@ export class Post {
         return {
             activity: this.activity,
             comments: this.comments.reverse(),
+            title: this.title,
             content: this.content,
+            type: this.type,
             createdAt: this.createdAt.getTime(),
             likes: this.likes,
             user: this.user

@@ -277,7 +277,9 @@ export class GoalService {
                             .set(wins).then(
                             (res) => {
                                 const post = new Post();
+                                post.title = goal.duration + ' ' + goal.type + ' goal achieved';
                                 post.content = 'Hooray, I\'ve achieved my ' + goal.duration + ' goal for ' + goal.type;
+                                post.type = 'goalAchievement';
                                 this.postService.createPost(post).then(
                                     () => resolve(res),
                                     err => reject(err)
