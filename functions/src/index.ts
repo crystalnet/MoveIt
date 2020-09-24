@@ -76,6 +76,8 @@ function generateLeaderboardNotification(uid: string) {
             const data = new NotificationData();
             data.header = (userRank - 1).toString() + ' to go';
             data.text = 'Your rank is ' + userRank.toString();
+            data.target = 'menu/leaderboard/leaderboard/detail';
+            data.type = 'leaderboardNotification';
             return data;
         },
         (err: any) => console.log(err)
@@ -123,6 +125,7 @@ function likeNotification(uid: string, group: string, postId: string) {
             data.header = 'Your post received a new like';
             data.text = 'Your post was liked by someone, go check it out!';
             data.target = '/menu/socialfeed/socialfeed/detail';
+            data.type = 'likeNotification';
             return data;
         },
         (err: any) => console.log(err));
@@ -152,6 +155,7 @@ function commentNotification(uid: string, group: string, postId: string) {
             data.header = 'Your post has a new comment';
             data.text = 'Your post was commented by someone, go check it out!';
             data.target = '/menu/socialfeed/socialfeed/detail';
+            data.type = 'commentNotification';
             return data;
         },
         (err: any) => console.log(err));
@@ -371,7 +375,7 @@ class UserNotification {
         const dbNotification = {
             notification: this.data.type,
             time: this.data.id,
-            response: 'negative'
+            response: 'not opened'
         };
         admin.database().ref('/tracking/' + this.uid + '/reactions/' + this.data.id).set(dbNotification).then(
             () => console.log('created db entry', dbNotification),
