@@ -27,13 +27,12 @@ const routes: Routes = [
                 {path: 'add-activity', loadChildren: '../add-activity/add-activity.module#AddActivityPageModule'},
                 {path: 'edit-activity', loadChildren: '../edit-activity/edit-activity.module#EditActivityPageModule'},
                 {path: 'credits', loadChildren: '../credits/credits.module#CreditsPageModule'},
-
                 {path: 'goals', loadChildren: '../goals/goals.module#GoalsPageModule'},
-
-                {path: 'profile', loadChildren: '../profile/profile.module#ProfilePageModule'}
-               
-
-
+                {path: 'profile', loadChildren: '../profile/profile.module#ProfilePageModule'},
+                {
+                    path: 'set-goals',
+                    loadChildren: () => import('../set-goals/set-goals.module').then(m => m.SetGoalsPageModule)
+                },
             ]
     }
 ];

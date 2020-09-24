@@ -10,7 +10,7 @@
     </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content *ngIf="goalPromise | async">
     <h1>Here you can change your {{goal.duration}} {{goal.type}} minutes goal!</h1>
     <!--<ion-segment [(ngModel)]="goals">
       <ion-segment-button value="trophies">
@@ -52,6 +52,6 @@
     </ion-list>
 
     <section>
-        <ion-button slot="end" color="secondary" (click)="editGoal()">Save goals</ion-button>
+        <ion-button slot="end" color="secondary" (click)="editGoal()"> Change goals</ion-button>
     </section>
 </ion-content>
