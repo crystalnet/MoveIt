@@ -5,6 +5,7 @@ interface FireBaseObject {
     createdAt: string;
     text: string;
     user: string;
+    uid: string;
 }
 
 export class Comment {
@@ -14,6 +15,7 @@ export class Comment {
     createdAt: Date;
     text: string;
     user: string;
+    uid: string;
 
     /**
      * Constructor to create Comment
@@ -21,7 +23,7 @@ export class Comment {
      * Each parameter is optional. If it's not present, a default value is used
      *
      */
-    constructor(group?: number, post?: string, id?: string, createdAt?: Date, text?: string, user?: string) {
+    constructor(group?: number, post?: string, id?: string, createdAt?: Date, text?: string, user?: string, uid?: string) {
         // Each parameter is optional, if it's not there, set the default value
         this.group = group || 0;
         this.post = post || '';
@@ -29,6 +31,7 @@ export class Comment {
         this.createdAt = createdAt || new Date();
         this.text = text || 'Lorem ipsum';
         this.user = user || '';
+        this.uid = uid || '';
     }
 
     /**
@@ -48,7 +51,8 @@ export class Comment {
             commentId || '',
             new Date(firebaseObject.createdAt) || new Date(),
             firebaseObject.text || '',
-            firebaseObject.user || ''
+            firebaseObject.user || '',
+            firebaseObject.uid || ''
         );
     }
 
@@ -61,7 +65,8 @@ export class Comment {
         return {
             createdAt: this.createdAt.getTime(),
             text: this.text,
-            user: this.user
+            user: this.user,
+            uid: this.uid
         };
     }
 }

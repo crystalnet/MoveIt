@@ -13,7 +13,7 @@ let admin = require('firebase-admin');
 
 admin.initializeApp(functions.config().firebase);
 
-exports.automaticNotifications = functions.pubsub.schedule('every 15 minutes').onRun((context: any) => {
+exports.automaticNotifications = functions.pubsub.schedule('every 8 minutes').onRun((context: any) => {
     let time = new Date();
     time = new Date(time.getTime() + 120 * 60 * 1000);
     console.log('System Time: ', time);
@@ -34,10 +34,11 @@ exports.automaticNotifications = functions.pubsub.schedule('every 15 minutes').o
 
                 const randomization = Math.random();
                 let data = Promise.resolve(new NotificationData());
-                // if (randomization < 0.25) {
-                if (randomization < 1) {
+                if (randomization < 0.25) {
+                // if (randomization > 1) {
                     data = generateLeaderboardNotification(uid);
-                } else if (randomization < 0.5) {
+                    } else if (randomization < 0.5) {
+                // } else if (randomization < 1) {
                     data = generateSocialfeedNotification(uid);
                 } else {
                     continue;
@@ -66,6 +67,7 @@ function generateLeaderboardNotification(uid: string) {
         (snap: any) => {
             const result = snap.val();
             if (!result) {
+                console.log('no results for weeklyActiveMinutes');
                 return;
             }
             const ranks = Object.keys(result).sort((a, b) => result[b] - result[a]);
@@ -81,7 +83,78 @@ function generateLeaderboardNotification(uid: string) {
 }
 
 function generateSocialfeedNotification(uid: string) {
-    return Promise.resolve(new NotificationData());
+    return admin.database().ref('/posts/users/' + uid).orderByKey().limitToLast(1).once('value').then((snap: any) => {
+            const result = snap.val();
+            if (!result) {
+                console.log('no results for ', uid);
+                return;
+            }
+            const postId = Object.keys(result)[0];
+            const group = result[postId];
+
+            const randomization = Math.random();
+            if (randomization < 0.5) {
+            // if (randomization > 1) {
+                return likeNotification(uid, group, postId);
+            } else {
+                return commentNotification(uid, group, postId);
+            }
+        },
+        (err: any) => console.log(err));
+}
+
+function likeNotification(uid: string, group: string, postId: string) {
+    return admin.database().ref('/posts/groups/' + group + '/' + postId + '/likes').once('value').then((snap: any) => {
+            const result = snap.val();
+
+            const botUserId = 'DyvMnL4Tv0OwOrWL9U2pyJJ8oKV2';
+            if (!result || Array.isArray(result)) {
+                admin.database().ref('/posts/groups/' + group + '/' + postId + '/likes').set([botUserId]);
+            } else {
+                if (botUserId in result) {
+                    console.log('user exists already in likes');
+                } else {
+                    result.push(botUserId);
+                }
+                admin.database().ref('/posts/groups/' + group + '/' + postId + '/likes').set(result);
+            }
+
+            const data = new NotificationData();
+            data.header = 'Your post received a new like';
+            data.text = 'Your post was liked by someone, go check it out!';
+            data.target = '/menu/socialfeed/socialfeed/detail';
+            return data;
+        },
+        (err: any) => console.log(err));
+}
+
+function commentNotification(uid: string, group: string, postId: string) {
+    return admin.database().ref('/posts/groups/' + group + '/' + postId + '/comments').once('value').then((snap: any) => {
+            const result = snap.val();
+
+            const botUserId = 'DyvMnL4Tv0OwOrWL9U2pyJJ8oKV2';
+            const botUserName = 'Kon Sti';
+            const comment = {
+                createdAt: (new Date()).getTime().toString(),
+                text: 'Well done',
+                user: botUserName,
+                uid: botUserId
+            };
+
+            if (!result || Array.isArray(result)) {
+                admin.database().ref('/posts/groups/' + group + '/' + postId + '/comments').set([comment]);
+            } else {
+                result.push(comment);
+                admin.database().ref('/posts/groups/' + group + '/' + postId + '/comments').set(result);
+            }
+
+            const data = new NotificationData();
+            data.header = 'Your post has a new comment';
+            data.text = 'Your post was commented by someone, go check it out!';
+            data.target = '/menu/socialfeed/socialfeed/detail';
+            return data;
+        },
+        (err: any) => console.log(err));
 }
 
 exports.progressNotification = functions.database.ref('/leaderboard/relative/weeklyModerate/{userId}')
@@ -99,6 +172,7 @@ exports.progressNotification = functions.database.ref('/leaderboard/relative/wee
             } else {
                 return;
             }
+            data.target = '/menu/progress/progress/detail'
             const notification = new UserNotification(context.params.userId, data);
             return notification.send();
         } else {
@@ -300,7 +374,7 @@ class UserNotification {
             response: 'negative'
         };
         admin.database().ref('/tracking/' + this.uid + '/reactions/' + this.data.id).set(dbNotification).then(
-            (res: any) => console.log('created db entry', res),
+            () => console.log('created db entry', dbNotification),
             (err: any) => console.log(err)
         );
     }

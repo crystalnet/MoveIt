@@ -172,6 +172,7 @@ export class PostService {
                 comment.post = postId;
                 comment.text = userComment;
                 comment.user = user.name;
+                comment.uid = user.id;
 
                 this.fireDatabase.database.ref('/posts/groups/' + user.group).child(comment.post).child('comments').child(id)
                     .set(comment.toFirebaseObject()).then(
