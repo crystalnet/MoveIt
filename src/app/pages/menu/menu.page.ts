@@ -170,7 +170,9 @@ export class MenuPage implements OnInit, OnDestroy {
                 }
             ]
         });
-        await this.navCtrl.navigateForward(payload.target);
+        if (payload.target) {
+            await this.navCtrl.navigateForward(payload.target);
+        }
         await alert.present();
     }
 }
