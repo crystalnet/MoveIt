@@ -180,7 +180,7 @@ exports.progressNotification = functions.database.ref('/leaderboard/relative/wee
             const notification = new UserNotification(context.params.userId, data);
             return notification.send();
         } else {
-            return;
+            return Promise.resolve('performance value decreased not increased');
         }
     });
 

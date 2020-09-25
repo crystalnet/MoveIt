@@ -210,13 +210,15 @@ export class GoalService {
             const filteredActivities = this.filterActivities(activities, startDate, endDate);
             // Get the duration for each activity
             times = filteredActivities.map((activity) => {
-                if (goal.type !== 'active' || activity.type === 'moderate') {
-                    return activity.getDuration();
-                } else {
+                if (activity.intensity === 'vigorous') {
                     return 2 * activity.getDuration();
+                } else {
+                    return activity.getDuration();
                 }
             });
         }
+        console.log(goal);
+        console.log(times);
 
         // Check if there are elements in the array, that passed the filtering
         if (times.length > 0) {
@@ -267,7 +269,7 @@ export class GoalService {
                         // If it doesn't exist, create a new array with the current win
                         wins = [(new Date()).getTime()];
                     }
-                    this.fireDatabase.database.ref('/leaderboard/' + '/nWins/' + goal.name + firebase.auth().currentUser.uid)
+                    this.fireDatabase.database.ref('/leaderboard/' + '/nWins/' + goal.name + '/' + firebase.auth().currentUser.uid)
                         .set(wins.length).catch(err => console.log(err));
                     if (createPost) {
                         this.fireDatabase.database.ref('/wins/' + firebase.auth().currentUser.uid + '/' + goal.name)

@@ -172,7 +172,7 @@ export class LeaderboardDetailPage implements OnInit {
     }
 
     generateActiveMinutesList() {
-        this.goalService.getLeaderboardGoals('absolute', 'weeklyActiveMinutes')
+        this.goalService.getLeaderboardGoals('absolute', 'weekly-active')
             .subscribe(result => {
                 if (!result) {
                     this.activitiesModerate = [];
@@ -181,53 +181,40 @@ export class LeaderboardDetailPage implements OnInit {
                 console.log(result);
                 const testarray = Object.keys(result)
                     .map(uid => new LeaderboardObject(uid, result[uid], this.userService));
-                this.activitiesModerate = testarray;
+                this.activitiesModerate = this.sortArrays(testarray);
                 console.log(testarray);
             });
     }
 
     generateGoalProgressList() {
-        const moderateObservable = this.goalService.getLeaderboardGoals('relative', 'weeklyModerate');
-        const vigorousObservable = this.goalService.getLeaderboardGoals('relative', 'weeklyVigorous');
-
-        combineLatest(moderateObservable, vigorousObservable)
+        this.goalService.getLeaderboardGoals('relative', 'weekly-active')
             .subscribe(result => {
-                const moderateList = result[0];
-                const vigorousList = result[1];
-                const combinedList = moderateList;
-
-                if (vigorousList && moderateList) {
-                    for (const user of Object.keys(vigorousList)) {
-                        if (user in Object.keys(combinedList)) {
-                            combinedList[user] += vigorousList[user];
-                        }
-                        combinedList[user] = vigorousList[user];
-                    }
-
-                    const testarray = Object.keys(combinedList)
-                        .map(uid => new LeaderboardObject(uid, combinedList[uid] > 0 ? combinedList[uid] / 2 : 0, this.userService));
-                    this.goalProgressList = this.sortArrays(testarray);
-                    console.log(this.goalProgressList);
+                if (!result) {
+                    return;
                 }
+
+                const testarray = Object.keys(result).map(uid => new LeaderboardObject(uid, result[uid], this.userService));
+                this.goalProgressList = this.sortArrays(testarray);
+                console.log(this.goalProgressList);
             });
     }
 
     generateGoalWinsList() {
-        const moderateObservable = this.goalService.getLeaderboardGoals('nWins', 'dailyModerate');
-        const vigorousObservable = this.goalService.getLeaderboardGoals('nWins', 'dailyVigorous');
+        const dailyObservable = this.goalService.getLeaderboardGoals('nWins', 'daily-active');
+        const weeklyObservable = this.goalService.getLeaderboardGoals('nWins', 'weekly-active');
 
-        combineLatest(moderateObservable, vigorousObservable)
+        combineLatest(dailyObservable, weeklyObservable)
             .subscribe(result => {
-                const moderateList = result[0];
-                const vigorousList = result[1];
-                const combinedList = moderateList;
+                const dailyList = result[0];
+                const weeklyList = result[1];
+                const combinedList = dailyList;
 
-                if (vigorousList && moderateList) {
-                    for (const user of Object.keys(vigorousList)) {
+                if (weeklyList && dailyList) {
+                    for (const user of Object.keys(weeklyList)) {
                         if (user in Object.keys(combinedList)) {
-                            combinedList[user] += vigorousList[user];
+                            combinedList[user] += weeklyList[user];
                         }
-                        combinedList[user] = vigorousList[user];
+                        combinedList[user] = weeklyList[user];
                     }
 
                     const testarray = Object.keys(combinedList)
@@ -242,7 +229,7 @@ export class LeaderboardDetailPage implements OnInit {
      * this method sorts all arrays for the leaderboard visualization
      */
     sortArrays(array) {
-        if (array !== undefined) {
+        if (array !== undefined && Array.isArray(array)) {
             array.sort((a, b) => a.compareTo(b));
         }
         return array;
