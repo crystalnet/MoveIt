@@ -10,6 +10,8 @@ import {PostService} from '../post/post.service';
 import {Post} from '../../model/post';
 import {TrackingService} from '../tracking/tracking.service';
 import {ActionLog} from '../../model/actionLog';
+import * as moment from 'moment';
+import {Moment} from 'moment';
 
 @Injectable({
     providedIn: 'root'
@@ -195,10 +197,14 @@ export class GoalService {
      *
      * @param goal to calculate the progress for
      * @param activities list of activities to base the progress on
+     * @param referenceDate the date from which to count back. If this is not specified we assume that for example for a weekly goal, we
+     *                      calculate the progress from start of the week until now. If the referenceDate is one week earlier, we count back
+     *                      one week from that point in time.
      */
-    calculateGoalProgress(goal: Goal, activities: Array<Activity>) {
-        const startDate = this.getStartOf(goal.duration === 'weekly');
-        const endDate = new Date();
+    calculateGoalProgress(goal: Goal, activities: Array<Activity>, referenceDate?: Moment) {
+        const endDate = referenceDate ? referenceDate : moment();
+        // @ts-ignore
+        const startDate = endDate.clone().startOf(goal.duration.slice(0, -2));
 
         // Filter the activities based on the goals type (e.g. 'moderate') and duration (e.g. 'weekly')
         let times;
@@ -255,22 +261,25 @@ export class GoalService {
                     let createPost = true;
                     if (Array.isArray(wins)) {
                         // If the list exists, check if the goal was already won today
-                        const lastWin = new Date(wins.slice(-1)[0]);
-                        const startOfPeriod = this.getStartOf(goal.duration === 'weekly');
-                        if (lastWin.getTime() >= startOfPeriod.getTime()) {
+                        const lastWin = moment(wins.slice(-1)[0]);
+                        const now = moment();
+                        if (goal.duration === 'weekly' && lastWin.isSame(now, 'week')) {
+                            resolve(goal.name + ' goal was already won');
+                            createPost = false;
+                        } else if (goal.duration === 'daily' && lastWin.isSame(now, 'day')) {
                             resolve(goal.name + ' goal was already won');
                             createPost = false;
                         } else {
                             // If not, append it to the wins list
                             wins.push((new Date()).getTime());
                         }
-
                     } else {
                         // If it doesn't exist, create a new array with the current win
                         wins = [(new Date()).getTime()];
                     }
                     this.fireDatabase.database.ref('/leaderboard/' + '/nWins/' + goal.name + '/' + firebase.auth().currentUser.uid)
                         .set(wins.length).catch(err => console.log(err));
+                    this.trackingService.logAction(new ActionLog('goal-won', goal.name, goal.target, goal.target));
                     if (createPost) {
                         this.fireDatabase.database.ref('/wins/' + firebase.auth().currentUser.uid + '/' + goal.name)
                             .set(wins).then(
@@ -302,19 +311,17 @@ export class GoalService {
      * @param fromDate earliest endTime of an activity
      * @param untilDate latest endTime of an activity
      */
-    filterActivities(activities: Array<Activity>, fromDate: Date = new Date(0), untilDate: Date = new Date(), intensity?: string) {
-        fromDate.setHours(0, 0, 0);
-        untilDate.setHours(23, 59, 59);
+    filterActivities(activities: Array<Activity>, fromDate: Moment = moment(), untilDate: Moment = moment(), intensity?: string) {
         return activities.filter((activity: Activity) => {
             if (intensity && activity.intensity !== intensity) {
                 return false;
             }
-
-            if (activity.endTime <= fromDate) {
+            const time = moment(activity.endTime);
+            if (time.isBefore(fromDate, 'day')) {
                 return false;
             }
 
-            if (activity.endTime >= untilDate) {
+            if (time.isAfter(untilDate, 'day')) {
                 return false;
             }
 

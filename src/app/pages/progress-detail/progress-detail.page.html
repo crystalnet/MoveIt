@@ -69,39 +69,81 @@
    </ion-item>-->
 
 
-    <ion-card>
-        <ion-card-header>
-            <ion-card-title>Goals</ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-            <ion-list *ngIf="dailyActivePromise | async">
-                <ion-item>
-                    <ion-label>
-                        <h3>{{dailyActive.duration}} </h3>
-                        <p>{{dailyActive.type}}</p>
-                    </ion-label>
-                    <ion-label><h3>{{dailyActive.current}} / {{dailyActive.target}} min</h3>
-                    </ion-label>
-                    <ion-icon name="create" id="edit" (click)='routeToEditGoalPage(dailyActive)'></ion-icon>
-                </ion-item>
-                <ion-progress-bar color="secondary" [value]="dailyActive.relative"></ion-progress-bar>
-            </ion-list>
+    <ion-slides [options]="slideOpts" #slides>
+        <ng-container *ngFor="let n of [3,2,1]">
+            <ion-slide>
+                <ion-card>
+                    <ion-card-header>
+                        <ion-card-title>{{ n }} Weeks ago</ion-card-title>
+                    </ion-card-header>
+                    <ion-card-content>
+                        <ion-list *ngIf="dailyActivePromise | async">
+                            <ion-item>
+                                <ion-label>
+                                    <h3>{{dailyActive.duration}} </h3>
+                                    <p>{{dailyActive.type}}</p>
+                                </ion-label>
+                                <ion-label><h3>{{dailyActive.current}} / {{dailyActive.target}} min</h3>
+                                </ion-label>
+                                <ion-icon name="create" id="edit" (click)='routeToEditGoalPage(dailyActive)'></ion-icon>
+                            </ion-item>
+                            <ion-progress-bar color="secondary" [value]="dailyActive.relative"></ion-progress-bar>
+                        </ion-list>
 
-            <ion-list *ngIf="weeklyActivePromise | async">
-                <ion-item>
-                    <ion-label>
-                        <h3>{{weeklyActive.duration}} </h3>
-                        <p>{{weeklyActive.type}}</p>
-                    </ion-label>
-                    <ion-label><h3>{{weeklyActive.current}} / {{weeklyActive.target}}
-                        min</h3></ion-label>
-                    <ion-icon name="create" id="edit"
-                              (click)='routeToEditGoalPage(weeklyActive)'></ion-icon>
-                </ion-item>
-                <ion-progress-bar color="tertiary" [value]="weeklyActive.relative"></ion-progress-bar>
-            </ion-list>
-        </ion-card-content>
-    </ion-card>
+                        <ion-list *ngIf="weeklyActivePromise | async">
+                            <ion-item>
+                                <ion-label>
+                                    <h3>{{weeklyActive.duration}} </h3>
+                                    <p>{{weeklyActive.type}}</p>
+                                </ion-label>
+                                <ion-label><h3>{{weeklyActive.current}} / {{weeklyActive.target}}
+                                    min</h3></ion-label>
+                                <ion-icon name="create" id="edit"
+                                          (click)='routeToEditGoalPage(weeklyActive)'></ion-icon>
+                            </ion-item>
+                            <ion-progress-bar color="tertiary" [value]="weeklyActive.relative"></ion-progress-bar>
+                        </ion-list>
+                    </ion-card-content>
+                </ion-card>
+            </ion-slide>
+        </ng-container>
+
+        <ion-slide>
+            <ion-card>
+                <ion-card-header>
+                    <ion-card-title>Goals</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                    <ion-list *ngIf="dailyActivePromise | async">
+                        <ion-item>
+                            <ion-label>
+                                <h3>{{dailyActive.duration}} </h3>
+                                <p>{{dailyActive.type}}</p>
+                            </ion-label>
+                            <ion-label><h3>{{dailyActive.current}} / {{dailyActive.target}} min</h3>
+                            </ion-label>
+                            <ion-icon name="create" id="edit" (click)='routeToEditGoalPage(dailyActive)'></ion-icon>
+                        </ion-item>
+                        <ion-progress-bar color="secondary" [value]="dailyActive.relative"></ion-progress-bar>
+                    </ion-list>
+
+                    <ion-list *ngIf="weeklyActivePromise | async">
+                        <ion-item>
+                            <ion-label>
+                                <h3>{{weeklyActive.duration}} </h3>
+                                <p>{{weeklyActive.type}}</p>
+                            </ion-label>
+                            <ion-label><h3>{{weeklyActive.current}} / {{weeklyActive.target}}
+                                min</h3></ion-label>
+                            <ion-icon name="create" id="edit"
+                                      (click)='routeToEditGoalPage(weeklyActive)'></ion-icon>
+                        </ion-item>
+                        <ion-progress-bar color="tertiary" [value]="weeklyActive.relative"></ion-progress-bar>
+                    </ion-list>
+                </ion-card-content>
+            </ion-card>
+        </ion-slide>
+    </ion-slides>
 
 
     <!--ion-slides [options]="slideOpts" #slides>
