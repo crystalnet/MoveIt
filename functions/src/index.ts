@@ -280,20 +280,18 @@ exports.resetLeaderboard = functions.pubsub.schedule('every monday 00:00').onRun
                 }
 
                 const goals = {
-                    dailyModerate: result,
-                    dailyVigorous: result,
-                    dailyWeight: result,
-                    weeklyModerate: result,
-                    weeklyVigorous: result,
-                    weeklyWeight: result,
+                    'daily-moderate': result,
+                    'daily-vigorous': result,
+                    'daily-active': result,
+                    'weekly-moderate': result,
+                    'weekly-vigorous': result,
+                    'weekly-active': result,
                 };
 
                 console.log(goals);
 
                 admin.database().ref('/leaderboard/absolute').set(goals);
                 admin.database().ref('/leaderboard/relative').set(goals);
-                admin.database().ref('/leaderboard/absolute/weeklyActiveMinutes').set(goals);
-
             },
             (err: any) => console.log(err));
 });

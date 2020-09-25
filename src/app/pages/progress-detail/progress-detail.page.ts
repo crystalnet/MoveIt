@@ -1,16 +1,16 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivityService} from '../../services/activity/activity.service';
 import {Activity} from '../../model/activity';
-import {merge, Observable, of} from 'rxjs';
+import {merge, Observable} from 'rxjs';
 import {GoalService} from '../../services/goal/goal.service';
 import {Goal} from '../../model/goal';
 import {Location} from '@angular/common';
 import {Health} from '@ionic-native/health/ngx';
-import {Platform, NavController} from '@ionic/angular';
+import {IonSlides, NavController, Platform} from '@ionic/angular';
 import {Router} from '@angular/router';
 import {Chart} from 'chart.js';
-import {first, map, last} from 'rxjs/operators';
-import {IonSlides} from '@ionic/angular';
+import {map} from 'rxjs/operators';
+import * as moment from 'moment';
 
 @Component({
     selector: 'app-progress-detail',
@@ -24,8 +24,10 @@ export class ProgressDetailPage implements OnInit {
     activities: Observable<Activity[]>;
     // Array which contains the displayed activities
     displayedActivities: Observable<Activity[]>;
-    goals: Observable<any>;
-    goalStorage: Array<Goal>;
+    dailyActivePromise: Promise<any>;
+    dailyActive: Goal;
+    weeklyActivePromise: Promise<any>;
+    weeklyActive: Goal;
     duration = 'day';
 
     weeklyActivities;
@@ -46,7 +48,7 @@ export class ProgressDetailPage implements OnInit {
 
     hrzBars5: any;
     weeklyBarChart: any;
-    dailyActivities: any[];
+    dailyActivities: any;
     public chartLabelsWeekly: any = [];
 
     slideOpts = {
@@ -81,18 +83,12 @@ export class ProgressDetailPage implements OnInit {
             }
         ));
 
-        this.goals = this.goalService.getGoals();
-        this.goals.subscribe(goals => {
-            this.goalStorage = goals;
-            console.log(this.goalStorage);
-        });
-        this.goals.pipe(first()).subscribe(goals => {
-            this.activities.pipe(first()).subscribe(activities => {
-                this.goalService.updateGoals(goals, activities);
-            });
-        });
+        this.dailyActivePromise = this.goalService.getGoal('daily-active').then(res => this.dailyActive = res, err => console.log(err));
+        this.weeklyActivePromise = this.goalService.getGoal('weekly-active').then(res => this.weeklyActive = res, err => console.log(err));
+
         this.defineChartDataDaily();
-        this.loadOldGoals();
+        // this.defineChartData();
+        // this.loadOldGoals();
     }
 
     ionViewDidEnter() {
@@ -117,57 +113,40 @@ export class ProgressDetailPage implements OnInit {
     // daily
     defineChartDataDaily() {
         const that = this;
-        const now = new Date();
-        const lastWeek: Date = new Date();
-        // lastWeek.setDate(lastWeek.getDate() - 7);
+        const now = moment();
 
         this.activities.subscribe(activities => {
             // Daten für die Woche
-            const dailyActivities = [];
+            const dailyActivities = {};
             this.chartLabels = [];
+            const intensities = Goal.types;
 
-            for (let hour = 0; hour < 24; hour++) {
-                //  lastWeek.setDate(now.getDate() - dayOfWeek);
-                dailyActivities.push(activities.filter((activity) => {
-                    return activity.startTime.getDate() === now.getDate() && activity.startTime.getHours() === hour;
-                }));
-
-
-                that.chartLabels.push(
-                    hour
-                );
+            // Prepare daily activities with hours 0-23 as indices and initialize with empty array
+            for (const intensity of intensities) {
+                dailyActivities[intensity] = {};
+                for (let hour = 0; hour < 24; hour++) {
+                    dailyActivities[intensity][hour.toString()] = [];
+                    if (this.chartLabels.length < 24) {
+                        this.chartLabels.push(hour);
+                    }
+                }
             }
 
-            const intensities = [
-                {id: 'vigorous', name: 'vigorous'},
-                {id: 'moderate', name: 'moderate'},
-                {id: 'weightTraining', name: 'weight training'}
-            ];
+            // Fill the dailyActivities object with the activities
+            for (const activity of activities) {
+                const time = moment(activity.startTime);
+                if (now.isSame(time, 'day')) {
+                    const index = activity.startTime.getHours().toString();
+                    dailyActivities[activity.intensity][index].push(activity.getDuration());
+                }
+            }
 
-            const dailyActivitiesDurations = [];
-            dailyActivities.forEach(function(weekly) {
-                const obj = {
-                    vigorous: [],
-                    moderate: [],
-                    weightTraining: []
-                };
-                intensities.forEach(function(intensity) {
-                    obj[intensity.id] = weekly
-                        .filter((activity) => activity.intensity === intensity.name)
-                        .reduce(((totalDuration, activity) => totalDuration + activity.getDuration()), 0);
-                });
-
-                dailyActivitiesDurations.push(obj);
-
-
-                /*let weeklyActivities = activities.filter(function(activity){
-                    return activity.startTime.getDate() >= lastWeek.getDate();
-                   /* getFullYear() === now.getFullYear() &&
-                    activity.startTime.getMonth()           === now.getMonth()    &&
-                    activity.startTime.getDay()             === now.getDay();
-                    //activity.intensity                      === 'moderate';*/
-            });
-            this.dailyActivities = dailyActivitiesDurations;
+            this.dailyActivities = dailyActivities;
+            console.log(dailyActivities);
+            console.log(
+                Object.values(this.dailyActivities.moderate)
+                    .map((el: Array<number>) => el.reduce((a: number, b: number) => a + b, 0)));
+            console.log(that.chartLabels);
 
             that.createHrzBarChart5Daily();
         });
@@ -183,46 +162,35 @@ export class ProgressDetailPage implements OnInit {
             this.chartLabelsWeekly = [];
             // Daten für die Woche
             const weeklyActivities = [];
-            // let now = new Date();
+            const intensities = Goal.types;
+            const start = moment().startOf('day').subtract(6, 'day');
+            const current = start.clone();
 
-            for (let dayOfWeek = 6; dayOfWeek >= 0; dayOfWeek--) {
-
-                const lastWeek: Date = new Date();
-                lastWeek.setDate(new Date().getDate() - dayOfWeek);
-
-                weeklyActivities.push(activities.filter(function(activity) {
-                    return activity.startTime.getDate() === lastWeek.getDate();
-                }));
-
-                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-                that.chartLabelsWeekly.push(
-                    days[lastWeek.getDay()]
-                );
+            // Prepare weekly activities with days -6 days until today as indices and initialize with empty array
+            for (const intensity of intensities) {
+                current.set(start.toObject());
+                weeklyActivities[intensity] = {};
+                for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+                    weeklyActivities[intensity][current.toISOString(true)] = [];
+                    if (that.chartLabelsWeekly.length < 7) {
+                        that.chartLabelsWeekly.push(current.format('ddd'));
+                    }
+                    current.add(1, 'day');
+                }
             }
 
-            const intensities = [
-                {id: 'vigorous', name: 'vigorous'},
-                {id: 'moderate', name: 'moderate'},
-                {id: 'weightTraining', name: 'weight training'}
-            ];
+            // Fill the dailyActivities object with the activities
+            for (const activity of activities) {
+                const time = moment(activity.startTime);
+                if (time.isAfter(start)) {
+                    const index = time.startOf('day').toISOString(true);
+                    weeklyActivities[activity.intensity][index].push(activity.getDuration());
+                }
+            }
 
-            const weeklyActivityDurations = [];
-            weeklyActivities.forEach(function(weekly) {
-                const obj = {
-                    vigorous: [],
-                    moderate: [],
-                    weightTraining: []
-                };
-                intensities.forEach(function(intensity) {
-                    obj[intensity.id] = weekly
-                        .filter((activity) => activity.intensity === intensity.name)
-                        .reduce(((totalDuration, activity) => totalDuration + activity.getDuration()), 0);
-                });
-
-                weeklyActivityDurations.push(obj);
-            });
-            this.weeklyActivities = weeklyActivityDurations;
+            this.weeklyActivities = weeklyActivities;
+            console.log(weeklyActivities);
+            console.log(that.chartLabelsWeekly);
 
             that.createWeeklyChart();
         });
@@ -241,25 +209,21 @@ export class ProgressDetailPage implements OnInit {
             type: 'bar',
             data: {
                 labels: this.chartLabels,
-                datasets: [{
-                    label: 'moderate',
-                    data: this.dailyActivities.map((intensity) => intensity.moderate),
-                    backgroundColor: '#F61067', // array should have same number of elements as number of dataset
-                    borderColor: '#F61067', // array should have same number of elements as number of dataset
-                    borderWidth: 1
-                },
+                datasets: [
                     {
-                        label: 'vigorous',
-                        data: this.dailyActivities.map((intensity) => intensity.vigorous),
-                        backgroundColor: '#6DECAF', // array should have same number of elements as number of dataset
-                        borderColor: '#6DECAF', // array should have same number of elements as number of dataset
+                        label: 'moderate',
+                        data: Object.values(this.dailyActivities.moderate)
+                            .map((el: Array<number>) => el.reduce((a: number, b: number) => a + b, 0)),
+                        backgroundColor: '#F61067', // array should have same number of elements as number of dataset
+                        borderColor: '#F61067', // array should have same number of elements as number of dataset
                         borderWidth: 1
                     },
                     {
-                        label: 'weight training',
-                        data: this.dailyActivities.map((intensity) => intensity.weightTraining),
-                        backgroundColor: '#656866', // array should have same number of elements as number of dataset
-                        borderColor: '#656866', // array should have same number of elements as number of dataset
+                        label: 'vigorous',
+                        data: Object.values(this.dailyActivities.vigorous)
+                            .map((el: Array<number>) => el.reduce((a: number, b: number) => a + b, 0)),
+                        backgroundColor: '#6DECAF', // array should have same number of elements as number of dataset
+                        borderColor: '#6DECAF', // array should have same number of elements as number of dataset
                         borderWidth: 1
                     }
                 ]
@@ -302,7 +266,6 @@ export class ProgressDetailPage implements OnInit {
 
 
     createWeeklyChart() {
-
         if (this.weeklyBarChart) {
             this.weeklyBarChart.destroy();
         }
@@ -314,25 +277,21 @@ export class ProgressDetailPage implements OnInit {
             type: 'bar',
             data: {
                 labels: this.chartLabelsWeekly,
-                datasets: [{
-                    label: 'moderate',
-                    data: this.weeklyActivities.map((intensity) => intensity.moderate),
-                    backgroundColor: '#F61067', // array should have same number of elements as number of dataset
-                    borderColor: '#F61067', // array should have same number of elements as number of dataset
-                    borderWidth: 1
-                },
+                datasets: [
                     {
-                        label: 'vigorous',
-                        data: this.weeklyActivities.map((intensity) => intensity.vigorous),
-                        backgroundColor: '#6DECAF', // array should have same number of elements as number of dataset
-                        borderColor: '#6DECAF', // array should have same number of elements as number of dataset
+                        label: 'moderate',
+                        data: Object.values(this.weeklyActivities.moderate)
+                            .map((el: Array<number>) => el.reduce((a: number, b: number) => a + b, 0)),
+                        backgroundColor: '#F61067', // array should have same number of elements as number of dataset
+                        borderColor: '#F61067', // array should have same number of elements as number of dataset
                         borderWidth: 1
                     },
                     {
-                        label: 'weight training',
-                        data: this.weeklyActivities.map((intensity) => intensity.weightTraining),
-                        backgroundColor: '#656866', // array should have same number of elements as number of dataset
-                        borderColor: '#656866', // array should have same number of elements as number of dataset
+                        label: 'vigorous',
+                        data: Object.values(this.weeklyActivities.vigorous)
+                            .map((el: Array<number>) => el.reduce((a: number, b: number) => a + b, 0)),
+                        backgroundColor: '#6DECAF', // array should have same number of elements as number of dataset
+                        borderColor: '#6DECAF', // array should have same number of elements as number of dataset
                         borderWidth: 1
                     }
                 ]
@@ -421,9 +380,9 @@ export class ProgressDetailPage implements OnInit {
            */
         const activity = new Activity();
         activity.endTime = new Date();
-        activity.startTime = new Date(new Date().getTime() - 3 * 60 * 1000), // three minutes ago
+        activity.startTime = new Date(new Date().getTime() - 3 * 60 * 1000); // three minutes ago
 
-            this.activityService.writeFitnessApi(activity);
+        this.activityService.writeFitnessApi(activity);
     }
 
     loadHealthData() {
@@ -529,9 +488,9 @@ export class ProgressDetailPage implements OnInit {
             this.goalsHistory = data;
 
 
-            this.goalsHistory.forEach(function(goal) {
+            this.goalsHistory.forEach((goal) => {
 
-                goal.history.forEach(function(history) {
+                goal.history.forEach((history) => {
                     for (const hist in history) {
                         if (history.hasOwnProperty(hist)) {
 
@@ -559,7 +518,7 @@ export class ProgressDetailPage implements OnInit {
                 that.lastGoalV = 0;
                 that.lastGoalW = 0;
                 // console.log(this.allInfo);
-                this.allInfo.forEach(function(changedGoal) {
+                this.allInfo.forEach((changedGoal) => {
 
                     if (changedGoal.time < lastSunday.getTime()) {
                         //  console.log(changedGoal.val);
@@ -650,7 +609,7 @@ export class ProgressDetailPage implements OnInit {
 
                 // console.log(that.oldGoals);
             }
-            
+
 
         });
         this.activitiesFromLastWeek();
@@ -672,7 +631,7 @@ export class ProgressDetailPage implements OnInit {
                 lastSecSunday.setDate(lastSecSunday.getDate() - (7 * weekNumber) - lastSecSunday.getDay() - 7);
                 lastSecSunday.setHours(0, 0, 0, 0);
 
-                lastWekkActivities.push(data.filter(function(activity) {
+                lastWekkActivities.push(data.filter((activity) => {
                     return activity.startTime.getTime() < lastSunday.getTime() && activity.startTime.getTime() > lastSecSunday.getTime();
                 }));
                 this.activitiesGoals = lastWekkActivities;
@@ -684,13 +643,13 @@ export class ProgressDetailPage implements OnInit {
                 ];
 
                 const weeklyActivityDurations = [];
-                lastWekkActivities.forEach(function(weekly) {
+                lastWekkActivities.forEach((weekly)  => {
                     const obj = {
                         vigorous: [],
                         moderate: [],
                         weightTraining: []
                     };
-                    intensities.forEach(function(intensity) {
+                    intensities.forEach((intensity)  =>{
                         obj[intensity.id] = weekly
                             .filter((activity) => activity.intensity === intensity.name)
                             .reduce(((totalDuration, activity) => totalDuration + activity.getDuration()), 0);
@@ -707,7 +666,7 @@ export class ProgressDetailPage implements OnInit {
                 weight = this.wholeDuration.map((intensity) => intensity.weightTraining);
                 console.log(weight);
 
-                this.oldGoals.forEach(function(goal) {
+                this.oldGoals.forEach((goal) => {
                     if (goal.intensity === 'moderate' && goal.weekNumber === weekNumber) {
                         goal.duration = moderate;
                         goal.relative = goal.duration / goal.weekGoal;

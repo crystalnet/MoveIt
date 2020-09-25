@@ -8,13 +8,15 @@ import {GoalArray} from '../../model/goalArray';
 import {map} from 'rxjs/operators';
 import {PostService} from '../post/post.service';
 import {Post} from '../../model/post';
+import {TrackingService} from '../tracking/tracking.service';
+import {ActionLog} from '../../model/actionLog';
 
 @Injectable({
     providedIn: 'root'
 })
 export class GoalService {
 
-    constructor(private fireDatabase: AngularFireDatabase, private postService: PostService) {
+    constructor(private fireDatabase: AngularFireDatabase, private postService: PostService, private trackingService: TrackingService) {
     }
 
     /**
@@ -95,13 +97,10 @@ export class GoalService {
      */
     adjustGoal(goal: Goal, target: number) {
         return new Promise<any>((resolve, reject) => {
-            // Create a new history entry with the current date as key and the previous target as value
-            const newHistoryEntry = {};
-            // newHistoryEntry[new Date().setDate(new Date().getDate() - 23)] = goal.target;
-            newHistoryEntry[new Date().getTime()] = goal.target;
-
-            goal.history.push(newHistoryEntry); // Add the value to the history
-            goal.target = target; // Set the new target value
+            // Log the goal adjustment
+            this.trackingService.logAction(new ActionLog('goal-adjustment', goal.name, goal.target, target));
+            // Set the new target value
+            goal.target = target;
 
             this.updateGoal(goal).then(
                 res => resolve(res),
@@ -173,20 +172,12 @@ export class GoalService {
      */
     updateGoals(goals: Array<Goal>, activities: Array<Activity>) {
         return new Promise<any>((resolve, reject) => {
-            let weeklyModerate = 0;
-            let weeklyVigorous = 0;
             for (const goal of goals) {
                 goal.current = this.calculateGoalProgress(goal, activities);
                 this.updateGoal(goal).then(
                     res => console.log(res),
                     err => reject(err)
                 );
-
-                if (goal.type === 'weeklyModerate') {
-                    weeklyModerate = goal.current;
-                } else if (goal.type === 'weeklyVigorous') {
-                    weeklyVigorous = goal.current;
-                }
 
                 if (goal.current >= goal.target) {
                     this.winGoal(goal).then(
@@ -195,13 +186,6 @@ export class GoalService {
                     );
                 }
             }
-            this.fireDatabase.database
-                .ref('/leaderboard/absolute/' + 'weeklyActiveMinutes' + '/' + firebase.auth().currentUser.uid)
-                .set(2 * weeklyVigorous + weeklyModerate).then(
-                res => console.log(res),
-                err => console.log(err)
-            );
-
             resolve('Successfully updated goals');
         });
     }
@@ -214,12 +198,25 @@ export class GoalService {
      */
     calculateGoalProgress(goal: Goal, activities: Array<Activity>) {
         const startDate = this.getStartOf(goal.duration === 'weekly');
+        const endDate = new Date();
 
         // Filter the activities based on the goals type (e.g. 'moderate') and duration (e.g. 'weekly')
-        const filteredActivities = this.filterActivities(activities, goal.type, startDate);
-
-        // Get the duration for each activity
-        const times = filteredActivities.map((activity) => activity.getDuration());
+        let times;
+        if (goal.type !== 'active') {
+            const filteredActivities = this.filterActivities(activities, startDate, endDate, goal.type);
+            // Get the duration for each activity
+            times = filteredActivities.map((activity) => activity.getDuration());
+        } else {
+            const filteredActivities = this.filterActivities(activities, startDate, endDate);
+            // Get the duration for each activity
+            times = filteredActivities.map((activity) => {
+                if (goal.type !== 'active' || activity.type === 'moderate') {
+                    return activity.getDuration();
+                } else {
+                    return 2 * activity.getDuration();
+                }
+            });
+        }
 
         // Check if there are elements in the array, that passed the filtering
         if (times.length > 0) {
@@ -303,11 +300,11 @@ export class GoalService {
      * @param fromDate earliest endTime of an activity
      * @param untilDate latest endTime of an activity
      */
-    filterActivities(activities: Array<Activity>, intensity: string, fromDate: Date = new Date(0), untilDate: Date = new Date()) {
+    filterActivities(activities: Array<Activity>, fromDate: Date = new Date(0), untilDate: Date = new Date(), intensity?: string) {
         fromDate.setHours(0, 0, 0);
         untilDate.setHours(23, 59, 59);
         return activities.filter((activity: Activity) => {
-            if (activity.intensity !== intensity) {
+            if (intensity && activity.intensity !== intensity) {
                 return false;
             }
 

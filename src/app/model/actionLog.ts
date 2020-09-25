@@ -1,10 +1,9 @@
 interface FirebaseObject {
     action: string;
-    startTime: number;
-    endTime: number;
     object: string;
     oldValue: number;
     newValue: number;
+    timestamp: number;
 }
 
 export class ActionLog {
@@ -15,23 +14,21 @@ export class ActionLog {
      * Each parameter is optional. If it's not present, a default value is used
      *
      */
-    constructor(action?: string, object?: string, startTime?: Date, endTime?: Date, oldValue?: number, newValue?: number) {
+    constructor(action?: string, object?: string, oldValue?: number, newValue?: number, time?: Date) {
         // Each parameter is optional, if it's not there, set the default value
         this.action = action || '';
         this.object = object || '';
-        this.startTime = startTime || new Date();
-        this.endTime = endTime || new Date();
         this.oldValue = oldValue || 0;
         this.newValue = newValue || 0;
+        this.timestamp = time || new Date();
     }
 
     static actions = ['adjust-goal'];
     action: string;
     object: string;
-    startTime: Date;
-    endTime: Date;
     oldValue: number;
     newValue: number;
+    timestamp: Date;
 
     /**
      * Reconstruct the ActionLog from a firebase result
@@ -44,10 +41,9 @@ export class ActionLog {
         return new ActionLog(
             firebaseObject.action,
             firebaseObject.object,
-            new Date(firebaseObject.startTime),
-            new Date(firebaseObject.endTime),
             firebaseObject.oldValue,
-            firebaseObject.newValue);
+            firebaseObject.newValue,
+            new Date(firebaseObject.timestamp));
     }
 
     /**
@@ -60,10 +56,9 @@ export class ActionLog {
         return {
             action: this.action,
             object: this.object,
-            startTime: this.startTime.getTime(),
-            endTime: this.endTime.getTime(),
             oldValue: this.oldValue,
-            newValue: this.newValue
+            newValue: this.newValue,
+            timestamp: this.timestamp.getTime()
         };
     }
 }

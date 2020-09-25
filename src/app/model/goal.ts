@@ -29,14 +29,14 @@ export class Goal {
     }
 
     static durations = ['daily', 'weekly'];
-    static types = ['moderate', 'vigorous', 'weight training'];
+    static types = ['moderate', 'vigorous', 'active'];
     static defaultGoals: Array<Goal> = [
-        new Goal('dailyModerate', 'daily',  'moderate',  20,  0),
-        new Goal('weeklyModerate',   'weekly',  'moderate',  150,  0),
-        new Goal('dailyVigorous',    'daily',  'vigorous',  10,  0),
-        new Goal('weeklyVigorous',    'weekly',  'vigorous',  75,  0),
-        new Goal('dailyWeight',    'daily',  'weight training',  10,  0),
-        new Goal('weeklyWeight',    'weekly',  'weight training',  60,  0)
+        new Goal('daily-moderate', 'daily', 'moderate', 20, 0),
+        new Goal('weekly-moderate', 'weekly', 'moderate', 150, 0),
+        new Goal('daily-vigorous', 'daily', 'vigorous', 10, 0),
+        new Goal('weekly-vigorous', 'weekly', 'vigorous', 75, 0),
+        new Goal('daily-active', 'daily', 'active', 20, 0),
+        new Goal('weekly-active', 'weekly', 'active', 150, 0),
     ];
     name: string;
     current: number;
@@ -55,17 +55,20 @@ export class Goal {
      * @param firebaseObject result of the firebase query
      */
     static fromFirebaseObject(name, firebaseObject: FirebaseObject) {
-        // console.log(firebaseObject);
+        const goalType = name.split('-');
+        const duration = goalType[0];
+        const type = goalType[1];
 
-        return new Goal(name, firebaseObject.duration,
-            firebaseObject.type, firebaseObject.target, firebaseObject.current, firebaseObject.history);
+        return new Goal(name, duration, type, firebaseObject.target, firebaseObject.current, firebaseObject.history);
 
     }
 
     static fromAnyObject(name, firebaseObject: any) {
-        // console.log(firebaseObject);
-        return new Goal(name, firebaseObject.duration,
-            firebaseObject.type, firebaseObject.target, firebaseObject.current, firebaseObject.history);
+        const goalType = name.split('-');
+        const duration = goalType[0];
+        const type = goalType[1];
+
+        return new Goal(name, duration, type, firebaseObject.target, firebaseObject.current, firebaseObject.history);
     }
 
     /**
@@ -77,6 +80,8 @@ export class Goal {
     toFirebaseObject() {
         const copy = {...this};
         delete copy.name;
+        delete copy.type;
+        delete copy.duration;
         return copy;
     }
 }

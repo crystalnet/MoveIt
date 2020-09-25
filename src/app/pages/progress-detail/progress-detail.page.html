@@ -71,57 +71,40 @@
 
     <ion-card>
         <ion-card-header>
-            <ion-card-title>Daily Goals</ion-card-title>
+            <ion-card-title>Goals</ion-card-title>
         </ion-card-header>
         <ion-card-content>
-            <ng-container *ngFor="let goal of goalStorage, let i = index">
-                <ng-container *ngIf="i === 0">
+            <ion-list *ngIf="dailyActivePromise | async">
+                <ion-item>
+                    <ion-label>
+                        <h3>{{dailyActive.duration}} </h3>
+                        <p>{{dailyActive.type}}</p>
+                    </ion-label>
+                    <ion-label><h3>{{dailyActive.current}} / {{dailyActive.target}} min</h3>
+                    </ion-label>
+                    <ion-icon name="create" id="edit" (click)='routeToEditGoalPage(dailyActive)'></ion-icon>
+                </ion-item>
+                <ion-progress-bar color="secondary" [value]="dailyActive.relative"></ion-progress-bar>
+            </ion-list>
 
-                    <ion-list>
-                        <ion-item>
-                            <ion-label>
-                                <h3>{{goalStorage[i].duration}} </h3>
-                                <p>{{goalStorage[i].type}}</p>
-                            </ion-label>
-                            <ion-label><h3>{{goalStorage[i].current}} / {{goalStorage[i].target}} min</h3>
-                            </ion-label>
-                            <ion-icon name="create" id="edit" (click)='routeToEditGoalPage(goalStorage[i])'></ion-icon>
-                        </ion-item>
-                        <ion-progress-bar color="secondary" [value]="goalStorage[i].relative"></ion-progress-bar>
-                    </ion-list>
-                    <ion-list>
-                        <ion-item>
-                            <ion-label>
-                                <h3>{{goalStorage[i + 1].duration}} </h3>
-                                <p>{{goalStorage[i + 1].type}}</p>
-                            </ion-label>
-                            <ion-label><h3>{{goalStorage[i + 1].current}} / {{goalStorage[i + 1].target}}
-                                min</h3></ion-label>
-                            <ion-icon name="create" id="edit"
-                                      (click)='routeToEditGoalPage(goalStorage[i+1])'></ion-icon>
-                        </ion-item>
-                        <ion-progress-bar color="primary" [value]="goalStorage[i+1].relative"></ion-progress-bar>
-                    </ion-list>
-                    <ion-list>
-                        <ion-item>
-                            <ion-label>
-                                <h3>{{goalStorage[i + 2].duration}} </h3>
-                                <p>{{goalStorage[i + 2].type}}</p>
-                            </ion-label>
-                            <ion-label><h3>{{goalStorage[i + 2].current}} / {{goalStorage[i + 2].target}}
-                                min</h3></ion-label>
-                            <ion-icon name="create" id="edit"
-                                      (click)='routeToEditGoalPage(goalStorage[i+2])'></ion-icon>
-                        </ion-item>
-                        <ion-progress-bar color="tertiary" [value]="goalStorage[i+2].relative"></ion-progress-bar>
-                    </ion-list>
-                </ng-container>
-            </ng-container>
+            <ion-list *ngIf="weeklyActivePromise | async">
+                <ion-item>
+                    <ion-label>
+                        <h3>{{weeklyActive.duration}} </h3>
+                        <p>{{weeklyActive.type}}</p>
+                    </ion-label>
+                    <ion-label><h3>{{weeklyActive.current}} / {{weeklyActive.target}}
+                        min</h3></ion-label>
+                    <ion-icon name="create" id="edit"
+                              (click)='routeToEditGoalPage(weeklyActive)'></ion-icon>
+                </ion-item>
+                <ion-progress-bar color="tertiary" [value]="weeklyActive.relative"></ion-progress-bar>
+            </ion-list>
         </ion-card-content>
     </ion-card>
 
 
-    <ion-slides [options]="slideOpts" #slides>
+    <!--ion-slides [options]="slideOpts" #slides>
         <ng-container *ngFor="let goal of oldGoals, let i = index">
             <ion-slide class="slide" *ngIf="i % 3 === 0">
                 <ion-card>
@@ -181,7 +164,7 @@
             </ion-slide>
         </ng-container>
 
-        <ng-container *ngFor="let goal of goalStorage; let i = index">
+        <ng-container *ngFor="let goal of dailyActive; let i = index">
             <ion-slide *ngIf="i === 3">
                 <ion-card>
                     <ion-card-header>
@@ -195,45 +178,45 @@
                         <ion-list>
                             <ion-item>
                                 <ion-label>
-                                    <h3>{{goalStorage[i].duration}} </h3>
-                                    <p>{{goalStorage[i].type}}</p>
+                                    <h3>{{dailyActive[i].duration}} </h3>
+                                    <p>{{dailyActive[i].type}}</p>
                                 </ion-label>
-                                <ion-label><h3>{{goalStorage[i].current}} / {{goalStorage[i].target}}
+                                <ion-label><h3>{{dailyActive[i].current}} / {{dailyActive[i].target}}
                                     min</h3>
                                 </ion-label>
                                 <ion-icon name="create" id="edit"
-                                          (click)='routeToEditGoalPage(goalStorage[i])'></ion-icon>
+                                          (click)='routeToEditGoalPage(dailyActive[i])'></ion-icon>
 
                             </ion-item>
-                            <ion-progress-bar color="secondary" [value]="goalStorage[i].relative"></ion-progress-bar>
+                            <ion-progress-bar color="secondary" [value]="dailyActive[i].relative"></ion-progress-bar>
                         </ion-list>
                         <ion-list>
                             <ion-item>
                                 <ion-label>
-                                    <h3>{{goalStorage[i + 1].duration}} </h3>
-                                    <p>{{goalStorage[i + 1].type}}</p>
+                                    <h3>{{dailyActive[i + 1].duration}} </h3>
+                                    <p>{{dailyActive[i + 1].type}}</p>
                                 </ion-label>
-                                <ion-label><h3>{{goalStorage[i + 1].current}} / {{goalStorage[i + 1].target}}
+                                <ion-label><h3>{{dailyActive[i + 1].current}} / {{dailyActive[i + 1].target}}
                                     min</h3></ion-label>
                                 <ion-icon name="create" id="edit"
-                                          (click)='routeToEditGoalPage(goalStorage[i+1])'></ion-icon>
+                                          (click)='routeToEditGoalPage(dailyActive[i+1])'></ion-icon>
 
                             </ion-item>
-                            <ion-progress-bar color="primary" [value]="goalStorage[i+1].relative"></ion-progress-bar>
+                            <ion-progress-bar color="primary" [value]="dailyActive[i+1].relative"></ion-progress-bar>
                         </ion-list>
                         <ion-list>
                             <ion-item>
                                 <ion-label>
-                                    <h3>{{goalStorage[i + 2].duration}} </h3>
-                                    <p>{{goalStorage[i + 2].type}}</p>
+                                    <h3>{{dailyActive[i + 2].duration}} </h3>
+                                    <p>{{dailyActive[i + 2].type}}</p>
                                 </ion-label>
-                                <ion-label><h3>{{goalStorage[i + 2].current}} / {{goalStorage[i + 2].target}}
+                                <ion-label><h3>{{dailyActive[i + 2].current}} / {{dailyActive[i + 2].target}}
                                     min</h3></ion-label>
                                 <ion-icon name="create" id="edit"
-                                          (click)='routeToEditGoalPage(goalStorage[i+2])'></ion-icon>
+                                          (click)='routeToEditGoalPage(dailyActive[i+2])'></ion-icon>
 
                             </ion-item>
-                            <ion-progress-bar color="tertiary" [value]="goalStorage[i+2].relative"></ion-progress-bar>
+                            <ion-progress-bar color="tertiary" [value]="dailyActive[i+2].relative"></ion-progress-bar>
                         </ion-list>
                     </ion-card-content>
                 </ion-card>
@@ -241,7 +224,7 @@
         </ng-container>
 
 
-    </ion-slides>
+    </ion-slides-->
 
 
     <!--<ion-list>
