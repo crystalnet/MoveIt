@@ -243,8 +243,12 @@
 
                     <!-- 1. TIME -->
                     <ion-item>
-                        <ion-label position="floating">Please pick a time for notifications.</ion-label>
-                        <ion-datetime formControlName="time1" placeholder="Select Date" minuteValues="0,15,30,45"
+                        <p position="floating">Please select four times during the day, when you're available to
+                            receive a notification. They can be in any order and must be at least 30 min apart.
+                        </p>
+
+                        <ion-label position="floating">Please pick the first time.</ion-label>
+                        <ion-datetime formControlName="time1" placeholder="Select Time" minuteValues="0,15,30,45"
                                       [displayFormat]="'HH:mm'"></ion-datetime>
                     </ion-item>
 
@@ -261,8 +265,8 @@
 
                     <!-- 2. TIME -->
                     <ion-item>
-                        <ion-label position="floating">Please pick a time for notifications.</ion-label>
-                        <ion-datetime formControlName="time2" placeholder="Select Date" minuteValues="0,15,30,45"
+                        <ion-label position="floating">Please pick the second.</ion-label>
+                        <ion-datetime formControlName="time2" placeholder="Select Time" minuteValues="0,15,30,45"
                                       [displayFormat]="'HH:mm'"></ion-datetime>
                     </ion-item>
 
@@ -279,8 +283,8 @@
 
                     <!-- 3. TIME -->
                     <ion-item>
-                        <ion-label position="floating">Please pick a time for notifications.</ion-label>
-                        <ion-datetime formControlName="time3" placeholder="Select Date" minuteValues="0,15,30,45"
+                        <ion-label position="floating">Please pick the third time.</ion-label>
+                        <ion-datetime formControlName="time3" placeholder="Select Time" minuteValues="0,15,30,45"
                                       [displayFormat]="'HH:mm'"></ion-datetime>
                     </ion-item>
 
@@ -297,8 +301,8 @@
 
                     <!-- 4. TIME -->
                     <ion-item>
-                        <ion-label position="floating">Please pick a time for notifications.</ion-label>
-                        <ion-datetime formControlName="time4" placeholder="Select Date" minuteValues="0,15,30,45"
+                        <ion-label position="floating">Please pick the fourth time.</ion-label>
+                        <ion-datetime formControlName="time4" placeholder="Select Time" minuteValues="0,15,30,45"
                                       [displayFormat]="'HH:mm'"></ion-datetime>
                     </ion-item>
 
