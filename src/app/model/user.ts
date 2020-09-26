@@ -12,6 +12,7 @@ interface FireBaseObject {
     occupation: string;
     times: Array<any>;
     profilePictureUrl: string;
+    bio: string;
     token: string;
 }
 
@@ -23,8 +24,8 @@ export class User {
      * Each parameter is optional. If it's not present, a default value is used
      *
      */
-    constructor(id?: string, name?: string, challengesActive?: Array<any>, group?: string, type?: string,
-                birthday?: Date, gender?: string, degree?: string, occupation?: string, times?: Array<any>, profilePictureUrl?: string) {
+    constructor(id?: string, name?: string, challengesActive?: Array<any>, group?: string, type?: string, birthday?: Date, gender?: string,
+                degree?: string, occupation?: string, times?: Array<any>, profilePictureUrl?: string, bio?: string) {
         // Each parameter is optional, if it's not there, set the default value
         this.id = id || '-1';
         this.name = name || 'No username';
@@ -37,6 +38,7 @@ export class User {
         this.occupation = gender;
         this.times = [];
         this.profilePictureUrl = profilePictureUrl || '';
+        this.bio = bio || 'Hey there, I\'m using MoveIt';
     }
 
     id: string;
@@ -50,6 +52,7 @@ export class User {
     occupation: string;
     times: Array<any>;
     profilePictureUrl: string;
+    bio: string;
     token: string;
 
     static fromFirebaseObject(id: string, firebaseObject: FireBaseObject) {
@@ -64,7 +67,8 @@ export class User {
             firebaseObject.degree || '',
             firebaseObject.occupation || '',
             firebaseObject.times || [],
-            firebaseObject.profilePictureUrl || ''
+            firebaseObject.profilePictureUrl || '',
+            firebaseObject.bio || 'Hey there, I\'m using MoveIt'
         );
     }
 
@@ -94,6 +98,7 @@ export class User {
             occupation: this.occupation,
             times: this.times,
             profilePictureUrl: this.profilePictureUrl,
+            bio: this.bio
         };
     }
 }

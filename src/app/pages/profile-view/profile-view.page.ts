@@ -32,7 +32,7 @@ export interface MyData {
 })
 
 export class ProfileViewPage implements OnInit {
-    currentUser: Observable<User>;
+    userObservable: Observable<User>;
     activities: Observable<Activity[]>;
     goals: Observable<any>;
     goalStorage: Array<Goal>;
@@ -52,7 +52,7 @@ export class ProfileViewPage implements OnInit {
         this.route.queryParams.subscribe(params => {
             const userid = JSON.parse(params.special);
             this.activities = this.activityService.getThisUsersActivities(userid);
-            this.goals = this.goalService.getGoalsFromUser(userid);
+            this.goals = this.goalService.getGoalsFromUser(userid).pipe(map(goals => goals.filter(goal => goal.type === 'active')));
             this.goals.subscribe(goals => this.goalStorage = goals);
 
             // Set collection where our documents/ images info will save
@@ -61,7 +61,7 @@ export class ProfileViewPage implements OnInit {
             //  this.storage.ref(path)
             this.usertestpath = `profilePic/${userid}`;
             // this.router = router;
-            this.currentUser = this.userService.getUserById(userid);
+            this.userObservable = this.userService.getUserById(userid);
 
             this.displayedActivities = this.activities.pipe(map(
                 (data) => {

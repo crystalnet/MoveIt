@@ -115,11 +115,7 @@ export class GoalService {
      * Get all goals of the current user
      */
     getGoals() {
-        const ref = this.fireDatabase.list<Goal>('/goals/' + firebase.auth().currentUser.uid);
-        // Retrieve an array, but with its metadata. This is necessary to have the key available
-        // An array of Goals is reconstructed using the fromFirebaseObject method
-        return ref.snapshotChanges().pipe(
-            map(goals => goals.map(goalPayload => (Goal.fromFirebaseObject(goalPayload.key, goalPayload.payload.val())))));
+        return this.getGoalsFromUser(firebase.auth().currentUser.uid);
     }
 
     getGoalsFromUser(userId: string) {

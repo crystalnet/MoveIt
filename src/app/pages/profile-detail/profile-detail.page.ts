@@ -45,7 +45,7 @@ export class ProfileDetailPage implements OnInit {
     constructor(private location: Location, private userService: UserService, private goalService: GoalService,
                 private activityService: ActivityService, private storage: AngularFireStorage, private database: AngularFirestore) {
         this.activities = this.activityService.getAllUserActivities();
-        this.goals = this.goalService.getGoals();
+        this.goals = this.goalService.getGoals().pipe(map(goals => goals.filter(goal => goal.type === 'active')));
         this.goals.subscribe(goals => this.goalStorage = goals);
         this.isUploading = false;
         this.isUploaded = false;
@@ -118,8 +118,6 @@ export class ProfileDetailPage implements OnInit {
 
 
     uploadFile(event: FileList) {
-
-
         // The File object
         const file = event.item(0);
 
@@ -175,6 +173,4 @@ export class ProfileDetailPage implements OnInit {
     goBack() {
         this.location.back();
     }
-
-
 }
