@@ -3,7 +3,7 @@ import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import {AngularFireDatabase} from '@angular/fire/database';
 import {Activity} from '../../model/activity';
-import {first, map} from 'rxjs/operators';
+import {first, map, tap} from 'rxjs/operators';
 import {PostService} from '../post/post.service';
 import {Post} from '../../model/post';
 import {GoalService} from '../goal/goal.service';
@@ -22,9 +22,9 @@ export class ActivityService {
     }
 
     writeActivitytoFirebase(activity: Activity) {
-        const id = firebase.database().ref(this.activityLocation + firebase.auth().currentUser.uid).push().key;
-        activity.id = id;
-        return this.fireDatabase.database.ref('/activities/' + firebase.auth().currentUser.uid).child(id).set(activity.toFirebaseObject());
+        activity.id = (new Date()).getTime().toString();
+        return this.fireDatabase.database.ref('/activities/' + firebase.auth().currentUser.uid + '/' + activity.id)
+            .set(activity.toFirebaseObject());
     }
 
     /**
@@ -41,7 +41,7 @@ export class ActivityService {
                         () => {
                             this.writeFitnessApi(activity);
                             const message = 'Look, I did ' + activity.getDuration() + ' minutes of ' + activity.type;
-                            this.runUpdates(activity, message).then(
+                            this.runUpdates(activity, true, message).then(
                                 () => resolve(activity),
                                 err => reject(err)
                             );
@@ -65,8 +65,8 @@ export class ActivityService {
             this.fireDatabase.database.ref(this.activityLocation + firebase.auth().currentUser.uid).child(activityId)
                 .set(activity.toFirebaseObject()).then(
                 () => {
-                    const message = 'I edited my activity, I did ' + activity.getDuration() + ' minutes of ' + activity.type;
-                    this.runUpdates(activity, message).then(
+                    // const message = 'I edited my activity, I did ' + activity.getDuration() + ' minutes of ' + activity.type;
+                    this.runUpdates(activity, false).then(
                         () => resolve(activity),
                         err => reject(err)
                     );
@@ -76,43 +76,36 @@ export class ActivityService {
         });
     }
 
-    runUpdates(activity?: Activity, message?: string) {
+    runUpdates(activity?: Activity, sendPost: boolean = true, message?: string) {
         return new Promise<any>((resolve, reject) => {
             this.getAllUserActivities().pipe(first()).subscribe(activities => {
                 this.goalService.getGoals().pipe(first()).subscribe(goals => {
                     console.log(activities);
-                    this.goalService.updateGoals(goals, activities).then(
-                        () => {
-                            this.rewardsService.updateTrophies(activities, goals).then(
-                                () => {
-                                    if (!activity) {
-                                        resolve();
-                                    } else {
-                                        const post = new Post();
-                                        post.activity = activity.id;
-                                        post.type = 'activity';
-                                        post.title = activity.getDuration() + ' min ' + activity.type;
-                                        if (message) {
-                                            post.content = message;
-                                        } else {
-                                            post.content = 'Look, I did ' + activity.getDuration() + ' minutes of ' + activity.type;
-                                        }
-                                        this.postService.createPost(post).then(
-                                            () => resolve(activity),
-                                            err => reject(err)
-                                        );
-                                    }
-                                },
-                                err => reject(err)
-                            );
-                        },
-                        err => reject(err)
-                    );
+                    const promises = [];
+                    promises.push(this.goalService.updateGoals(goals, activities));
+                    promises.push(this.rewardsService.updateTrophies(activities, goals));
+
+                    if (activity && sendPost) {
+                        const post = new Post();
+                        post.activity = activity.id;
+                        post.type = 'activity';
+                        post.title = activity.getDuration() + ' min ' + activity.type;
+                        if (message) {
+                            post.content = message;
+                        } else {
+                            post.content = 'Look, I did ' + activity.getDuration() + ' minutes of ' + activity.type;
+                        }
+                        promises.push(this.postService.createPost(post));
+                    }
+
+                    Promise.all(promises).then(
+                        () => resolve(),
+                        err => reject(err));
                 });
             });
         });
-
     }
+
 
     /**
      * Retrieves an activity from firebase
@@ -138,7 +131,8 @@ export class ActivityService {
     getAllUserActivities() {
         const ref = this.fireDatabase
             .list<Activity>(this.activityLocation + firebase.auth().currentUser.uid, query => query.orderByChild('endTime'));
-        return ref.snapshotChanges().pipe(map(activities => activities.map(
+        console.log('ACTIVITIES FUNCTION RUN');
+        return ref.snapshotChanges().pipe(tap(x => console.log('ACTIVITIES SNAPSHOT CHANGED', x)), map(activities => activities.map(
             activitySnapshot => Activity.fromFirebaseObject(activitySnapshot.key, activitySnapshot.payload.val())).reverse()));
     }
 
@@ -263,7 +257,7 @@ export class ActivityService {
                         endDate: activity.endTime,
                         dataType: 'activity',
                         value: activity.type,
-                        sourceName: 'MoveIt_test',
+                        sourceName: 'MoveIt',
                         sourceBundleId: 'com.moveitproject.www',
                     })
                         .then(res2 => console.log('Response of API while writing' + res2))

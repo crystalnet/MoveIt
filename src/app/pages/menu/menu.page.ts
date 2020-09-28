@@ -3,7 +3,6 @@ import {Router, RouterEvent} from '@angular/router';
 import {AlertController, NavController, Platform} from '@ionic/angular';
 
 import {AuthenticateService} from '../../services/authentication/authentication.service';
-import {Observable} from 'rxjs';
 import {UserService} from 'src/app/services/user/user.service';
 import {TrackingService} from '../../services/tracking/tracking.service';
 import {ActionLog} from '../../model/actionLog';
@@ -31,10 +30,6 @@ export class MenuPage implements OnInit, OnDestroy {
             }
         });
 
-        this.username = userService.getUsername(); // The username is just the observable
-        // If a new value is received, we have to manually update the pages object so that Angular notices the change
-        this.username.subscribe(username => this.updatePages(username));
-
         this.initializeFCM();
     }
 
@@ -49,8 +44,6 @@ export class MenuPage implements OnInit, OnDestroy {
     //     }
     // ];
     pages = [];
-
-    username: Observable<string>;
     selectedPath = '';
 
     ngOnInit() {

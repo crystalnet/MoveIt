@@ -101,4 +101,12 @@ export class User {
             bio: this.bio
         };
     }
+
+    toPublicUserData() {
+        return {
+            name: this.name,
+            age: this.getAge(),
+            profilePictureUrl: this.profilePictureUrl,
+        };
+    }
 }

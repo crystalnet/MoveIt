@@ -51,6 +51,9 @@ export class LeaderboardDetailPage implements OnInit {
     goalWinsList: Array<LeaderboardObject>;
     goalProgressList: Array<LeaderboardObject>;
 
+    publicUserDataObservable: Observable<any>;
+    publicUserData: any;
+
     tempUsername: string;
 
     currentUser: User;
@@ -64,6 +67,9 @@ export class LeaderboardDetailPage implements OnInit {
      * first get all important observables with the corresponding database queries
      */
     ngOnInit() {
+        this.publicUserDataObservable = this.userService.getUsersPublicData();
+        this.publicUserDataObservable.subscribe(data => this.publicUserData = data);
+
         // set chart active if rewards group is assigned to group
         this.group = this.userService.getUsergroup();
         this.group.subscribe(group => this.updateGroup(group));
@@ -127,7 +133,7 @@ export class LeaderboardDetailPage implements OnInit {
 
         for (const element of result) {
             if (element) {
-                const entity1 = await new LeaderboardObject(element.id, element.won.length, this.userService);
+                const entity1 = await new LeaderboardObject(element.id, element.won.length, this.publicUserData);
                 console.log(entity1);
                 testArray.push(entity1);
             }
@@ -144,7 +150,7 @@ export class LeaderboardDetailPage implements OnInit {
 
         for (const element of result) {
             if (element) {
-                const entity1 = await new LeaderboardObject(element.id, element.won.length - 1, this.userService);
+                const entity1 = await new LeaderboardObject(element.id, element.won.length - 1, this.publicUserData);
                 console.log(entity1);
                 testArray.push(entity1);
             }
@@ -163,7 +169,7 @@ export class LeaderboardDetailPage implements OnInit {
         for (const element of result) {
             if (element) {
                 if (element.type === 'weekly') {
-                    const entity1 = new LeaderboardObject(element.id, element.activity, this.userService);
+                    const entity1 = new LeaderboardObject(element.id, element.activity, this.publicUserData);
                     testArray.push(entity1);
                 }
             }
@@ -180,7 +186,7 @@ export class LeaderboardDetailPage implements OnInit {
                 }
                 console.log(result);
                 const testarray = Object.keys(result)
-                    .map(uid => new LeaderboardObject(uid, result[uid], this.userService));
+                    .map(uid => new LeaderboardObject(uid, result[uid], this.publicUserData));
                 this.activitiesModerate = this.sortArrays(testarray);
                 console.log(testarray);
             });
@@ -193,7 +199,7 @@ export class LeaderboardDetailPage implements OnInit {
                     return;
                 }
 
-                const testarray = Object.keys(result).map(uid => new LeaderboardObject(uid, result[uid], this.userService));
+                const testarray = Object.keys(result).map(uid => new LeaderboardObject(uid, result[uid], this.publicUserData));
                 this.goalProgressList = this.sortArrays(testarray);
                 console.log(this.goalProgressList);
             });
@@ -218,7 +224,7 @@ export class LeaderboardDetailPage implements OnInit {
                     }
 
                     const testarray = Object.keys(combinedList)
-                        .map(uid => new LeaderboardObject(uid, combinedList[uid], this.userService));
+                        .map(uid => new LeaderboardObject(uid, combinedList[uid], this.publicUserData));
                     this.goalWinsList = this.sortArrays(testarray);
                     console.log(this.goalWinsList);
                 }

@@ -4,6 +4,7 @@ import 'firebase/auth';
 import {AngularFireDatabase} from '@angular/fire/database';
 import {User} from '../../model/user';
 import {Group} from '../../model/group';
+import {UserPublicData} from '../../model/userPublicData';
 import {flatMap, map} from 'rxjs/operators';
 import {Observable, of} from 'rxjs';
 
@@ -14,7 +15,7 @@ export class UserService {
     constructor(private db: AngularFireDatabase) {
     }
 
-    // BK: returns the group the user is assigened to. Will be used in menu.page.ts
+    // BK: returns the group the user is assigned to. Will be used in menu.page.ts
     getUsergroup() {
         return this.db.object<string>('/users/' + firebase.auth().currentUser.uid + '/group').valueChanges();
     }
@@ -55,6 +56,11 @@ export class UserService {
         } else {
             return of(new User());
         }
+    }
+
+    getUserPublicData(userId: string) {
+        return this.db.object<any>('/publicUserData/' + userId).snapshotChanges()
+            .pipe(map(userSnapshot => UserPublicData.fromFirebaseObject(userId, userSnapshot.payload.val())));
     }
 
     getProfilePictureUrl() {
@@ -106,6 +112,12 @@ export class UserService {
             map(users => users.map(userPayload => (User.fromFirebaseObject(userPayload.key, userPayload.payload.val())))));
     }
 
+    getUsersPublicData() {
+        const ref = this.db.object<any>('/publicUserData/');
+        // Retrieve an array, but with its metadata. This is necessary to have the key available
+        return ref.valueChanges();
+    }
+
     getOTPs() {
         const ref = this.db.list<any>('/otps/');
         // Retrieve an array, but with its metadata. This is necessary to have the key available
@@ -149,7 +161,10 @@ export class UserService {
      * @param profilePictureUrl url of pointing to the new profile picture
      */
     changeProfilePicture(userID: string, profilePictureUrl: string) {
-        return this.db.database.ref('/users/' + userID + '/profilePictureUrl').set(profilePictureUrl);
+        const promises = [];
+        promises.push(this.db.database.ref('/users/' + userID + '/profilePictureUrl').set(profilePictureUrl));
+        promises.push(this.db.database.ref('/publicUserData/' + userID + '/profilePictureUrl').set(profilePictureUrl));
+        return Promise.all(promises);
     }
 
     /**

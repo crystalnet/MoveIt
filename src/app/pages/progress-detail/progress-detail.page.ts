@@ -619,7 +619,7 @@ export class ProgressDetailPage implements OnInit {
         const that = this;
         let lastWekkActivities = [];
 
-        this.activityService.getAllUserActivities().subscribe(data => {
+        this.activities.subscribe(data => {
             // console.log(data);
             for (let weekNumber = 3; weekNumber >= 0; weekNumber--) {
                 this.activitiesGoals = [];
@@ -643,13 +643,13 @@ export class ProgressDetailPage implements OnInit {
                 ];
 
                 const weeklyActivityDurations = [];
-                lastWekkActivities.forEach((weekly)  => {
+                lastWekkActivities.forEach((weekly) => {
                     const obj = {
                         vigorous: [],
                         moderate: [],
                         weightTraining: []
                     };
-                    intensities.forEach((intensity)  =>{
+                    intensities.forEach((intensity) => {
                         obj[intensity.id] = weekly
                             .filter((activity) => activity.intensity === intensity.name)
                             .reduce(((totalDuration, activity) => totalDuration + activity.getDuration()), 0);

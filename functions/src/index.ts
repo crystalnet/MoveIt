@@ -7,9 +7,11 @@
 //  response.send("Hello from Firebase!");
 // });
 
-let functions = require('firebase-functions');
+import {isObject} from 'util';
 
-let admin = require('firebase-admin');
+const functions = require('firebase-functions');
+
+const admin = require('firebase-admin');
 
 admin.initializeApp(functions.config().firebase);
 
@@ -35,10 +37,10 @@ exports.automaticNotifications = functions.pubsub.schedule('every 8 minutes').on
                 const randomization = Math.random();
                 let data = Promise.resolve(new NotificationData());
                 if (randomization < 0.25) {
-                // if (randomization > 1) {
+                    // if (randomization > 1) {
                     data = generateLeaderboardNotification(uid);
-                    } else if (randomization < 0.5) {
-                // } else if (randomization < 1) {
+                } else if (randomization < 0.5) {
+                    // } else if (randomization < 1) {
                     data = generateSocialfeedNotification(uid);
                 } else {
                     continue;
@@ -96,7 +98,7 @@ function generateSocialfeedNotification(uid: string) {
 
             const randomization = Math.random();
             if (randomization < 0.5) {
-            // if (randomization > 1) {
+                // if (randomization > 1) {
                 return likeNotification(uid, group, postId);
             } else {
                 return commentNotification(uid, group, postId);
@@ -176,7 +178,7 @@ exports.progressNotification = functions.database.ref('/leaderboard/relative/wee
             } else {
                 return;
             }
-            data.target = '/menu/progress/progress/detail'
+            data.target = '/menu/progress/progress/detail';
             const notification = new UserNotification(context.params.userId, data);
             return notification.send();
         } else {
@@ -295,6 +297,110 @@ exports.resetLeaderboard = functions.pubsub.schedule('every monday 00:00').onRun
             },
             (err: any) => console.log(err));
 });
+
+exports.dailyCleanUp = functions.pubsub.schedule('every 3 minutes').onRun((context: any) => {
+    let goals: any;
+    let leaderboard: any;
+    let users: any;
+    let publicUserData: any;
+    const promises = [];
+
+    promises.push(admin.database().ref('/goals/').once('value')
+        .then((snap: any) => {
+            goals = snap.val();
+        }));
+
+    promises.push(admin.database().ref('/leaderboard/').once('value')
+        .then((snap: any) => {
+            leaderboard = snap.val();
+        }));
+
+    promises.push(admin.database().ref('/users/').once('value')
+        .then((snap: any) => {
+            users = snap.val();
+        }));
+
+    promises.push(admin.database().ref('/publicUserData/').once('value')
+        .then((snap: any) => {
+            publicUserData = snap.val();
+        }));
+
+    return Promise.all(promises).then(
+        () => {
+            console.log(goals);
+            console.log(leaderboard);
+            console.log(users);
+            console.log(publicUserData);
+
+            resetDailyGoals(goals, leaderboard);
+            updatePublicUserData(users, publicUserData);
+
+            console.log(goals);
+            console.log(leaderboard);
+            console.log(users);
+            console.log(publicUserData);
+
+            const returnPromises = [];
+            returnPromises.push(admin.database().ref('/goals/').set(goals));
+            returnPromises.push(admin.database().ref('/leaderboard/').set(leaderboard));
+            returnPromises.push(admin.database().ref('/users/').set(users));
+            returnPromises.push(admin.database().ref('/publicUserData/').set(publicUserData));
+
+            return Promise.all(returnPromises);
+        },
+        err => console.log(err)
+    );
+});
+
+function resetDailyGoals(goals: any, leaderboard: any) {
+    if (!goals || !leaderboard || !isObject(goals) || !isObject(leaderboard)) {
+        console.log('goals or leaderboard not set ', goals, leaderboard);
+        return;
+    }
+
+    for (const user of Object.keys(goals)) {
+        for (const goal of Object.keys(goals[user])) {
+            const element = goals[user][goal];
+            if (element.duration === 'daily') {
+                element.relative = 0;
+                element.current = 0;
+            }
+        }
+    }
+
+    const dailyGoals = ['daily-active', 'daily-moderate', 'daily-vigorous'];
+    const metrics = ['relative', 'absolute'];
+    for (const metric of metrics) {
+        for (const goal of dailyGoals) {
+            for (const user of Object.keys(leaderboard[metric][goal])) {
+                leaderboard[metric][goal][user] = 0;
+            }
+        }
+    }
+
+    // Objects are edited in place, therefore no return value is necessary
+    return;
+}
+
+function updatePublicUserData(users: any, publicUserData: any) {
+    if (!users || !publicUserData || !isObject(users) || !isObject(publicUserData)) {
+        console.log('users or publicUserData not set ', users, publicUserData);
+        return;
+    }
+
+    for (const user of Object.keys(users)) {
+        const birthday = new Date(users[user].birthday);
+        const now = new Date();
+        if (birthday.getMonth() === now.getMonth() && birthday.getDay() === now.getDay()) {
+            console.log('increased age', user);
+            publicUserData[user].age = now.getFullYear() - birthday.getFullYear();
+        }
+    }
+
+    // Objects are edited in place, therefore no return value is necessary
+    return;
+}
+
 
 class NotificationData {
     header: string;

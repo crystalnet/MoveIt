@@ -1,31 +1,26 @@
-import {UserService} from '../services/user/user.service';
-
-import {first} from 'rxjs/operators';
-
 export class LeaderboardObject {
-    id: string;
-    username;
-    activity: number;
-    birthday;
+    uid: string;
+    username: string;
+    value: number;
+    age: number;
     pictureProfileUrl;
 
-    constructor(username: string, activity: number, private userService: UserService) {
-        this.id = username;
-        this.setUsername(username, userService);
-        this.activity = activity || 0;
-        userService.getSpecificUserBirthday(username).then
-            (val => {
-            this.birthday = val.val();
-        });
+    constructor(uid: string, value: number, private publicUserData: any) {
+        this.uid = uid;
+        this.value = value || 0;
+        if (publicUserData && uid in publicUserData) {
+            this.username = publicUserData[uid].name;
+            this.age = publicUserData[uid].age;
+            this.pictureProfileUrl = publicUserData[uid].profilePictureUrl;
+        } else {
+            this.username = 'No Username';
+            this.age = 0;
+            this.pictureProfileUrl = '';
+        }
 
-        this.pictureProfileUrl = userService.getSpecificProfilePictureUrl(this.id).pipe(first());
     }
 
     compareTo(compare: LeaderboardObject): number {
-        return (-1) * (this.activity - compare.activity);
-    }
-
-    async setUsername(uid, userService: UserService) {
-        await userService.getSpecificUsername(uid).then(result => this.username = result.val());
+        return (-1) * (this.value - compare.value);
     }
 }

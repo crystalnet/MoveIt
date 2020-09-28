@@ -76,7 +76,10 @@ export class AuthenticateService {
     }
 
     registerOnDatabase(user: User) {
-        return this.db.object<any>('/users/' + user.id).set(user.toFirebaseObject());
+        const promises = [];
+        promises.push(this.db.object<any>('/users/' + user.id).set(user.toFirebaseObject()));
+        promises.push(this.db.object<any>('/publicUserData/' + user.id).set(user.toPublicUserData()));
+        return Promise.all(promises);
     }
 
     addUserTimesToSchedule(user: User) {
