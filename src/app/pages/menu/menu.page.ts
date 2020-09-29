@@ -158,14 +158,14 @@ export class MenuPage implements OnInit, OnDestroy {
                             res => console.log(res),
                             err => console.log(err)
                         );
+                        if (payload.target) {
+                            this.navCtrl.navigateForward(payload.target);
+                        }
                         console.log('FCM: Notification accepted');
                     }
                 }
             ]
         });
-        if (payload.target) {
-            await this.navCtrl.navigateForward(payload.target);
-        }
         await alert.present();
     }
 }
