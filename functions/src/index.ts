@@ -15,7 +15,7 @@ const admin = require('firebase-admin');
 
 admin.initializeApp(functions.config().firebase);
 
-exports.automaticNotifications = functions.pubsub.schedule('every 8 minutes').onRun((context: any) => {
+exports.automaticNotifications = functions.pubsub.schedule('every 15 minutes').onRun((context: any) => {
     let time = new Date();
     time = new Date(time.getTime() + 120 * 60 * 1000);
     console.log('System Time: ', time);
@@ -247,8 +247,8 @@ exports.sendNotification = functions.https.onCall((data: any, context: any) => {
     const id = data.id || (new Date()).getTime();
     const type = data.type || '';
     const target = data.target || '';
-    const confirmButtonText = data.confirmButtonText || '';
-    const rejectButtonText = data.rejectButtonText || '';
+    const confirmButtonText = data.confirmButtonText || 'Nice';
+    const rejectButtonText = data.rejectButtonText || 'Dismiss';
     // Authentication / user information is automatically added to the request.
     // const uid = context.auth.uid;
     // const name = context.auth.token.name || null;
@@ -269,7 +269,7 @@ exports.sendNotification = functions.https.onCall((data: any, context: any) => {
     return notification.send();
 });
 
-exports.resetLeaderboard = functions.pubsub.schedule('every monday 00:00').onRun((context: any) => {
+exports.resetLeaderboard = functions.pubsub.schedule('0 0 * * 0').onRun((context: any) => {
     return admin.database().ref('/users/').once('value')
         .then((snap: any) => {
                 const result = snap.val();
@@ -298,12 +298,14 @@ exports.resetLeaderboard = functions.pubsub.schedule('every monday 00:00').onRun
             (err: any) => console.log(err));
 });
 
-exports.dailyCleanUp = functions.pubsub.schedule('every 3 minutes').onRun((context: any) => {
+exports.dailyCleanUp = functions.pubsub.schedule('0 0 * * *').onRun((context: any) => {
     let goals: any;
     let leaderboard: any;
     let users: any;
     let publicUserData: any;
+    let goalHistory: any;
     const promises = [];
+    console.log('dailyCleanUp: system time', new Date());
 
     promises.push(admin.database().ref('/goals/').once('value')
         .then((snap: any) => {
@@ -325,13 +327,14 @@ exports.dailyCleanUp = functions.pubsub.schedule('every 3 minutes').onRun((conte
             publicUserData = snap.val();
         }));
 
+    promises.push(admin.database().ref('/goalHistory/').once('value')
+        .then((snap: any) => {
+            goalHistory = snap.val();
+        }));
+
     return Promise.all(promises).then(
         () => {
-            console.log(goals);
-            console.log(leaderboard);
-            console.log(users);
-            console.log(publicUserData);
-
+            logGoalProgress(goalHistory, goals);
             resetDailyGoals(goals, leaderboard);
             updatePublicUserData(users, publicUserData);
 
@@ -339,18 +342,43 @@ exports.dailyCleanUp = functions.pubsub.schedule('every 3 minutes').onRun((conte
             console.log(leaderboard);
             console.log(users);
             console.log(publicUserData);
+            console.log(goalHistory);
 
             const returnPromises = [];
             returnPromises.push(admin.database().ref('/goals/').set(goals));
             returnPromises.push(admin.database().ref('/leaderboard/').set(leaderboard));
             returnPromises.push(admin.database().ref('/users/').set(users));
             returnPromises.push(admin.database().ref('/publicUserData/').set(publicUserData));
+            returnPromises.push(admin.database().ref('/goalHistory/').set(goalHistory));
 
             return Promise.all(returnPromises);
         },
         err => console.log(err)
     );
 });
+
+function logGoalProgress(goalHistory: any, goals: any) {
+    if (!goalHistory || !goals || !isObject(goalHistory) || !isObject(goals)) {
+        console.log('goalhistory or goals not set ', goals);
+        return;
+    }
+
+    // Get end of yesterday
+    let time = (new Date());
+    time.setHours(0, 0, 0, 0);
+    time = new Date(time.getTime() - 1);
+
+    for (const user of Object.keys(goals)) {
+        goalHistory[user] = {};
+        for (const goal of Object.keys(goals[user])) {
+            goalHistory[user][goal] = {};
+            goalHistory[user][goal][time.getTime()] = goals[user][goal];
+        }
+    }
+
+    // Objects are edited in place, therefore no return value is necessary
+    return;
+}
 
 function resetDailyGoals(goals: any, leaderboard: any) {
     if (!goals || !leaderboard || !isObject(goals) || !isObject(leaderboard)) {
@@ -391,7 +419,7 @@ function updatePublicUserData(users: any, publicUserData: any) {
     for (const user of Object.keys(users)) {
         const birthday = new Date(users[user].birthday);
         const now = new Date();
-        if (birthday.getMonth() === now.getMonth() && birthday.getDay() === now.getDay()) {
+        if (birthday.getMonth() === now.getMonth() && birthday.getDate() === now.getDate()) {
             console.log('increased age', user);
             publicUserData[user].age = now.getFullYear() - birthday.getFullYear();
         }

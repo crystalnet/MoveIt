@@ -74,8 +74,13 @@ export class GoalService {
      *
      * The goal name is read from the goal parameter
      * @param goal new goal with changes values
+     * @param activities to base the upadate on, if not present just the relative progress will be updated
      */
-    updateGoal(goal: Goal) {
+    updateGoal(goal: Goal, activities?: Array<Activity>) {
+        if (activities) {
+            goal.current = this.calculateGoalProgress(goal, activities);
+        }
+        goal.relative = goal.current / goal.target;
         return new Promise<any>((resolve, reject) => {
             const promises = [];
             promises.push(this.fireDatabase.database
@@ -171,8 +176,7 @@ export class GoalService {
     updateGoals(goals: Array<Goal>, activities: Array<Activity>) {
         return new Promise<any>((resolve, reject) => {
             for (const goal of goals) {
-                goal.current = this.calculateGoalProgress(goal, activities);
-                this.updateGoal(goal).then(
+                this.updateGoal(goal, activities).then(
                     res => console.log(res),
                     err => reject(err)
                 );
