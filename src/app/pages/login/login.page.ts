@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {NavController} from '@ionic/angular';
+import {LoadingController, NavController} from '@ionic/angular';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 
 import {AuthenticateService} from '../../services/authentication/authentication.service';
@@ -29,7 +29,8 @@ export class LoginPage implements OnInit {
     constructor(
         private navCtrl: NavController,
         private authService: AuthenticateService,
-        private formBuilder: FormBuilder
+        private formBuilder: FormBuilder,
+        private loadingController: LoadingController
     ) {
     }
 
@@ -46,16 +47,23 @@ export class LoginPage implements OnInit {
         });
     }
 
-    tryLogin(value) {
+    async tryLogin(value) {
+        const loading = await this.loadingController.create({
+            cssClass: 'my-custom-class',
+            message: 'Loading...'
+        });
+
         this.authService.loginUser(value)
             .then(res => {
                 console.log(res);
+                loading.dismiss();
                 this.errorMessage = '';
                 this.successMessage = 'Login was successful';
                 this.navCtrl.navigateForward('/menu/dashboard');
                 this.loginForm.reset();
             }, err => {
                 console.log(err);
+                loading.dismiss();
                 this.errorMessage = err.message;
                 this.successMessage = '';
             });

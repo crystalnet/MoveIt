@@ -216,25 +216,12 @@ exports.sendNotificationTrophyWin = functions.database.ref('/wins/{userId}').onW
             // we have everything we need
             // Build the message payload and send the message
             console.log('Construction the notification message.');
-            const payload = {
-                notification: {
-                    title: 'You reached your goal!',
-                    body: 'Congratulations - you reached your goal!',
-                    sound: 'default',
-                    click_action: 'FCM_PLUGIN_ACTIVITY'
-                },
-                data: {
-                    header: 'Congratulations!',
-                    text: 'Congratulations! You have reached your goal'
-                }
-            };
-            return admin.messaging().sendToDevice(token, payload)
-                .then(function(response: any) {
-                    console.log('Successfully sent message:', response);
-                })
-                .catch(function(error: any) {
-                    console.log('Error sending message:', error);
-                });
+            const data = new NotificationData();
+            data.header =  'You reached your goal!';
+            data.text = 'Congratulations - you reached your goal!';
+
+            const notification = new UserNotification(winnerId, data);
+            notification.send();
         });
 });
 

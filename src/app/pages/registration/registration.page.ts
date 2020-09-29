@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {IonSlides, NavController} from '@ionic/angular';
+import {IonSlides, LoadingController, NavController} from '@ionic/angular';
 
 import {AuthenticateService} from '../../services/authentication/authentication.service';
 import {User} from '../../model/user';
@@ -45,7 +45,8 @@ export class RegistrationPage implements OnInit {
     constructor(
         private navCtrl: NavController,
         private authService: AuthenticateService,
-        private formBuilder: FormBuilder
+        private formBuilder: FormBuilder,
+        private loadingController: LoadingController
     ) {
     }
 
@@ -74,10 +75,14 @@ export class RegistrationPage implements OnInit {
         this.validationsForm.get('terms').setValue(false);
     }
 
-    tryRegister(value) {
+    async tryRegister(value) {
         // if (this.calculateAge(this.birthday) < 18) {
         //     return;
         // }
+        const loading = await this.loadingController.create({
+            cssClass: 'my-custom-class',
+            message: 'Loading...'
+        });
 
         const user = new User();
         user.name = value.name;
@@ -91,11 +96,13 @@ export class RegistrationPage implements OnInit {
         this.authService.registerUser(value.code, value.email, value.password, user)
             .then(res => {
                 console.log(res);
+                loading.dismiss();
                 this.errorMessage = '';
                 this.successMessage = 'Your account has been created. Please log in.';
                 this.navCtrl.navigateRoot('/menu/set-goals');
             }, err => {
                 console.log(err);
+                loading.dismiss();
                 this.errorMessage = err.message;
                 this.successMessage = '';
             });

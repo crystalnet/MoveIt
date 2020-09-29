@@ -2,10 +2,8 @@ import {Component, OnInit} from '@angular/core';
 import {Activity} from '../../model/activity';
 import {ActivityService} from '../../services/activity/activity.service';
 import {Location} from '@angular/common';
-import {count} from 'rxjs/operators';
-import {ToastController} from '@ionic/angular';
-import {Route} from '@angular/compiler/src/core';
-import {Router, NavigationExtras} from '@angular/router';
+import {LoadingController, ToastController} from '@ionic/angular';
+import {NavigationExtras, Router} from '@angular/router';
 
 
 @Component({
@@ -36,7 +34,8 @@ export class AddActivityTrackPage implements OnInit {
     overallTimer: any = false;
 
 
-    constructor(private activityService: ActivityService, private location: Location, private toastController: ToastController, private router: Router) {
+    constructor(private loadingController: LoadingController, private activityService: ActivityService, private location: Location,
+                private toastController: ToastController, private router: Router) {
         this.activity = new Activity();
         this.location = location;
         this.types = Activity.types;
@@ -52,7 +51,7 @@ export class AddActivityTrackPage implements OnInit {
     }
 
     async presentAlert() {
-        const controller = await this.toastController.create({
+        await this.toastController.create({
             color: 'dark',
             duration: 2000,
             message: 'Activity added successfully!',
@@ -67,13 +66,20 @@ export class AddActivityTrackPage implements OnInit {
         });
     }
 
-    addActivity() {
-
+    async addActivity() {
         if (this.elapsed.h === '00' && this.elapsed.m === '00' && this.elapsed.s === '00') {
             return;
         }
 
-        const newDateObj = new Date(this.activity.startTime.getTime() + this.elapsed.m * 60000 + this.elapsed.s * 1000 + this.elapsed.h * 3600000);
+        const loading = await this.loadingController.create({
+            cssClass: 'my-custom-class',
+            message: 'Loading...'
+        });
+
+        await loading.present();
+
+        const newDateObj =
+            new Date(this.activity.startTime.getTime() + this.elapsed.m * 60000 + this.elapsed.s * 1000 + this.elapsed.h * 3600000);
 
         this.activity.endTime = new Date(newDateObj);
         this.activity.source = 'moveItApp';
@@ -81,10 +87,14 @@ export class AddActivityTrackPage implements OnInit {
         this.activityService.createActivity(this.activity).then(
             res => {
                 console.log(res);
+                loading.dismiss();
                 this.presentAlert();
                 this.router.navigateByUrl('/menu/progress');
             },
-            err => console.log(err)
+            err => {
+                loading.dismiss();
+                console.log(err);
+            }
         );
         this.stopTimer();
 

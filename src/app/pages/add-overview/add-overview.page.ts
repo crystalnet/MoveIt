@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Location} from '@angular/common';
 import {ActivityService} from '../../services/activity/activity.service';
-import {ToastController} from '@ionic/angular';
+import {LoadingController, ToastController} from '@ionic/angular';
 
 @Component({
     selector: 'app-add-overview',
@@ -11,7 +11,8 @@ import {ToastController} from '@ionic/angular';
 export class AddOverviewPage implements OnInit {
     lastDate: Date;
 
-    constructor(private location: Location, private activityService: ActivityService, private toastController: ToastController) {
+    constructor(private location: Location, private activityService: ActivityService, private toastController: ToastController,
+                private loadingController: LoadingController) {
         this.updateLastSynchronized();
     }
 
@@ -29,16 +30,24 @@ export class AddOverviewPage implements OnInit {
         this.location.back();
     }
 
-    synchronizeActivities() {
+    async synchronizeActivities() {
+        const loading = await this.loadingController.create({
+            cssClass: 'my-custom-class',
+            message: 'Loading...'
+        });
+        await loading.present();
+
         console.log('Synchronizing activities');
         this.activityService.synchronizeApi().then(
             res => {
                 console.log(res);
+                loading.dismiss();
                 this.presentAlert('Activities have been synchronized');
                 this.updateLastSynchronized();
             },
             err => {
                 console.log(err);
+                loading.dismiss();
                 this.presentAlert('Activities could not be fetched. See logs for more info.');
             }
         );
@@ -58,5 +67,9 @@ export class AddOverviewPage implements OnInit {
         }).then(toast => {
             toast.present();
         });
+    }
+
+    async presentLoading() {
+
     }
 }
