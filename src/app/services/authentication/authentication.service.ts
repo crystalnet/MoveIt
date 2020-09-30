@@ -34,7 +34,7 @@ export class AuthenticateService {
                             (userCredential) => {
                                 user.id = userCredential.user.uid;
                                 user.group = group;
-                                user.profilePictureUrl = 'https://firebasestorage.googleapis.com/v0/b/moveit-2019.appspot.com/o/profilePic%2FdefaultPic?alt=media&token=77281e2a-9855-4b8a-b8dc-74ee60092cc4';
+                                user.profilePictureUrl = 'https://firebasestorage.googleapis.com/v0/b/moveit-2019.appspot.com/o/profilePic%2FdefaultPic_64x64.png?alt=media&token=d0abb6aa-c02d-438e-bb3b-efe80e5fa020';
                                 const promises = [];
                                 promises.push(this.removeOTP(otp));
                                 // Try to create the user on the database

@@ -161,9 +161,11 @@ export class UserService {
      * @param profilePictureUrl url of pointing to the new profile picture
      */
     changeProfilePicture(userID: string, profilePictureUrl: string) {
+        const index = profilePictureUrl.lastIndexOf('.');
+        const url = profilePictureUrl.slice(0, index) + '_64x64' + profilePictureUrl.slice(index);
         const promises = [];
         promises.push(this.db.database.ref('/users/' + userID + '/profilePictureUrl').set(profilePictureUrl));
-        promises.push(this.db.database.ref('/publicUserData/' + userID + '/profilePictureUrl').set(profilePictureUrl));
+        promises.push(this.db.database.ref('/publicUserData/' + userID + '/profilePictureUrl').set(url));
         return Promise.all(promises);
     }
 
