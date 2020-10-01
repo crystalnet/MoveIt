@@ -30,6 +30,7 @@ export class Goal {
 
     static durations = ['daily', 'weekly'];
     static types = ['moderate', 'vigorous', 'active'];
+    static intensities = ['moderate', 'vigorous'];
     static defaultGoals: Array<Goal> = [
         new Goal('daily-moderate', 'daily', 'moderate', 20, 0),
         new Goal('weekly-moderate', 'weekly', 'moderate', 150, 0),

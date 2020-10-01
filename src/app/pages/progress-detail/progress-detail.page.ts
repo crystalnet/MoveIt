@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivityService} from '../../services/activity/activity.service';
 import {Activity} from '../../model/activity';
-import {merge, Observable} from 'rxjs';
+import {combineLatest, merge, Observable} from 'rxjs';
 import {GoalService} from '../../services/goal/goal.service';
 import {Goal} from '../../model/goal';
 import {Location} from '@angular/common';
@@ -20,18 +20,21 @@ import * as moment from 'moment';
 
 })
 export class ProgressDetailPage implements OnInit {
-
-    activities: Observable<Activity[]>;
-    // Array which contains the displayed activities
-    displayedActivities: Observable<Activity[]>;
     dailyActivePromise: Promise<any>;
     dailyActive: Goal;
     weeklyActivePromise: Promise<any>;
     weeklyActive: Goal;
+
+    currentGoals: any;
+    goalHistory: any;
+
+    activities: Observable<Activity[]>;
+    // Array which contains the displayed activities
+    displayedActivities: Observable<Activity[]>;
     duration = 'day';
 
-    weeklyActivities;
-    public chartLabels: any = [];
+    activitiesChartData;
+    public chartLabelsProgress: any = [];
     public chartValuesModerate: any = [];
     public chartValuesVigorous: any = [];
     public chartValuesWeight: any = [];
@@ -48,8 +51,8 @@ export class ProgressDetailPage implements OnInit {
 
     hrzBars5: any;
     weeklyBarChart: any;
-    dailyActivities: any;
-    public chartLabelsWeekly: any = [];
+    progressChartData: any;
+    public chartLabelsActivities: any = [];
 
     slideOpts = {
         initialSlide: 4
@@ -72,7 +75,17 @@ export class ProgressDetailPage implements OnInit {
 
     constructor(private activityService: ActivityService, private goalService: GoalService, private location: Location,
                 private health: Health, private platform: Platform, private router: Router, private navCtrl: NavController) {
+        const history = this.goalService.getGoalHistory();
+        const current = this.goalService.getGoals();
+        combineLatest(history, current).subscribe((results) => {
+            console.log('ENTERED');
+            this.goalHistory = results[0];
+            this.currentGoals = results[1];
+            this.prepareProgressChartData();
+        });
+
         this.activities = this.activityService.getAllUserActivities();
+
 
         this.displayedActivities = this.activities.pipe(map(
             (data) => {
@@ -86,7 +99,7 @@ export class ProgressDetailPage implements OnInit {
         this.dailyActivePromise = this.goalService.getGoal('daily-active').then(res => this.dailyActive = res, err => console.log(err));
         this.weeklyActivePromise = this.goalService.getGoal('weekly-active').then(res => this.weeklyActive = res, err => console.log(err));
 
-        this.defineChartDataDaily();
+        // this.prepareProgressChartData();
         // this.defineChartData();
         // this.loadOldGoals();
     }
@@ -110,94 +123,84 @@ export class ProgressDetailPage implements OnInit {
         );
     }
 
-    // daily
-    defineChartDataDaily() {
+    prepareProgressChartData() {
         const that = this;
-        const now = moment();
 
-        this.activities.subscribe(activities => {
-            // Daten für die Woche
-            const dailyActivities = {};
-            this.chartLabels = [];
-            const intensities = Goal.types;
+        this.chartLabelsProgress = [];
+        const weeklyProgress = [];
+        const intensities = Goal.intensities; // ['moderate','vigorous']
+        const duration = Goal.durations[1]; // 'weekly'
+        const start = moment().startOf('week').endOf('day').add(1, 'day');
+        const current = start.clone();
+        const today = (moment().get('day') + 7 - 1) % 7;
 
-            // Prepare daily activities with hours 0-23 as indices and initialize with empty array
-            for (const intensity of intensities) {
-                dailyActivities[intensity] = {};
-                for (let hour = 0; hour < 24; hour++) {
-                    dailyActivities[intensity][hour.toString()] = [];
-                    if (this.chartLabels.length < 24) {
-                        this.chartLabels.push(hour);
-                    }
+        // Prepare weekly activities with days -6 days until today as indices and initialize with empty array
+        for (const intensity of intensities) {
+            current.set(start.toObject());
+            weeklyProgress[intensity] = new Array(7);
+            for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+                let value = 0;
+                const history = this.goalHistory[`${duration}-${intensity}`];
+                if (dayOfWeek > today) {
+                    value = null;
+                } else if (dayOfWeek === today) {
+                    value = this.currentGoals.filter(el => el.name === `${duration}-${intensity}`)[0].relative;
+                } else if (history && history.hasOwnProperty(current.valueOf())) {
+                    value = history[current.valueOf()].relative;
                 }
-            }
-
-            // Fill the dailyActivities object with the activities
-            for (const activity of activities) {
-                const time = moment(activity.startTime);
-                if (now.isSame(time, 'day')) {
-                    const index = activity.startTime.getHours().toString();
-                    dailyActivities[activity.intensity][index].push(activity.getDuration());
+                weeklyProgress[intensity][dayOfWeek] = value;
+                if (that.chartLabelsProgress.length < 7) {
+                    that.chartLabelsProgress.push(current.format('ddd'));
                 }
+                current.add(1, 'day');
             }
+        }
+        this.progressChartData = weeklyProgress;
+        console.log(weeklyProgress);
+        console.log(that.chartLabelsProgress);
 
-            this.dailyActivities = dailyActivities;
-            console.log(dailyActivities);
-            console.log(
-                Object.values(this.dailyActivities.moderate)
-                    .map((el: Array<number>) => el.reduce((a: number, b: number) => a + b, 0)));
-            console.log(that.chartLabels);
-
-            that.createHrzBarChart5Daily();
-        });
+        that.createProgressChart();
     }
 
     // weekly
-    defineChartData() {
+    prepareActivitiesChartData() {
         const that = this;
 
-        // lastWeek.setDate(lastWeek.getDate() - 7);
+        this.chartLabelsActivities = [];
+        const weeklyActivities = [];
+        const intensities = Goal.intensities; // ['moderate','vigorous']
+        const duration = Goal.durations[0]; // 'daily'
+        const start = moment().endOf('day').subtract(6, 'day');
+        const current = start.clone();
 
-        this.activities.subscribe(activities => {
-            this.chartLabelsWeekly = [];
-            // Daten für die Woche
-            const weeklyActivities = [];
-            const intensities = Goal.types;
-            const start = moment().startOf('day').subtract(6, 'day');
-            const current = start.clone();
-
-            // Prepare weekly activities with days -6 days until today as indices and initialize with empty array
-            for (const intensity of intensities) {
-                current.set(start.toObject());
-                weeklyActivities[intensity] = {};
-                for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
-                    weeklyActivities[intensity][current.toISOString(true)] = [];
-                    if (that.chartLabelsWeekly.length < 7) {
-                        that.chartLabelsWeekly.push(current.format('ddd'));
-                    }
-                    current.add(1, 'day');
+        // Prepare weekly activities with days -6 days until today as indices and initialize with empty array
+        for (const intensity of intensities) {
+            current.set(start.toObject());
+            weeklyActivities[intensity] = new Array(7);
+            for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+                let value = 0;
+                const history = this.goalHistory[`${duration}-${intensity}`];
+                if (history && history.hasOwnProperty(current.valueOf())) {
+                    value = history[current.valueOf()].current;
                 }
-            }
-
-            // Fill the dailyActivities object with the activities
-            for (const activity of activities) {
-                const time = moment(activity.startTime);
-                if (time.isAfter(start)) {
-                    const index = time.startOf('day').toISOString(true);
-                    weeklyActivities[activity.intensity][index].push(activity.getDuration());
+                weeklyActivities[intensity][dayOfWeek] = value;
+                if (that.chartLabelsActivities.length < 7) {
+                    that.chartLabelsActivities.push(current.format('ddd'));
                 }
+                current.add(1, 'day');
             }
+            console.log(this.currentGoals);
+            weeklyActivities[intensity][6] = this.currentGoals.filter(el => el.name === `${duration}-${intensity}`)[0].current;
+        }
+        this.activitiesChartData = weeklyActivities;
+        console.log(weeklyActivities);
+        console.log(that.chartLabelsActivities);
 
-            this.weeklyActivities = weeklyActivities;
-            console.log(weeklyActivities);
-            console.log(that.chartLabelsWeekly);
-
-            that.createWeeklyChart();
-        });
+        that.createActivitiesChart();
     }
 
 
-    createHrzBarChart5Daily() {
+    createProgressChart() {
         if (this.hrzBars5) {
             this.hrzBars5.destroy();
         }
@@ -206,22 +209,20 @@ export class ProgressDetailPage implements OnInit {
         // ctx.height = 400;
 
         this.hrzBars5 = new Chart(ctx, {
-            type: 'bar',
+            type: 'line',
             data: {
-                labels: this.chartLabels,
+                labels: this.chartLabelsProgress,
                 datasets: [
                     {
                         label: 'moderate',
-                        data: Object.values(this.dailyActivities.moderate)
-                            .map((el: Array<number>) => el.reduce((a: number, b: number) => a + b, 0)),
+                        data: this.progressChartData.moderate,
                         backgroundColor: '#F61067', // array should have same number of elements as number of dataset
                         borderColor: '#F61067', // array should have same number of elements as number of dataset
                         borderWidth: 1
                     },
                     {
                         label: 'vigorous',
-                        data: Object.values(this.dailyActivities.vigorous)
-                            .map((el: Array<number>) => el.reduce((a: number, b: number) => a + b, 0)),
+                        data: this.progressChartData.via,
                         backgroundColor: '#6DECAF', // array should have same number of elements as number of dataset
                         borderColor: '#6DECAF', // array should have same number of elements as number of dataset
                         borderWidth: 1
@@ -255,7 +256,9 @@ export class ProgressDetailPage implements OnInit {
                             labelString: 'Minutes'
                         },
                         ticks: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            suggestedMin: 0,
+                            suggestedMax: 1
                         },
                         stacked: true
                     }]
@@ -265,7 +268,7 @@ export class ProgressDetailPage implements OnInit {
     }
 
 
-    createWeeklyChart() {
+    createActivitiesChart() {
         if (this.weeklyBarChart) {
             this.weeklyBarChart.destroy();
         }
@@ -276,20 +279,18 @@ export class ProgressDetailPage implements OnInit {
         this.weeklyBarChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: this.chartLabelsWeekly,
+                labels: this.chartLabelsActivities,
                 datasets: [
                     {
                         label: 'moderate',
-                        data: Object.values(this.weeklyActivities.moderate)
-                            .map((el: Array<number>) => el.reduce((a: number, b: number) => a + b, 0)),
+                        data: this.activitiesChartData.moderate,
                         backgroundColor: '#F61067', // array should have same number of elements as number of dataset
                         borderColor: '#F61067', // array should have same number of elements as number of dataset
                         borderWidth: 1
                     },
                     {
                         label: 'vigorous',
-                        data: Object.values(this.weeklyActivities.vigorous)
-                            .map((el: Array<number>) => el.reduce((a: number, b: number) => a + b, 0)),
+                        data: this.activitiesChartData.vigorous,
                         backgroundColor: '#6DECAF', // array should have same number of elements as number of dataset
                         borderColor: '#6DECAF', // array should have same number of elements as number of dataset
                         borderWidth: 1

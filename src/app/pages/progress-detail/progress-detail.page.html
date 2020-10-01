@@ -32,10 +32,10 @@
                     <ion-col size="8">
                         <ion-item>
                             <ion-segment [(ngModel)]="duration">
-                                <ion-segment-button value="day" (click)="defineChartDataDaily()">
+                                <ion-segment-button value="day" (click)="prepareProgressChartData()">
                                     Today
                                 </ion-segment-button>
-                                <ion-segment-button value="week" (click)="defineChartData()">
+                                <ion-segment-button value="week" (click)="prepareActivitiesChartData()">
                                     This Week
                                 </ion-segment-button>
                             </ion-segment>
