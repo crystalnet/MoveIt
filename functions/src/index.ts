@@ -15,7 +15,7 @@ const admin = require('firebase-admin');
 
 admin.initializeApp(functions.config().firebase);
 
-exports.automaticNotifications = functions.pubsub.schedule('every 15 minutes').onRun((context: any) => {
+exports.automaticNotifications = functions.region('europe-west1').pubsub.schedule('every 15 minutes').onRun((context: any) => {
     let time = new Date();
     time = new Date(time.getTime() + 120 * 60 * 1000);
     console.log('System Time: ', time);
@@ -256,7 +256,7 @@ exports.sendNotification = functions.https.onCall((data: any, context: any) => {
     return notification.send();
 });
 
-exports.resetLeaderboard = functions.pubsub.schedule('0 0 * * 0').onRun((context: any) => {
+exports.resetLeaderboard = functions.region('europe-west1').pubsub.schedule('0 23 * * 0').onRun((context: any) => {
     return admin.database().ref('/users/').once('value')
         .then((snap: any) => {
                 const result = snap.val();
@@ -285,7 +285,7 @@ exports.resetLeaderboard = functions.pubsub.schedule('0 0 * * 0').onRun((context
             (err: any) => console.log(err));
 });
 
-exports.dailyCleanUp = functions.pubsub.schedule('0 0 * * *').onRun((context: any) => {
+exports.dailyCleanUp = functions.region('europe-west1').pubsub.schedule('0 11 * * *').onRun((context: any) => {
     let goals: any;
     let leaderboard: any;
     let users: any;
