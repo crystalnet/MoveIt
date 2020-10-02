@@ -2,9 +2,9 @@ import {Component, OnInit} from '@angular/core';
 import {Location} from '@angular/common';
 import {Router} from '@angular/router';
 import {GoalService} from '../../services/goal/goal.service';
-import {Goal} from '../../model/goal';
 import {AlertController} from '@ionic/angular';
 import {TrackingService} from '../../services/tracking/tracking.service';
+import {combineLatest, Observable} from 'rxjs';
 
 @Component({
     selector: 'app-set-goals',
@@ -12,12 +12,14 @@ import {TrackingService} from '../../services/tracking/tracking.service';
     styleUrls: ['./set-goals.page.scss'],
 })
 export class SetGoalsPage implements OnInit {
-    goal: Goal;
-    goalPromise: Promise<any>;
+    goalPromise: Observable<any>;
 
     constructor(private location: Location, private router: Router, private goalService: GoalService,
                 private alertController: AlertController, private trackingService: TrackingService) {
-        this.goalPromise = this.goalService.getGoal('weeklyModerate').then(goal => this.goal = goal);
+        const dailyActive = this.goalService.getGoal('daily-active');
+        const weeklyActive = this.goalService.getGoal('weekly-active');
+        this.goalPromise = combineLatest(weeklyActive, dailyActive);
+        this.goalPromise.subscribe(res => console.log(res));
     }
 
     ngOnInit() {
@@ -27,8 +29,8 @@ export class SetGoalsPage implements OnInit {
         this.location.back();
     }
 
-    editGoal() {
-        this.goalService.adjustGoal(this.goal, this.goal.target).then(
+    editGoal(goal) {
+        this.goalService.adjustGoal(goal, goal.target).then(
             res => {
                 console.log(res);
                 this.presentAlert();

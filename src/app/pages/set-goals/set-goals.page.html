@@ -11,47 +11,49 @@
 </ion-header>
 
 <ion-content *ngIf="goalPromise | async">
-    <h1>Here you can change your {{goal.duration}} {{goal.type}} minutes goal!</h1>
-    <!--<ion-segment [(ngModel)]="goals">
-      <ion-segment-button value="trophies">
-        moderate
-      </ion-segment-button>
-      <ion-segment-button (click)="vigorous()" value="vigorous">
-        vigorous
-      </ion-segment-button>
-      <ion-segment-button (click)="weight()" value="weight">
-        weight training
-      </ion-segment-button>
-    </ion-segment>-->
+    <div *ngFor="let goal of (goalPromise | async)">
+        <h1>Here you can change your {{goal.duration}} {{goal.type}} minutes goal!</h1>
+        <!--<ion-segment [(ngModel)]="goals">
+          <ion-segment-button value="trophies">
+            moderate
+          </ion-segment-button>
+          <ion-segment-button (click)="vigorous()" value="vigorous">
+            vigorous
+          </ion-segment-button>
+          <ion-segment-button (click)="weight()" value="weight">
+            weight training
+          </ion-segment-button>
+        </ion-segment>-->
 
-    <ion-list>
-        <ion-item>
-            <ion-range min="0" max="1000" pin color="secondary" [(ngModel)]="goal.target">
-                <ion-icon slot="start" size="small" name="walk"></ion-icon>
-                <ion-icon slot="end" name="walk"></ion-icon>
-            </ion-range>
-        </ion-item>
+        <ion-list>
+            <ion-item>
+                <ion-range min="0" max="1000" pin color="secondary" [(ngModel)]="goal.target">
+                    <ion-icon slot="start" size="small" name="walk"></ion-icon>
+                    <ion-icon slot="end" name="walk"></ion-icon>
+                </ion-range>
+            </ion-item>
 
-        <ion-item>
-            <ion-label>Goal</ion-label>
-            <ion-input type="number" slot="end" [(ngModel)]="goal.target"></ion-input>
-        </ion-item>
-        <!--<ion-item>
-          <ion-label>Monthly goals</ion-label>
-          <ion-input placeholder="1500"></ion-input>
-        </ion-item>
+            <ion-item>
+                <ion-label>Goal</ion-label>
+                <ion-input type="number" slot="end" [(ngModel)]="goal.target"></ion-input>
+            </ion-item>
+            <!--<ion-item>
+              <ion-label>Monthly goals</ion-label>
+              <ion-input placeholder="1500"></ion-input>
+            </ion-item>
 
-           <ion-item>
-            <ion-label>Daily goals</ion-label>
-            <ion-input id="daily" placeholder="500"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label>Monthly goals</ion-label>
-            <ion-input id="weekly" placeholder="1500"></ion-input>
-          </ion-item>-->
-    </ion-list>
+               <ion-item>
+                <ion-label>Daily goals</ion-label>
+                <ion-input id="daily" placeholder="500"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label>Monthly goals</ion-label>
+                <ion-input id="weekly" placeholder="1500"></ion-input>
+              </ion-item>-->
+        </ion-list>
 
-    <section>
-        <ion-button slot="end" color="secondary" (click)="editGoal()"> Change goals</ion-button>
-    </section>
+        <section>
+            <ion-button slot="end" color="secondary" (click)="editGoal(goal)">Save</ion-button>
+        </section>
+    </div>
 </ion-content>

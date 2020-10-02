@@ -29,10 +29,11 @@ export class GoalService {
     createGoal(goal: Goal) {
         return new Promise<any>((resolve, reject) => {
             // Use the name as the key
-            this.fireDatabase.database.ref('/goals/' + firebase.auth().currentUser.uid + '/' + goal.name).set(goal.toFirebaseObject()).then(
-                () => resolve(goal),
-                err => reject(err)
-            );
+            const promises = [];
+            promises.push(this.fireDatabase.database.ref('/goals/' + firebase.auth().currentUser.uid + '/' + goal.name)
+                .set(goal.toFirebaseObject()));
+            promises.push(this.fireDatabase.database.ref('/goalHistory/' + firebase.auth().currentUser.uid + '/' + goal.name)
+                .set({}));
         });
     }
 
@@ -46,10 +47,12 @@ export class GoalService {
     initializeUserGoals() {
         return new Promise<any>((resolve, reject) => {
             for (const goal of Goal.defaultGoals) {
-                this.createGoal(goal).then(
+                this.updateGoal(goal).then(
                     () => null,
                     err => reject(err)
                 );
+                this.fireDatabase.database.ref('/leaderboard/nWins/' + goal.name + '/' + firebase.auth().currentUser.uid).set(0);
+                this.fireDatabase.database.ref('/goalHistory/' + firebase.auth().currentUser.uid + '/' + goal.name  ).set({a: 'b'});
             }
             resolve('Successfully initialized goals');
         });
