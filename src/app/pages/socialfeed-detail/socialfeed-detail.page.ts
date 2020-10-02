@@ -2,12 +2,12 @@ import {Component, OnInit} from '@angular/core';
 import {Post} from '../../model/post';
 import {Comment} from '../../model/comment';
 import {PostService} from '../../services/post/post.service';
-import {Observable, merge} from 'rxjs';
+import {combineLatest, Observable} from 'rxjs';
 import {Location} from '@angular/common';
 import {UserService} from '../../services/user/user.service';
 import {first, map} from 'rxjs/operators';
 import {User} from 'src/app/model/user';
-import {Router, NavigationExtras} from '@angular/router';
+import {NavigationExtras, Router} from '@angular/router';
 
 @Component({
     selector: 'app-socialfeed-detail',
@@ -23,8 +23,10 @@ export class SocialfeedDetailPage implements OnInit {
     now = new Date();
     post: Post;
     user: User;
+    publicUserData: any;
     userObservable: Observable<any>;
     displayedPosts: Observable<any[]>;
+    nPosts = 0;
 
 
     link: Observable<string>;
@@ -34,46 +36,35 @@ export class SocialfeedDetailPage implements OnInit {
     }
 
     ngOnInit() {
-        this.posts = this.postService.getAllPosts().pipe(map(posts => posts.map(post => {
-            const pseudoPost = {
-                username: this.getUsername(post.user).pipe(first()),
-                profilePictureUrl: this.getSpecificProfilePictureUrl(post.user).pipe(first()),
-                usernames: [],
-                ...post
-            };
-            pseudoPost.usernames = pseudoPost.comments.map(comment => this.getUsername(comment.user).pipe(first()));
-            return pseudoPost;
-        })));
+        const publicUserData = this.userService.getUsersPublicData();
+        this.posts = this.postService.getAllPosts();
+        combineLatest(publicUserData, this.posts).subscribe((results) => {
+            console.log('ENTERED');
+            this.publicUserData = results[0];
+            this.loadMorePosts();
+        });
+
         this.posts.subscribe(r => console.log(r));
         this.userObservable = this.userService.getUser();
         this.userObservable.subscribe(user => this.user = user);
-
-        this.displayedPosts = this.posts.pipe(map(
-            (data) => {
-                // data.sort((a, b) => {
-                //   return b.startTime.getTime() - a.startTime.getTime();
-                // });
-                console.log(data);
-                return data.slice(0, 10);
-            }
-        ));
-        console.log(this.displayedPosts);
     }
 
-    loadMorePosts() {
-        let currentlyDisplayed = 0;
-        this.displayedPosts.subscribe(
-            c => currentlyDisplayed = c.length
-        );
-
-        const newDisplayedActivities = this.posts.pipe(
-            map(data => data.slice(0, currentlyDisplayed + 5))
-        );
-
-        this.displayedPosts = merge(
-            this.displayedPosts,
-            newDisplayedActivities
-        );
+    loadMorePosts(event?) {
+        this.nPosts += 5;
+        this.posts = this.postService.getAllPosts(this.nPosts);
+        this.displayedPosts = this.posts.pipe(map(posts => posts.map(post => {
+            const pseudoPost = {
+                username: this.publicUserData[post.user].name,
+                profilePictureUrl: this.publicUserData[post.user].profilePictureUrl,
+                usernames: [],
+                ...post
+            };
+            pseudoPost.usernames = pseudoPost.comments.map(comment => comment.user);
+            return pseudoPost;
+        })));
+        if (event) {
+            event.target.complete();
+        }
     }
 
     goBack() {

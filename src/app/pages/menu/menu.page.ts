@@ -30,6 +30,7 @@ export class MenuPage implements OnInit, OnDestroy {
             }
         });
 
+        this.updatePages();
         this.initializeFCM();
     }
 
@@ -65,9 +66,8 @@ export class MenuPage implements OnInit, OnDestroy {
      * This method updates the whole pages array when there is a new username available. This is necessary, because
      * Angular cannot detect changes in the elements of the array.
      *
-     * @param username the new username
      */
-    updatePages(username) {
+    updatePages() {
         this.pages.push({title: 'My Profile', url: '/menu/profile'});
     }
 

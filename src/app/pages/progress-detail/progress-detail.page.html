@@ -304,9 +304,6 @@
                 <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more activities...">
                 </ion-infinite-scroll-content>
             </ion-infinite-scroll>
-            <ion-button *ngIf="(activities | async)?.length > 5" expand="block" color="secondary"
-                        (click)="loadMoreActivities()">Read more
-            </ion-button>
         </ion-card-content>
     </ion-card>
 </ion-content>
