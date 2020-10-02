@@ -28,6 +28,8 @@ export class ProgressDetailPage implements OnInit {
     currentGoals: any;
     goalHistory: any;
 
+    nActivities = 0;
+
     activities: Observable<Activity[]>;
     // Array which contains the displayed activities
     displayedActivities: Observable<Activity[]>;
@@ -72,7 +74,6 @@ export class ProgressDetailPage implements OnInit {
 
     oldGoals: any[] = [];
 
-
     constructor(private activityService: ActivityService, private goalService: GoalService, private location: Location,
                 private health: Health, private platform: Platform, private router: Router, private navCtrl: NavController) {
         const history = this.goalService.getGoalHistory();
@@ -84,17 +85,7 @@ export class ProgressDetailPage implements OnInit {
             this.prepareProgressChartData();
         });
 
-        this.activities = this.activityService.getAllUserActivities();
-
-
-        this.displayedActivities = this.activities.pipe(map(
-            (data) => {
-                // data.sort((a, b) => {
-                //   return b.startTime.getTime() - a.startTime.getTime();
-                // });
-                return data.slice(0, 5);
-            }
-        ));
+        this.loadMoreActivities();
 
         this.dailyActivePromise = this.goalService.getGoal('daily-active').then(res => this.dailyActive = res, err => console.log(err));
         this.weeklyActivePromise = this.goalService.getGoal('weekly-active').then(res => this.weeklyActive = res, err => console.log(err));
@@ -107,20 +98,12 @@ export class ProgressDetailPage implements OnInit {
     ionViewDidEnter() {
     }
 
-    loadMoreActivities() {
-        let currentlyDisplayed = 0;
-        this.displayedActivities.subscribe(
-            c => currentlyDisplayed = c.length
-        );
-
-        const newDisplayedActivities = this.activities.pipe(
-            map(data => data.slice(0, currentlyDisplayed + 5))
-        );
-
-        this.displayedActivities = merge(
-            this.displayedActivities,
-            newDisplayedActivities
-        );
+    loadMoreActivities(event?) {
+        this.nActivities += 5;
+        this.displayedActivities = this.activityService.getAllUserActivities(this.nActivities);
+        if (event) {
+            event.target.complete();
+        }
     }
 
     prepareProgressChartData() {
@@ -336,61 +319,6 @@ export class ProgressDetailPage implements OnInit {
         // this.checkPlatformReady();
     }
 
-    async checkPlatformReady() {
-        const ready = !!await this.platform.ready();
-        if (ready) {
-            this.health.isAvailable()
-                .then((available: boolean) => {
-                    console.log('HEALTH IS AVAILABLE :' + available);
-                    this.health.requestAuthorization([
-                        /* 'distance', 'nutrition', //read and write permissions
-                        {
-                            read: ['steps'], //read only permission
-                            write: ['height', 'weight'] //write only permission
-                        } */
-                        'activity', 'distance'
-                    ]).then(res => {
-                            console.log(res);
-                            this.loadHealthData();
-                        }
-                    ).catch(e => console.log(e));
-                })
-                .catch(e => console.log(e));
-        }
-    }
-
-
-    saveWorkout() {
-        /*
-       this.health.requestAuthorization([
-
-           'activity'
-       ])
-           .then(
-               res => console.log(res))
-           .catch(e => console.log(e));
-       this.health.store({
-           startDate: new Date(new Date().getTime() - 3 * 60 * 1000), // three minutes ago
-           endDate: new Date(),
-           dataType: 'activity',
-           value: 'walking',
-           sourceName: 'MoveIt_test',
-           sourceBundleId: 'com.moveitproject.www'
-       }).then(res => console.log('Response of API while writing' + res))
-           .catch(e => console.log('Response of API while writing ERROR:' + e));
-           */
-        const activity = new Activity();
-        activity.endTime = new Date();
-        activity.startTime = new Date(new Date().getTime() - 3 * 60 * 1000); // three minutes ago
-
-        this.activityService.writeFitnessApi(activity);
-    }
-
-    loadHealthData() {
-
-    }
-
-
     goBack() {
         this.location.back();
     }
@@ -403,289 +331,8 @@ export class ProgressDetailPage implements OnInit {
         this.router.navigateByUrl('/menu/progress/progress/edit', {state: {activity}});
     }
 
-    /**
-     * Create a new activity
-     *
-     * An activity object must be present in order to do so. This must be created from the user input
-     */
-    createActivity() {
-        // TODO replace with actual activity object
-        this.activityService.createActivity(new Activity()).then(
-            res => console.log(res),
-            err => console.log(err)
-        );
-    }
-
-    /**
-     * Update an existing id
-     *
-     * An updated activity object and the id of the activity to be updated must be provided
-     */
-    editActivity() {
-        const record = new Activity('-Lx_t1Ch4v1h7sox96XZ', {unit: 'km', value: 42.2});
-
-        // TODO replace with actual activity id
-        this.activityService.editActivity('-Lx_t1Ch4v1h7sox96XZ', record).then(
-            res => console.log(res),
-            err => console.log(err)
-        );
-    }
-
-    /**
-     * Retrieve an activity giving its id
-     */
-    getActivity() {
-        // TODO replace with actual activity id
-        this.activityService.getActivity('-Lx_t1Ch4v1h7sox96XZ').then(
-            res => {
-                console.log(res);
-            },
-            err => console.log(err)
-        );
-    }
-
-    /**
-     * Retrieves an array of all activities of a current user
-     */
-    getAllActivities() {
-        return this.activityService.getAllUserActivities();
-    }
-
-    /**
-     * For testing purposes only: Create all default goals for a user
-     */
-    createGoals() {
-        return this.goalService.initializeUserGoals();
-    }
-
-    /**
-     * Adjusts the target of a goal
-     */
-    adjustGoal() {
-        // Get the goal given a name
-        this.goalService.getGoal('dailyModerate').then(
-            // If the goal exists, adjust the goal
-            goal => this.goalService.adjustGoal(goal, 90).then(
-                res => console.log(res), // Goal successfully adjusted
-                err => console.log(err) // Goal adjustment failed
-            ),
-            err => console.log(err) // Fetching the goal failed
-        );
-    }
-
-
     goToOldGoalsPage() {
         this.navCtrl.navigateForward('/menu/progress/progress/goals-old');
-    }
-
-    loadOldGoals() {
-        const that = this;
-        this.allInfo = that.allInfo;
-        let latestGoalTimeM = 0;
-        let latestGoalTimeV = 0;
-        let latestGoalTimeW = 0;
-
-        this.goalService.getGoals().subscribe(data => {
-            this.goalsHistory = data;
-
-
-            this.goalsHistory.forEach((goal) => {
-
-                goal.history.forEach((history) => {
-                    for (const hist in history) {
-                        if (history.hasOwnProperty(hist)) {
-
-                            const obj = {
-                                name: goal.name,
-                                val: history[hist],
-                                time: hist
-                            };
-                            that.allInfo.push(obj);
-                        }
-                    }
-                });
-            });
-
-            for (let weekNumber = 3; weekNumber >= 0; weekNumber--) {
-                const lastSunday = new Date();
-                lastSunday.setDate(lastSunday.getDate() - (7 * weekNumber) - lastSunday.getDay());
-                lastSunday.setHours(0, 0, 0, 0);
-
-
-                latestGoalTimeW = 0;
-                latestGoalTimeV = 0;
-                latestGoalTimeM = 0;
-                that.lastGoalM = 0;
-                that.lastGoalV = 0;
-                that.lastGoalW = 0;
-                // console.log(this.allInfo);
-                this.allInfo.forEach((changedGoal) => {
-
-                    if (changedGoal.time < lastSunday.getTime()) {
-                        //  console.log(changedGoal.val);
-
-
-                        if (changedGoal.time > latestGoalTimeM && changedGoal.name === 'weeklyModerate') {
-                            latestGoalTimeM = changedGoal.time;
-                            that.lastGoalM = changedGoal.val;
-
-                        }
-
-                        if (changedGoal.time > latestGoalTimeV && changedGoal.name === 'weeklyVigorous') {
-                            latestGoalTimeV = changedGoal.time;
-                            that.lastGoalV = changedGoal.val;
-                        }
-
-
-                        if (changedGoal.time > latestGoalTimeW && changedGoal.name === 'weeklyWeight') {
-                            latestGoalTimeW = changedGoal.time;
-                            that.lastGoalW = changedGoal.val;
-                        }
-                    }
-                    if (that.lastGoalV === 0) {
-                        that.lastGoalV = 75;
-                    }
-                    if (that.lastGoalW === 0) {
-                        that.lastGoalW = 120;
-                    }
-                    if (that.lastGoalM === 0) {
-                        that.lastGoalM = 150;
-                    }
-                });
-
-                if (this.allInfo.length === 0) {
-                    if (that.lastGoalV === 0) {
-                        that.lastGoalV = 75;
-                    }
-                    if (that.lastGoalW === 0) {
-                        that.lastGoalW = 120;
-                    }
-                    if (that.lastGoalM === 0) {
-                        that.lastGoalM = 150;
-                    }
-                }
-
-
-                const oldGoalM: any = {
-                    name: '',
-                    intensiy: '',
-                    weekNumber: 0,
-                    weekGoal: 0,
-                    duration: 0,
-                    relative: 0
-                };
-                const oldGoalV: any = {
-                    name: '',
-                    intensiy: '',
-                    weekNumber: 0,
-                    weekGoal: 0,
-                    duration: 0,
-                    relative: 0
-                };
-                const oldGoalW: any = {
-                    name: '',
-                    intensiy: '',
-                    weekNumber: 0,
-                    weekGoal: 0,
-                    duration: 0,
-                    relative: 0
-                };
-                oldGoalM.name = 'weekly ' + (weekNumber + 1) + ' ago';
-                oldGoalM.weekNumber = weekNumber;
-                oldGoalM.intensity = 'moderate';
-                oldGoalM.weekGoal = that.lastGoalM;
-                that.oldGoals.push(oldGoalM);
-
-                oldGoalV.name = 'weekly ' + (weekNumber + 1) + ' ago';
-                oldGoalV.weekNumber = weekNumber;
-                oldGoalV.intensity = 'vigorous';
-                oldGoalV.weekGoal = that.lastGoalV;
-                that.oldGoals.push(oldGoalV);
-
-                oldGoalW.name = 'weekly ' + (weekNumber + 1) + ' ago';
-                oldGoalW.weekNumber = weekNumber;
-                oldGoalW.intensity = 'weight training';
-                oldGoalW.weekGoal = that.lastGoalW;
-                that.oldGoals.push(oldGoalW);
-
-                // console.log(that.oldGoals);
-            }
-
-
-        });
-        this.activitiesFromLastWeek();
-    }
-
-    activitiesFromLastWeek() {
-        const that = this;
-        let lastWekkActivities = [];
-
-        this.activities.subscribe(data => {
-            // console.log(data);
-            for (let weekNumber = 3; weekNumber >= 0; weekNumber--) {
-                this.activitiesGoals = [];
-                lastWekkActivities = [];
-                const lastSunday = new Date();
-                const lastSecSunday = new Date();
-                lastSunday.setDate(lastSunday.getDate() - (7 * weekNumber) - lastSunday.getDay());
-                lastSunday.setHours(0, 0, 0, 0);
-                lastSecSunday.setDate(lastSecSunday.getDate() - (7 * weekNumber) - lastSecSunday.getDay() - 7);
-                lastSecSunday.setHours(0, 0, 0, 0);
-
-                lastWekkActivities.push(data.filter((activity) => {
-                    return activity.startTime.getTime() < lastSunday.getTime() && activity.startTime.getTime() > lastSecSunday.getTime();
-                }));
-                this.activitiesGoals = lastWekkActivities;
-
-                const intensities = [
-                    {id: 'vigorous', name: 'vigorous'},
-                    {id: 'moderate', name: 'moderate'},
-                    {id: 'weightTraining', name: 'weight training'}
-                ];
-
-                const weeklyActivityDurations = [];
-                lastWekkActivities.forEach((weekly) => {
-                    const obj = {
-                        vigorous: [],
-                        moderate: [],
-                        weightTraining: []
-                    };
-                    intensities.forEach((intensity) => {
-                        obj[intensity.id] = weekly
-                            .filter((activity) => activity.intensity === intensity.name)
-                            .reduce(((totalDuration, activity) => totalDuration + activity.getDuration()), 0);
-                    });
-
-                    weeklyActivityDurations.push(obj);
-                });
-                this.wholeDuration = weeklyActivityDurations;
-                let moderate: any;
-                let vigorous: any;
-                let weight: any;
-                moderate = this.wholeDuration.map((intensity) => intensity.moderate);
-                vigorous = this.wholeDuration.map((intensity) => intensity.vigorous);
-                weight = this.wholeDuration.map((intensity) => intensity.weightTraining);
-                console.log(weight);
-
-                this.oldGoals.forEach((goal) => {
-                    if (goal.intensity === 'moderate' && goal.weekNumber === weekNumber) {
-                        goal.duration = moderate;
-                        goal.relative = goal.duration / goal.weekGoal;
-                    }
-                    if (goal.intensity === 'vigorous' && goal.weekNumber === weekNumber) {
-                        goal.duration = vigorous;
-                        goal.relative = goal.duration / goal.weekGoal;
-                    }
-                    if (goal.intensity === 'weight training' && goal.weekNumber === weekNumber) {
-                        goal.duration = weight;
-                        goal.relative = goal.duration / goal.weekGoal;
-                    }
-
-                });
-                // console.log(this.oldGoals);
-
-            }
-        });
     }
 
     slidePrev() {
@@ -695,6 +342,5 @@ export class ProgressDetailPage implements OnInit {
     slideNext() {
         this.slides.slideNext();
     }
-
 }
 

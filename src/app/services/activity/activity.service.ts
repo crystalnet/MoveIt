@@ -22,7 +22,7 @@ export class ActivityService {
     }
 
     writeActivitytoFirebase(activity: Activity) {
-        activity.id = (new Date()).getTime().toString();
+        activity.id = activity.startTime.getTime().toString();
         return this.fireDatabase.database.ref('/activities/' + firebase.auth().currentUser.uid + '/' + activity.id)
             .set(activity.toFirebaseObject());
     }
@@ -128,9 +128,9 @@ export class ActivityService {
     /**
      * Retrieve all activities of the current user
      */
-    getAllUserActivities() {
+    getAllUserActivities(limit = 5) {
         const ref = this.fireDatabase
-            .list<Activity>(this.activityLocation + firebase.auth().currentUser.uid, query => query.orderByChild('endTime'));
+            .list<Activity>(this.activityLocation + firebase.auth().currentUser.uid, query => query.orderByKey().limitToLast(limit));
         console.log('ACTIVITIES FUNCTION RUN');
         return ref.snapshotChanges().pipe(tap(x => console.log('ACTIVITIES SNAPSHOT CHANGED', x)), map(activities => activities.map(
             activitySnapshot => Activity.fromFirebaseObject(activitySnapshot.key, activitySnapshot.payload.val())).reverse()));

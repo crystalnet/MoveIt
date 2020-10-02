@@ -300,6 +300,10 @@
                     </ion-icon>
                 </ion-item>
             </ion-list>
+            <ion-infinite-scroll (ionInfinite)="loadMoreActivities($event)">
+                <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more activities...">
+                </ion-infinite-scroll-content>
+            </ion-infinite-scroll>
             <ion-button *ngIf="(activities | async)?.length > 5" expand="block" color="secondary"
                         (click)="loadMoreActivities()">Read more
             </ion-button>
