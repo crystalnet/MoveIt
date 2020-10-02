@@ -133,11 +133,13 @@ export class ProfileDetailPage implements OnInit {
         this.fileName = file.name;
 
         // The storage path
-        const path = `profilePic/${firebase.auth().currentUser.uid}/${firebase.auth().currentUser.uid}`;
+        const path = `profilePic/${firebase.auth().currentUser.uid}/${file.name.slice(-10)}`;
 
 
         // File reference
         const fileRef = this.storage.ref(path);
+        console.log(path);
+        console.log(file);
 
         // The main task
         this.task = this.storage.upload(path, file);

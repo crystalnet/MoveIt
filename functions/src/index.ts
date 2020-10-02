@@ -15,53 +15,60 @@ const admin = require('firebase-admin');
 
 admin.initializeApp(functions.config().firebase);
 
-exports.automaticNotifications = functions.region('europe-west1').pubsub.schedule('every 15 minutes').onRun((context: any) => {
-    let time = new Date();
-    time = new Date(time.getTime() + 120 * 60 * 1000);
-    console.log('System Time: ', time);
-    time.setMinutes(time.getMinutes() - (time.getMinutes() % 15)); // Round down to last quarter hour (00, 15, 30 or 45)
-    console.log('checking path ' + '/times/' + time.getHours() + '/' + time.getMinutes());
-    return admin.database().ref('/times/' + time.getHours() + '/' + time.getMinutes()).once('value').then(
-        (snapshot: any) => {
-            const result = snapshot.val();
-            if (!result) {
-                console.log('No results for this time: ', time.toISOString(), result);
-                return;
-            }
-
-            const promises = [];
-            for (const k of Object.keys(result)) {
-                const uid = result[k as keyof typeof result];
-                console.log('result for ', uid);
-
-                const randomization = Math.random();
-                let data = Promise.resolve(new NotificationData());
-                if (randomization < 0.25) {
-                    // if (randomization > 1) {
-                    data = generateLeaderboardNotification(uid);
-                } else if (randomization < 0.5) {
-                    // } else if (randomization < 1) {
-                    data = generateSocialfeedNotification(uid);
-                } else {
-                    continue;
+exports.automaticNotifications = functions
+    .region('europe-west1')
+    .pubsub.schedule('every 15 minutes')
+    .timeZone('Europe/Berlin')
+    .onRun((context: any) => {
+        let time = new Date();
+        time = new Date(time.getTime() + 120 * 60 * 1000);
+        console.log('System Time: ', time);
+        time.setMinutes(time.getMinutes() - (time.getMinutes() % 15)); // Round down to last quarter hour (00, 15, 30 or 45)
+        console.log('checking path ' + '/times/' + time.getHours() + '/' + time.getMinutes());
+        return admin.database().ref('/times/' + time.getHours() + '/' + time.getMinutes()).once('value').then(
+            (snapshot: any) => {
+                const result = snapshot.val();
+                if (!result) {
+                    console.log('No results for this time: ', time.toISOString(), result);
+                    return;
                 }
 
-                promises.push(data.then(
-                    (res: NotificationData) => {
-                        const notification = new UserNotification(uid, res);
-                        return notification.send();
-                    },
-                    (err: any) => console.log(err)
-                ));
+                const promises = [];
+                for (const k of Object.keys(result)) {
+                    const uid = result[k as keyof typeof result];
+                    console.log('result for ', uid);
+
+                    const randomization = Math.random();
+                    console.log('randomization is ', randomization);
+                    let data = Promise.resolve(new NotificationData());
+                    if (randomization < 0.25) {
+                        // if (randomization > 1) {
+                        data = generateLeaderboardNotification(uid);
+                    } else if (randomization < 0.5) {
+                        // } else if (randomization < 1) {
+                        data = generateSocialfeedNotification(uid);
+                    } else {
+                        console.log('continuing to next key. current key ', k);
+                        continue;
+                    }
+                    console.log('preparing to send notification for ', k);
+
+                    promises.push(data.then(
+                        (res: NotificationData) => {
+                            const notification = new UserNotification(uid, res);
+                            return notification.send();
+                        },
+                        (err: any) => console.log(err)
+                    ));
+                }
+                return Promise.all(promises);
+            },
+            (err: any) => {
+                console.log(err);
+                return;
             }
-            return Promise.all(promises);
-        },
-        (err: any) => {
-            console.log(err);
-            return;
-        }
-    );
-});
+        );
+    });
 
 
 function generateLeaderboardNotification(uid: string) {
@@ -163,7 +170,7 @@ function commentNotification(uid: string, group: string, postId: string) {
         (err: any) => console.log(err));
 }
 
-exports.progressNotification = functions.database.ref('/leaderboard/relative/weeklyModerate/{userId}')
+exports.progressNotification = functions.database.ref('/leaderboard/relative/weekly-active/{userId}')
     .onWrite((event: any, context: any) => {
         const before = event.before.val();
         const after = event.after.val();
@@ -217,7 +224,7 @@ exports.sendNotificationTrophyWin = functions.database.ref('/wins/{userId}').onW
             // Build the message payload and send the message
             console.log('Construction the notification message.');
             const data = new NotificationData();
-            data.header =  'You reached your goal!';
+            data.header = 'You reached your goal!';
             data.text = 'Congratulations - you reached your goal!';
 
             const notification = new UserNotification(winnerId, data);
@@ -256,93 +263,95 @@ exports.sendNotification = functions.https.onCall((data: any, context: any) => {
     return notification.send();
 });
 
-exports.resetLeaderboard = functions.region('europe-west1').pubsub.schedule('0 23 * * 0').onRun((context: any) => {
-    return admin.database().ref('/users/').once('value')
-        .then((snap: any) => {
-                const result = snap.val();
-                if (!result) {
-                    return;
-                }
+exports.resetLeaderboard = functions
+    .region('europe-west1')
+    .pubsub.schedule('0 23 * * 0')
+    .timeZone('Europe/Berlin')
+    .onRun((context: any) => {
+        return admin.database().ref('/users/').once('value')
+            .then((snap: any) => {
+                    const result = snap.val();
+                    if (!result) {
+                        return;
+                    }
 
-                for (const user of Object.keys(result)) {
-                    result[user as keyof typeof result] = 0;
-                }
+                    for (const user of Object.keys(result)) {
+                        result[user as keyof typeof result] = 0;
+                    }
 
-                const goals = {
-                    'daily-moderate': result,
-                    'daily-vigorous': result,
-                    'daily-active': result,
-                    'weekly-moderate': result,
-                    'weekly-vigorous': result,
-                    'weekly-active': result,
-                };
+                    const goals = {
+                        'daily-moderate': result,
+                        'daily-vigorous': result,
+                        'daily-active': result,
+                        'weekly-moderate': result,
+                        'weekly-vigorous': result,
+                        'weekly-active': result,
+                    };
 
-                console.log(goals);
+                    console.log(goals);
 
-                admin.database().ref('/leaderboard/absolute').set(goals);
-                admin.database().ref('/leaderboard/relative').set(goals);
+                    admin.database().ref('/leaderboard/absolute').set(goals);
+                    admin.database().ref('/leaderboard/relative').set(goals);
+                },
+                (err: any) => console.log(err));
+    });
+
+exports.dailyCleanUp = functions
+    .region('europe-west1')
+    .pubsub.schedule('0 0 * * *')
+    .timeZone('Europe/Berlin')
+    .onRun((context: any) => {
+        let goals: any;
+        let leaderboard: any;
+        let users: any;
+        let publicUserData: any;
+        let goalHistory: any;
+        const promises = [];
+        console.log('dailyCleanUp: system time ' + (new Date()).toISOString());
+
+        promises.push(admin.database().ref('/goals/').once('value')
+            .then((snap: any) => {
+                goals = snap.val();
+            }));
+
+        promises.push(admin.database().ref('/leaderboard/').once('value')
+            .then((snap: any) => {
+                leaderboard = snap.val();
+            }));
+
+        promises.push(admin.database().ref('/users/').once('value')
+            .then((snap: any) => {
+                users = snap.val();
+            }));
+
+        promises.push(admin.database().ref('/publicUserData/').once('value')
+            .then((snap: any) => {
+                publicUserData = snap.val();
+            }));
+
+        promises.push(admin.database().ref('/goalHistory/').once('value')
+            .then((snap: any) => {
+                goalHistory = snap.val();
+            }));
+
+        return Promise.all(promises).then(
+            () => {
+                logGoalProgress(goalHistory, goals);
+                resetDailyGoals(goals, leaderboard);
+                updatePublicUserData(users, publicUserData);
+
+                const returnPromises = [];
+                returnPromises.push(admin.database().ref('/goals/').set(goals));
+                returnPromises.push(admin.database().ref('/leaderboard/').set(leaderboard));
+                returnPromises.push(admin.database().ref('/users/').set(users));
+                returnPromises.push(admin.database().ref('/publicUserData/').set(publicUserData));
+                returnPromises.push(admin.database().ref('/goalHistory/').set(goalHistory));
+
+                return Promise.all(returnPromises);
             },
-            (err: any) => console.log(err));
-});
-
-exports.dailyCleanUp = functions.region('europe-west1').pubsub.schedule('0 11 * * *').onRun((context: any) => {
-    let goals: any;
-    let leaderboard: any;
-    let users: any;
-    let publicUserData: any;
-    let goalHistory: any;
-    const promises = [];
-    console.log('dailyCleanUp: system time', new Date());
-
-    promises.push(admin.database().ref('/goals/').once('value')
-        .then((snap: any) => {
-            goals = snap.val();
-        }));
-
-    promises.push(admin.database().ref('/leaderboard/').once('value')
-        .then((snap: any) => {
-            leaderboard = snap.val();
-        }));
-
-    promises.push(admin.database().ref('/users/').once('value')
-        .then((snap: any) => {
-            users = snap.val();
-        }));
-
-    promises.push(admin.database().ref('/publicUserData/').once('value')
-        .then((snap: any) => {
-            publicUserData = snap.val();
-        }));
-
-    promises.push(admin.database().ref('/goalHistory/').once('value')
-        .then((snap: any) => {
-            goalHistory = snap.val();
-        }));
-
-    return Promise.all(promises).then(
-        () => {
-            logGoalProgress(goalHistory, goals);
-            resetDailyGoals(goals, leaderboard);
-            updatePublicUserData(users, publicUserData);
-
-            console.log(goals);
-            console.log(leaderboard);
-            console.log(users);
-            console.log(publicUserData);
-            console.log(goalHistory);
-
-            const returnPromises = [];
-            returnPromises.push(admin.database().ref('/goals/').set(goals));
-            returnPromises.push(admin.database().ref('/leaderboard/').set(leaderboard));
-            returnPromises.push(admin.database().ref('/users/').set(users));
-            returnPromises.push(admin.database().ref('/publicUserData/').set(publicUserData));
-            returnPromises.push(admin.database().ref('/goalHistory/').set(goalHistory));
-
-            return Promise.all(returnPromises);
-        },
-        err => console.log(err)
-    );
-});
+            err => console.log(err)
+        );
+    });
 
 function logGoalProgress(goalHistory: any, goals: any) {
     if (!goalHistory || !goals || !isObject(goalHistory) || !isObject(goals)) {
