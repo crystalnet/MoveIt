@@ -39,16 +39,40 @@ exports.automaticNotifications = functions
                     console.log('result for ', uid);
 
                     const randomization = Math.random();
-                    console.log('randomization is ', randomization);
+                    console.log('randomization is ' + randomization);
                     let data = Promise.resolve(new NotificationData());
-                    if (randomization < 0.25) {
-                        // if (randomization > 1) {
-                        data = generateLeaderboardNotification(uid);
-                    } else if (randomization < 0.5) {
-                        // } else if (randomization < 1) {
-                        data = generateSocialfeedNotification(uid);
-                    } else {
-                        console.log('continuing to next key. current key ', k);
+                    try {
+                        if (randomization < 0.25) {
+                            // if (randomization > 1) {
+                            data = generateLeaderboardNotification(uid);
+                        } else if (randomization < 0.5) {
+                            // } else if (randomization < 1) {
+                            data = generateSocialfeedNotification(uid);
+                        } else {
+                            console.log('continuing to next key. current key ', k);
+                            continue;
+                        }
+                    } catch (err) {
+                        console.log('received error' + err);
+
+                        let type = 'default';
+                        if (randomization < 0.25) {
+                            type = 'leaderboardNotification';
+                        } else if (randomization < 0.5) {
+                            // } else if (randomization < 1) {
+                            type = 'socialfeedNotification';
+                        }
+
+                        const dbNotification = {
+                            notification: type,
+                            time: (new Date()).getTime().toString(),
+                            response: 'not send',
+                            error: err
+                        };
+                        admin.database().ref('/tracking/' + uid + '/reactions/' + (new Date()).getTime().toString()).set(dbNotification).then(
+                            () => console.log('created db entry', dbNotification),
+                            (err: any) => console.log(err)
+                        );
                         continue;
                     }
                     console.log('preparing to send notification for ', k);
@@ -77,7 +101,7 @@ function generateLeaderboardNotification(uid: string) {
             const result = snap.val();
             if (!result) {
                 console.log('no results for weeklyActiveMinutes');
-                return;
+                throw new Error('no results for weeklyActiveMinutes');
             }
             const ranks = Object.keys(result).sort((a, b) => result[b] - result[a]);
             const userRank = ranks.indexOf(uid) + 1;
@@ -98,7 +122,7 @@ function generateSocialfeedNotification(uid: string) {
             const result = snap.val();
             if (!result) {
                 console.log('no results for ', uid);
-                return;
+                throw new Error('no results for ' + uid);
             }
             const postId = Object.keys(result)[0];
             const group = result[postId];
@@ -265,7 +289,7 @@ exports.sendNotification = functions.https.onCall((data: any, context: any) => {
 
 exports.resetLeaderboard = functions
     .region('europe-west1')
-    .pubsub.schedule('0 23 * * 0')
+    .pubsub.schedule('0 0 * * 1')
     .timeZone('Europe/Berlin')
     .onRun((context: any) => {
         return admin.database().ref('/users/').once('value')
@@ -298,7 +322,7 @@ exports.resetLeaderboard = functions
 
 exports.dailyCleanUp = functions
     .region('europe-west1')
-    .pubsub.schedule('0 0 * * *')
+    .pubsub.schedule('36 17 * * *')
     .timeZone('Europe/Berlin')
     .onRun((context: any) => {
         let goals: any;
