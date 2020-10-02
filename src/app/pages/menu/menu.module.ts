@@ -33,6 +33,10 @@ const routes: Routes = [
                     path: 'set-goals',
                     loadChildren: () => import('../set-goals/set-goals.module').then(m => m.SetGoalsPageModule)
                 },
+                {
+                    path: 'initial-setup',
+                    loadChildren: () => import('../initial-setup/initial-setup.module').then(m => m.InitialSetupPageModule)
+                },
             ]
     }
 ];

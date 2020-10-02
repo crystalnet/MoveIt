@@ -97,9 +97,9 @@ export class RegistrationPage implements OnInit {
             .then(res => {
                 console.log(res);
                 loading.dismiss();
-                this.errorMessage = '';
+                this.errorMessage = 'Error';
                 this.successMessage = 'Your account has been created. Please log in.';
-                this.navCtrl.navigateRoot('/menu/set-goals');
+                this.navCtrl.navigateRoot('/menu/initial-setup');
             }, err => {
                 console.log(err);
                 loading.dismiss();

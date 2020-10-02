@@ -170,6 +170,15 @@ export class UserService {
     }
 
     /**
+     * Update the bio of the current user
+     *
+     * @param bio new bio
+     */
+    updateBio(bio) {
+        return this.db.database.ref('/users/' + firebase.auth().currentUser.uid + '/bio').set(bio);
+    }
+
+    /**
      * Generate a 6-character random string, which serves as a UID
      */
     generateUID() {
