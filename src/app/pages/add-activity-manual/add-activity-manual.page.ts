@@ -5,8 +5,7 @@ import {Location} from '@angular/common';
 import {LoadingController, ToastController} from '@ionic/angular';
 import {FormBuilder, FormGroup} from '@angular/forms';
 import {NavigationExtras, Router} from '@angular/router';
-
-// import { ConsoleReporter } from 'jasmine';
+import * as moment from 'moment';
 
 @Component({
     selector: 'app-add-activity-manual',
@@ -25,6 +24,7 @@ export class AddActivityManualPage implements OnInit {
     successMessage = '';
     todayA: Date = new Date();
     today: string = new Date().toISOString();
+    minDate: string = moment().startOf('day').subtract(2, 'day').toISOString(true);
     check = false;
     validationMessage: string;
     error = false;

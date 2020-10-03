@@ -61,7 +61,6 @@ export class Goal {
         const type = goalType[1];
 
         return new Goal(name, duration, type, firebaseObject.target, firebaseObject.current, firebaseObject.history);
-
     }
 
     static fromAnyObject(name, firebaseObject: any) {

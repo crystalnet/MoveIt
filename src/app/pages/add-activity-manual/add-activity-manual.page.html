@@ -34,7 +34,7 @@
 
                     <ion-item>
                         <ion-label>Start date</ion-label>
-                        <ion-datetime [max]="today" placeholder="Select date" [(ngModel)]="date"></ion-datetime>
+                        <ion-datetime [min]="minDate" [max]="today" placeholder="Select date" [(ngModel)]="date"></ion-datetime>
                     </ion-item>
                     <ion-item>
                         <ion-label>Start time</ion-label>

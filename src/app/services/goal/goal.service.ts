@@ -5,7 +5,7 @@ import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import {Activity} from '../../model/activity';
 import {GoalArray} from '../../model/goalArray';
-import {map} from 'rxjs/operators';
+import {first, map} from 'rxjs/operators';
 import {PostService} from '../post/post.service';
 import {Post} from '../../model/post';
 import {TrackingService} from '../tracking/tracking.service';
@@ -52,7 +52,7 @@ export class GoalService {
                     err => reject(err)
                 );
                 this.fireDatabase.database.ref('/leaderboard/nWins/' + goal.name + '/' + firebase.auth().currentUser.uid).set(0);
-                this.fireDatabase.database.ref('/goalHistory/' + firebase.auth().currentUser.uid + '/' + goal.name  ).set({a: 'b'});
+                this.fireDatabase.database.ref('/goalHistory/' + firebase.auth().currentUser.uid + '/' + goal.name).set({a: 'b'});
             }
             resolve('Successfully initialized goals');
         });
@@ -191,7 +191,7 @@ export class GoalService {
                     err => reject(err)
                 );
 
-                if (goal.current >= goal.target) {
+                if (goal.type === 'active' && goal.current >= goal.target) {
                     this.winGoal(goal).then(
                         res => console.log(res),
                         err => reject(err)
@@ -200,6 +200,37 @@ export class GoalService {
             }
             resolve('Successfully updated goals');
         });
+    }
+
+    updatePreviousGoals(activity: Activity) {
+        const activityTime = moment(activity.startTime);
+        const today = moment();
+        if (activityTime.isSameOrAfter(today, 'day')) {
+            // Activity is from today, so no need to update previous goals
+            return;
+        }
+
+        const time = moment().subtract(2, 'day').endOf('day');
+        while (time.isBefore(today, 'day')) {
+            const goalList = ['daily-active', 'weekly-active'];
+            if (activity.intensity === 'vigorous') {
+                goalList.push('daily-vigorous', 'weekly-vigorous');
+            } else {
+                goalList.push('daily-moderate', 'weekly-moderate');
+            }
+
+            for (const goalName of goalList) {
+                const path = '/goalHistory/' + firebase.auth().currentUser.uid + '/' + goalName + '/' + time.valueOf();
+                this.fireDatabase.object<Goal>(path).snapshotChanges() // TODO get right entry
+                    .pipe(first(), map(el => Goal.fromFirebaseObject(goalName, el.payload.val()))).subscribe(goal => {
+                    goal.current += activity.getDuration();
+                    goal.relative = goal.current / goal.target;
+                    return this.fireDatabase.database.ref(path).set(goal.toFirebaseObject());
+                });
+            }
+            time.add(1, 'day');
+        }
+
     }
 
     /**

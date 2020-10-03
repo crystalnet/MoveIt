@@ -8,6 +8,7 @@
 // });
 
 import {isObject} from 'util';
+import * as moment from 'moment-timezone';
 
 const functions = require('firebase-functions');
 
@@ -20,12 +21,11 @@ exports.automaticNotifications = functions
     .pubsub.schedule('every 15 minutes')
     .timeZone('Europe/Berlin')
     .onRun((context: any) => {
-        let time = new Date();
-        time = new Date(time.getTime() + 120 * 60 * 1000);
-        console.log('System Time: ', time);
-        time.setMinutes(time.getMinutes() - (time.getMinutes() % 15)); // Round down to last quarter hour (00, 15, 30 or 45)
-        console.log('checking path ' + '/times/' + time.getHours() + '/' + time.getMinutes());
-        return admin.database().ref('/times/' + time.getHours() + '/' + time.getMinutes()).once('value').then(
+        const time = moment('', 'Europe/Berlin');
+        console.log('System Time: ', moment(time.valueOf()).toISOString(true));
+        time.set('minutes', time.get('minutes') % 15); // Round down to last quarter hour (00, 15, 30 or 45)
+        console.log('checking path ' + '/times/' + time.get('hours') + '/' + time.get('minutes'));
+        return admin.database().ref('/times/' + time.get('hours') + '/' + time.get('minutes')).once('value').then(
             (snapshot: any) => {
                 const result = snapshot.val();
                 if (!result) {
@@ -65,11 +65,11 @@ exports.automaticNotifications = functions
 
                         const dbNotification = {
                             notification: type,
-                            time: (new Date()).getTime().toString(),
+                            time: time.valueOf().toString(),
                             response: 'not send',
                             error: err
                         };
-                        admin.database().ref('/tracking/' + uid + '/reactions/' + (new Date()).getTime().toString()).set(dbNotification).then(
+                        admin.database().ref('/tracking/' + uid + '/reactions/' + moment('', 'Europe/Berlin').valueOf().toString()).set(dbNotification).then(
                             () => console.log('created db entry', dbNotification),
                             (err: any) => console.log(err)
                         );
@@ -171,7 +171,7 @@ function commentNotification(uid: string, group: string, postId: string) {
             const botUserId = 'DyvMnL4Tv0OwOrWL9U2pyJJ8oKV2';
             const botUserName = 'Kon Sti';
             const comment = {
-                createdAt: (new Date()).getTime().toString(),
+                createdAt: moment('', 'Europe/Berlin').valueOf().toString(),
                 text: 'Well done',
                 user: botUserName,
                 uid: botUserId
@@ -331,7 +331,7 @@ exports.dailyCleanUp = functions
         let publicUserData: any;
         let goalHistory: any;
         const promises = [];
-        console.log('dailyCleanUp: system time ' + (new Date()).toISOString());
+        console.log('dailyCleanUp: system time ' + moment('', 'Europe/Berlin').toISOString(true));
 
         promises.push(admin.database().ref('/goals/').once('value')
             .then((snap: any) => {
@@ -384,13 +384,11 @@ function logGoalProgress(goalHistory: any, goals: any) {
     }
 
     // Get end of yesterday
-    let time = (new Date());
-    time.setHours(0, 0, 0, 0);
-    time = new Date(time.getTime() - 1);
+    const time = moment('', 'Europe/Berlin').subtract(1, 'day').endOf('day');
 
     for (const user of Object.keys(goals)) {
         for (const goal of Object.keys(goals[user])) {
-            goalHistory[user][goal][time.getTime()] = goals[user][goal];
+            goalHistory[user][goal][time.valueOf()] = goals[user][goal];
         }
     }
 
@@ -461,7 +459,7 @@ class NotificationData {
                 rejectButtonText?: string) {
         this.header = header || 'New Notification';
         this.text = text || 'Lorem ipsum dolor sit amet.';
-        this.id = id || (new Date()).getTime().toString();
+        this.id = id || moment('','Europe/Berlin').valueOf().toString();
         this.type = type || '';
         this.target = target || '';
         this.confirmButtonText = confirmButtonText || 'Nice';

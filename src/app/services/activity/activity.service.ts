@@ -10,6 +10,9 @@ import {GoalService} from '../goal/goal.service';
 import {RewardsService} from '../rewards/rewards.service';
 import {Health} from '@ionic-native/health/ngx';
 import {Storage} from '@ionic/storage';
+import {forkJoin} from 'rxjs';
+import {Goal} from '../../model/goal';
+import * as moment from 'moment';
 
 @Injectable({
     providedIn: 'root'
@@ -34,21 +37,24 @@ export class ActivityService {
      */
     createActivity(activity: Activity) {
         return new Promise<any>((resolve, reject) => {
-            this.synchronizeApi(false).then(
+            const promises = [];
+            promises.push(this.writeActivitytoFirebase(activity));
+            promises.push(this.synchronizeApi(false).then(
                 () => {
-                    this.writeActivitytoFirebase(activity).then(
-                        // Returns the activity with the new id
-                        () => {
-                            this.writeFitnessApi(activity);
-                            const message = 'Look, I did ' + activity.getDuration() + ' minutes of ' + activity.type;
-                            this.runUpdates(activity, true, message).then(
-                                () => resolve(activity),
-                                err => reject(err)
-                            );
-                        },
-                        err => reject(err)
-                    );
+                    // Returns the activity with the new id
+                    return this.writeFitnessApi(activity);
                 },
+                err => reject(err)
+            ));
+
+            const message = 'Look, I did ' + activity.getDuration() + ' minutes of ' + activity.type;
+            promises.push(this.runUpdates(activity, true, message).then(
+                () => resolve(activity),
+                err => reject(err)
+            ));
+
+            Promise.all(promises).then(
+                () => resolve(),
                 err => reject(err)
             );
         });
@@ -78,12 +84,18 @@ export class ActivityService {
 
     runUpdates(activity?: Activity, sendPost: boolean = true, message?: string) {
         return new Promise<any>((resolve, reject) => {
-            this.getAllUserActivities().pipe(first()).subscribe(activities => {
-                this.goalService.getGoals().pipe(first()).subscribe(goals => {
+            const activities = this.getAllUserActivities(100).pipe(first());
+            const goals = this.goalService.getGoals().pipe(first());
+            forkJoin([activities, goals]).subscribe(
+                (result: [Activity[], Goal[]]) => {
                     console.log(activities);
                     const promises = [];
-                    promises.push(this.goalService.updateGoals(goals, activities));
-                    promises.push(this.rewardsService.updateTrophies(activities, goals));
+                    promises.push(this.goalService.updateGoals(result[1], result[0]));
+                    if (moment(activity.startTime).get('date') !== moment().get('date')) {
+                        promises.push(this.goalService.updatePreviousGoals(activity));
+                    }
+                    // TODO temporarily disabled
+                    // promises.push(this.rewardsService.updateTrophies(activities, goals));
 
                     if (activity && sendPost) {
                         const post = new Post();
@@ -102,7 +114,7 @@ export class ActivityService {
                         () => resolve(),
                         err => reject(err));
                 });
-            });
+
         });
     }
 
@@ -241,7 +253,7 @@ export class ActivityService {
      * writes an activity to the FitnessAPI
      */
     writeFitnessApi(activity: Activity) {
-        this.health.requestAuthorization([
+        return this.health.requestAuthorization([
             /* 'distance', 'nutrition', //read and write permissions
             {
                 read: ['steps'], //read only permission
@@ -260,8 +272,8 @@ export class ActivityService {
                         sourceName: 'MoveIt',
                         sourceBundleId: 'com.moveitproject.www',
                     })
-                        .then(res2 => console.log('Response of API while writing' + res2))
-                        .catch(e => console.log('Response of API while writing ERROR:' + e));
+                        .then(res2 => console.log('Response of API while writing', res2))
+                        .catch(e => console.log('Response of API while writing ERROR:', e));
                 })
             .catch(e => console.log(e));
     }

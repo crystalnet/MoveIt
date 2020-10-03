@@ -110,7 +110,7 @@ export class ProgressDetailPage implements OnInit {
 
         this.chartLabelsProgress = [];
         const weeklyProgress = [];
-        const intensities = Goal.intensities; // ['moderate','vigorous']
+        const intensities = ['active'];
         const duration = Goal.durations[1]; // 'weekly'
         const start = moment().startOf('week').endOf('day').add(1, 'day');
         const current = start.clone();
@@ -196,19 +196,19 @@ export class ProgressDetailPage implements OnInit {
                 labels: this.chartLabelsProgress,
                 datasets: [
                     {
-                        label: 'moderate',
-                        data: this.progressChartData.moderate,
+                        label: 'Weekly goal',
+                        data: this.progressChartData.active,
                         backgroundColor: '#F61067', // array should have same number of elements as number of dataset
                         borderColor: '#F61067', // array should have same number of elements as number of dataset
                         borderWidth: 1
                     },
-                    {
-                        label: 'vigorous',
-                        data: this.progressChartData.via,
-                        backgroundColor: '#6DECAF', // array should have same number of elements as number of dataset
-                        borderColor: '#6DECAF', // array should have same number of elements as number of dataset
-                        borderWidth: 1
-                    }
+                    // {
+                    //     label: 'vigorous',
+                    //     data: this.progressChartData.via,
+                    //     backgroundColor: '#6DECAF', // array should have same number of elements as number of dataset
+                    //     borderColor: '#6DECAF', // array should have same number of elements as number of dataset
+                    //     borderWidth: 1
+                    // }
                 ]
             },
             options: {
