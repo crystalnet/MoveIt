@@ -322,7 +322,7 @@ exports.resetLeaderboard = functions
 
 exports.dailyCleanUp = functions
     .region('europe-west1')
-    .pubsub.schedule('36 17 * * *')
+    .pubsub.schedule('39 9 * * *')
     .timeZone('Europe/Berlin')
     .onRun((context: any) => {
         let goals: any;
@@ -389,9 +389,7 @@ function logGoalProgress(goalHistory: any, goals: any) {
     time = new Date(time.getTime() - 1);
 
     for (const user of Object.keys(goals)) {
-        goalHistory[user] = {};
         for (const goal of Object.keys(goals[user])) {
-            goalHistory[user][goal] = {};
             goalHistory[user][goal][time.getTime()] = goals[user][goal];
         }
     }
@@ -409,9 +407,10 @@ function resetDailyGoals(goals: any, leaderboard: any) {
     for (const user of Object.keys(goals)) {
         for (const goal of Object.keys(goals[user])) {
             const element = goals[user][goal];
-            if (element.duration === 'daily') {
+            if (goal.split('-')[0] === 'daily') {
                 element.relative = 0;
                 element.current = 0;
+                console.log(`${user} ${goal}`);
             }
         }
     }
