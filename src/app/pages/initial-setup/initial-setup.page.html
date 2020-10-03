@@ -1,0 +1,133 @@
+<ion-header>
+    <ion-toolbar color="primary">
+        <ion-buttons slot="start">
+            <ion-back-button class="show-back-button" (click)="goBack()"></ion-back-button>
+        </ion-buttons>
+        <ion-buttons slot="end">
+            <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+        <ion-title>Goals</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content>
+    <h1>Set up your account</h1>
+
+    <div *ngIf="goalPromise | async as goals">
+        <ion-card>
+            <ion-list>
+                <ion-item>
+                    <ion-label>Here you can change your {{goals[0].duration}} {{goals[0].type}} minutes goal!
+                    </ion-label>
+                </ion-item>
+                <ion-item>
+                    <ion-range min="0" max="120" pin color="primary" [(ngModel)]="goals[0].target">
+                        <ion-icon slot="start" size="small" name="walk"></ion-icon>
+                        <ion-icon slot="end" name="walk"></ion-icon>
+                    </ion-range>
+                </ion-item>
+
+                <ion-item>
+                    <ion-label>Goal</ion-label>
+                    <ion-input type="number" slot="end" [(ngModel)]="goals[0].target"></ion-input>
+                </ion-item>
+            </ion-list>
+        </ion-card>
+
+        <ion-card>
+            <ion-list>
+                <ion-item>
+                    <ion-label>Here you can change your {{goals[1].duration}} {{goals[1].type}} minutes goal!
+                    </ion-label>
+                </ion-item>
+                <ion-item>
+                    <ion-range min="0" max="600" pin color="secondary" [(ngModel)]="goals[1].target">
+                        <ion-icon slot="start" size="small" name="walk"></ion-icon>
+                        <ion-icon slot="end" name="walk"></ion-icon>
+                    </ion-range>
+                </ion-item>
+
+                <ion-item>
+                    <ion-label>Goal</ion-label>
+                    <ion-input type="number" slot="end" [(ngModel)]="goals[1].target"></ion-input>
+                </ion-item>
+            </ion-list>
+        </ion-card>
+    </div>
+
+    <div *ngIf="userObservable | async">
+        <ion-card>
+            <ion-item>
+                <ion-avatar slot="start">
+                    <img src="{{ (userObservable | async)?.profilePictureUrl }}">
+                    <!--img [src]="post.image"-->
+                </ion-avatar>
+
+                <ion-label>
+                    <h2>{{ (userObservable | async)?.name  }}</h2>
+                    <!-- <h2 *ngIf="(currentUser | async); let user">{{ user.name }} Username</h2> -->
+                    <p *ngIf="(userObservable | async); let user">{{ calculateAge(user.birthday) }} years old</p>
+                </ion-label>
+                <ion-label>
+                    <!--<div class="fileUpload btn btn-primary">
+                        <span>Select profile picture</span>
+
+                    </div>-->
+
+                    <ion-button color="secondary" (click)="uploadBtn.click()">
+                        Upload picture
+                    </ion-button>
+                    <input #uploadBtn
+                           id="uploadBtn"
+                           type="file"
+                           class="upload"
+                           (change)="uploadFile($event.target.files)"/>
+                </ion-label>
+            </ion-item>
+
+            <div *ngIf="percentage | async as pct">
+                Progress: {{ pct | number }}%
+                <ion-progress-bar value="{{ pct / 100 }}"></ion-progress-bar>
+            </div>
+            <div *ngIf="snapshot | async as snap">
+                File Size: {{ snap.totalBytes | fileSizePipe }} Transfered:
+                {{ snap.bytesTransferred | fileSizePipe }}
+                <div *ngIf="snapshot && snap.bytesTransferred != snap.totalBytes">
+                    <ion-button
+                            color="warning"
+                            size="small"
+                            (click)="task.pause()"
+                            class="button is-warning"
+                    >Pause
+                    </ion-button>
+                    <ion-button
+                            size="small"
+                            (click)="task.resume()"
+                            class="button is-info"
+                    >Resume
+                    </ion-button>
+                    <ion-button
+                            color="danger"
+                            size="small"
+                            (click)="task.cancel()"
+                            class="button is-danger"
+                    >Cancel
+                    </ion-button>
+                </div>
+            </div>
+        </ion-card>
+
+        <ion-card>
+            <ion-item>
+                <ion-label position="floating">Introduce yourself</ion-label>
+                <ion-input type="text" [(ngModel)]="user.bio"></ion-input>
+            </ion-item>
+        </ion-card>
+
+
+    </div>
+
+    <section>
+        <ion-button slot="end" color="secondary" (click)="save()">Save</ion-button>
+    </section>
+</ion-content>
