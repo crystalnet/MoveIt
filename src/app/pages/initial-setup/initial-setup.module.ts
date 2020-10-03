@@ -8,6 +8,8 @@ import { InitialSetupPageRoutingModule } from './initial-setup-routing.module';
 
 import { InitialSetupPage } from './initial-setup.page';
 
+import { FileSizeFormatPipe } from './file-size-format.pipe';
+
 @NgModule({
   imports: [
     CommonModule,
@@ -15,6 +17,6 @@ import { InitialSetupPage } from './initial-setup.page';
     IonicModule,
     InitialSetupPageRoutingModule
   ],
-  declarations: [InitialSetupPage]
+  declarations: [InitialSetupPage, FileSizeFormatPipe]
 })
 export class InitialSetupPageModule {}
