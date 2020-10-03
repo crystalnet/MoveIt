@@ -12,7 +12,7 @@ export class DashboardDetailPage implements OnInit {
     allServices = [];
 
     social = {
-        label: 'Socialfeed',
+        label: 'Social Feed',
         routerLink: '/menu/socialfeed',
         image: './assets/socialfeed2.png'
     };

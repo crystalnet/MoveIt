@@ -32,7 +32,7 @@ import {NavigationExtras, Router} from '@angular/router';
 })
 export class LeaderboardDetailPage implements OnInit {
     persons: any;
-    ranking = 'actMinutes';
+    ranking = 'activeMinutes';
 
     rewards = false;
     group: Observable<string>;
@@ -103,10 +103,10 @@ export class LeaderboardDetailPage implements OnInit {
         this.generateGoalProgressList();
     }
 
-    viewProfile(counter, list) {
+    viewProfile(uid) {
         const navigationExtras: NavigationExtras = {
             queryParams: {
-                special: JSON.stringify(list[counter].id)
+                special: JSON.stringify(uid)
             }
         };
         this.router.navigate(['/menu/profile/profile/view'], navigationExtras);

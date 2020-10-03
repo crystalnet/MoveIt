@@ -12,31 +12,33 @@
 
 <ion-content>
 
-    <ion-segment [(ngModel)]="ranking">
-        <ion-segment-button value="trophies" *ngIf="rewards">
-            Won Trophies
-        </ion-segment-button>
-        <ion-segment-button value="goalProgress" *ngIf="!rewards">
-            Goal Progress
-        </ion-segment-button>
-        <ion-segment-button value="actMinutes">
-            Active Minutes
-        </ion-segment-button>
-        <ion-segment-button value="goalWins" *ngIf="!rewards">
-            Won Goals
-        </ion-segment-button>
-        <ion-segment-button value="challenges" *ngIf="rewards">
-            Won Challenges
-        </ion-segment-button>
-    </ion-segment>
+    <ion-item>
+        <ion-segment [(ngModel)]="ranking">
+            <ion-segment-button value="trophies" *ngIf="rewards">
+                Won Trophies
+            </ion-segment-button>
+            <ion-segment-button value="goalProgress" *ngIf="!rewards">
+                Progress
+            </ion-segment-button>
+            <ion-segment-button value="activeMinutes">
+                Activity
+            </ion-segment-button>
+            <ion-segment-button value="goalWins" *ngIf="!rewards">
+                Goals
+            </ion-segment-button>
+            <ion-segment-button value="challenges" *ngIf="rewards">
+                Won Challenges
+            </ion-segment-button>
+        </ion-segment>
+    </ion-item>
 
 
-    <div *ngIf="(userObservable | async)">
+    <div *ngIf="(userObservable | async)" class="ion-padding-horizontal">
         <div [ngSwitch]="ranking">
             <ion-list *ngSwitchCase="'trophies'">
                 <ion-item *ngFor="let user of trophiesList; let counter = index" [attr.data-index]="counter">
                     <ng-container *ngIf="user.uid == currentUser.id; else running">
-                        <p id="space" slot="start" class="self">{{counter + 1}}</p>
+                        <p  slot="start" class="self">{{counter + 1}}</p>
                         <ion-avatar slot="start">
                             <img src="{{ user.pictureProfileUrl }}">
                         </ion-avatar>
@@ -49,11 +51,11 @@
                         </ion-label>
                     </ng-container>
                     <ng-template #running>
-                        <p id="space" slot="start">{{counter + 1}}</p>
+                        <p  slot="start">{{counter + 1}}</p>
                         <ion-avatar slot="start">
-                            <img src="{{ user.pictureProfileUrl }}" (click)="viewProfile(counter, trophiesList)">
+                            <img src="{{ user.pictureProfileUrl }}" (click)="viewProfile(user.uid)">
                         </ion-avatar>
-                        <ion-label (click)="viewProfile(counter, trophiesList)">
+                        <ion-label (click)="viewProfile(user.uid)">
                             <h2>{{user.username}}</h2>
                             <h3>{{ user.age }} years old</h3>
                         </ion-label>
@@ -65,10 +67,13 @@
                 </ion-item>
             </ion-list>
 
-            <ion-list *ngSwitchCase="'goalProgress'">
+            <ion-list *ngSwitchCase="'goalProgress'" lines="full" class="ion-align-self-baseline ion-justify-content-evenly">
+                <ion-list-header>
+                    Weekly Goal Progress
+                </ion-list-header>
                 <ion-item *ngFor="let user of goalProgressList; let counter = index" [attr.data-index]="counter">
                     <ng-container *ngIf="user.uid == currentUser.id; else running">
-                        <p id="space" slot="start" class="self">{{counter + 1}}</p>
+                        <p  slot="start" class="self ion-text-nowrap">{{counter + 1}}</p>
                         <ion-avatar slot="start">
                             <img src="{{ user.pictureProfileUrl }}">
                         </ion-avatar>
@@ -76,54 +81,57 @@
                             <h2 class="self"> You </h2>
                             <h3>{{ user.age }} years old</h3>
                         </ion-label>
-                        <ion-label>
+                        <ion-label  class="ion-text-right">
                             <p class="self">{{user.value | percent}} won</p>
                         </ion-label>
                     </ng-container>
                     <ng-template #running>
-                        <p id="space" slot="start">{{counter + 1}}</p>
+                        <p  slot="start">{{counter + 1}}</p>
                         <ion-avatar slot="start">
-                            <img src="{{ user.pictureProfileUrl }}" (click)="viewProfile(counter, goalProgressList)">
+                            <img src="{{ user.pictureProfileUrl }}" (click)="viewProfile(user.uid)">
                         </ion-avatar>
-                        <ion-label (click)="viewProfile(counter, goalProgressList)">
+                        <ion-label (click)="viewProfile(user.uid)">
                             <h2>{{user.username}}</h2>
                             <h3>{{ user.age }} years old</h3>
                         </ion-label>
-                        <ion-label>
+                        <ion-label class="ion-text-right">
                             <p>{{user.value | percent}} won</p>
                         </ion-label>
-
                     </ng-template>
                 </ion-item>
             </ion-list>
 
-            <ion-list *ngSwitchCase="'actMinutes'">
-                <ion-item *ngFor="let user of activitiesModerate ; let counter = index" [attr.data-index]="counter">
+            <ion-list *ngSwitchCase="'activeMinutes'" lines="full" class="ion-align-self-baseline ion-justify-content-evenly">
+                <ion-list-header>
+                    Weekly Active Minutes
+                </ion-list-header>
+                <ion-item *ngFor="let user of activitiesModerate ; let counter = index" [attr.data-index]="counter"
+                class="ion-align-self-baseline ion-justify-content-evenly">
 
-                    <ng-container *ngIf="user.uid == currentUser.id; else running">
-                        <p id="space" slot="start" class="self">{{counter + 1}}</p>
+                    <ng-container *ngIf="user.uid == currentUser.id; else running" class="ion-align-self-baseline ion-justify-content-evenly ion-nowrap">
+                        <p  slot="start" class="self ion-text-nowrap">{{counter + 1}}</p>
                         <ion-avatar slot="start">
                             <img src="{{ user.pictureProfileUrl }}">
                         </ion-avatar>
-                        <ion-label>
+                        <ion-label class="ion-text-nowrap">
                             <h2 class="self"> You </h2>
                             <h3>{{ user.age }} years old</h3>
                         </ion-label>
-                        <ion-label>
+                        <ion-label class="ion-text-right">
                             <p class="self">{{user.value}} min</p>
                         </ion-label>
                     </ng-container>
-                    <ng-template #running>
-                        <p id="space" slot="start">{{counter + 1}}</p>
+                    <ng-template #running class="ion-align-self-baseline ion-justify-content-evenly ion-nowrap">
+                        <p  slot="start" class="ion-text-nowrap">{{counter + 1}}</p>
                         <ion-avatar slot="start">
                             <img src="{{ user.pictureProfileUrl }}"
-                                 (click)="viewProfile(counter, activitiesModerate)">
+                                 (click)="viewProfile(user.uid)">
                         </ion-avatar>
-                        <ion-label (click)="viewProfile(counter, activitiesModerate)">
+                        <ion-label (click)="viewProfile(user.uid)" class="ion-text-nowrap">
                             <h2>{{user.username}}</h2>
                             <h3>{{ user.age }} years old</h3>
                         </ion-label>
-                        <ion-label>
+                        <ion-label class="ion-text-right">
                             <p>{{user.value}} min</p>
                         </ion-label>
                     </ng-template>
@@ -131,10 +139,13 @@
             </ion-list>
 
 
-            <ion-list *ngSwitchCase="'goalWins'">
+            <ion-list *ngSwitchCase="'goalWins'" lines="full" class="ion-align-self-baseline ion-justify-content-evenly">
+                <ion-list-header>
+                    Total Goal Wins (daily & weekly)
+                </ion-list-header>
                 <ion-item *ngFor="let user of goalWinsList; let counter = index" [attr.data-index]="counter">
                     <ng-container *ngIf="user.uid == currentUser.id; else running">
-                        <p id="space" slot="start" class="self">{{counter + 1}}</p>
+                        <p  slot="start" class="self ion-text-nowrap">{{counter + 1}}</p>
                         <ion-avatar slot="start">
                             <img src="{{ user.pictureProfileUrl }}">
                         </ion-avatar>
@@ -142,20 +153,20 @@
                             <h2 class="self"> You </h2>
                             <h3>{{ user.age }} years old</h3>
                         </ion-label>
-                        <ion-label>
+                        <ion-label class="ion-text-right">
                             <p class="self">{{user.value}} won</p>
                         </ion-label>
                     </ng-container>
                     <ng-template #running>
-                        <p id="space" slot="start">{{counter + 1}}</p>
+                        <p  slot="start">{{counter + 1}}</p>
                         <ion-avatar slot="start">
-                            <img src="{{ user.pictureProfileUrl }}" (click)="viewProfile(counter, goalWinsList)">
+                            <img src="{{ user.pictureProfileUrl }}" (click)="viewProfile(user.uid)">
                         </ion-avatar>
-                        <ion-label (click)="viewProfile(counter, goalWinsList)">
+                        <ion-label (click)="viewProfile(user.uid)">
                             <h2>{{user.username}}</h2>
                             <h3>{{ user.age }} years old</h3>
                         </ion-label>
-                        <ion-label>
+                        <ion-label class="ion-text-right">
                             <p>{{user.value}} won</p>
                         </ion-label>
                     </ng-template>
@@ -167,7 +178,7 @@
                 <ion-item *ngFor="let user of challengeList ; let counter = index" [attr.data-index]="counter">
 
                     <ng-container *ngIf="user.uid == currentUser.id; else running">
-                        <p id="space" slot="start" class="self">{{counter + 1}}</p>
+                        <p  slot="start" class="self">{{counter + 1}}</p>
                         <ion-avatar slot="start">
                             <img src="{{ user.pictureProfileUrl }}">
                         </ion-avatar>
@@ -175,20 +186,20 @@
                             <h2 class="self"> You </h2>
                             <h3>{{ user.age }} years old</h3>
                         </ion-label>
-                        <ion-label>
+                        <ion-label class="ion-text-right">
                             <p class="self">{{user.value}} won</p>
                         </ion-label>
                     </ng-container>
                     <ng-template #running>
-                        <p id="space" slot="start">{{counter + 1}}</p>
+                        <p  slot="start">{{counter + 1}}</p>
                         <ion-avatar slot="start">
-                            <img src="{{ user.pictureProfileUrl }}" (click)="viewProfile(counter, challengeList)">
+                            <img src="{{ user.pictureProfileUrl }}" (click)="viewProfile(user.uid)">
                         </ion-avatar>
-                        <ion-label (click)="viewProfile(counter, challengeList)">
+                        <ion-label (click)="viewProfile(user.uid)">
                             <h2>{{user.username}}</h2>
                             <h3>{{ user.age }} years old</h3>
                         </ion-label>
-                        <ion-label>
+                        <ion-label class="ion-text-right">
                             <p>{{user.value}} won</p>
                         </ion-label>
 
@@ -199,25 +210,5 @@
 
         </div>
     </div>
-
-
-    <!--<ion-list>
-      <ion-list-header>
-        Active Minutes
-      </ion-list-header>
-  
-      <ion-item *ngFor="let person of persons">
-        <ion-avatar slot="start">
-          <img [src]="person.image">
-        </ion-avatar>
-        <ion-label>
-          <h2>{{person.name}}</h2>
-          <h3>{{person.age}} years old</h3>
-        </ion-label>
-        <ion-label side="end">
-          <p>{{person.actMinutes}} active minutes</p>
-        </ion-label>
-      </ion-item>
-    </ion-list>-->
 </ion-content>
 

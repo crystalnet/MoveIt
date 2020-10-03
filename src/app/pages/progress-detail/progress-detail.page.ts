@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivityService} from '../../services/activity/activity.service';
 import {Activity} from '../../model/activity';
-import {combineLatest, merge, Observable} from 'rxjs';
+import {combineLatest, Observable} from 'rxjs';
 import {GoalService} from '../../services/goal/goal.service';
 import {Goal} from '../../model/goal';
 import {Location} from '@angular/common';
@@ -9,7 +9,6 @@ import {Health} from '@ionic-native/health/ngx';
 import {IonSlides, NavController, Platform} from '@ionic/angular';
 import {Router} from '@angular/router';
 import {Chart} from 'chart.js';
-import {map} from 'rxjs/operators';
 import * as moment from 'moment';
 
 @Component({
@@ -218,7 +217,7 @@ export class ProgressDetailPage implements OnInit {
                     xAxes: [{
                         scaleLabel: {
                             display: true,
-                            labelString: 'Hour'
+                            labelString: 'Day'
                         },
                         /*type: 'time',
                         time: {
@@ -236,7 +235,7 @@ export class ProgressDetailPage implements OnInit {
                     yAxes: [{
                         scaleLabel: {
                             display: true,
-                            labelString: 'Minutes'
+                            labelString: 'Percent'
                         },
                         ticks: {
                             beginAtZero: true,

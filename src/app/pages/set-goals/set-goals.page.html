@@ -10,7 +10,7 @@
     </ion-toolbar>
 </ion-header>
 
-<ion-content *ngIf="goalPromise | async">
+<ion-content *ngIf="goalPromise | async" class="ion-padding-horizontal">
     <div *ngFor="let goal of (goalPromise | async)">
         <h1>Here you can change your {{goal.duration}} {{goal.type}} minutes goal!</h1>
         <!--<ion-segment [(ngModel)]="goals">

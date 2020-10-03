@@ -10,30 +10,30 @@
     </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="ion-padding-horizontal">
     <ion-list>
         <ion-item>
-            <ion-label>Kind of activity</ion-label>
-            <ion-select [(ngModel)]="activity.type" placeholder="Select One" disabled="false">
+            <ion-label>Activity type</ion-label>
+            <ion-select [(ngModel)]="activity.type" placeholder="Select type" disabled="false">
                 <ion-select-option *ngFor="let type of types">{{type}}</ion-select-option>
             </ion-select>
         </ion-item>
 
         <ion-item>
             <ion-label>Intensity*</ion-label>
-            <ion-select [(ngModel)]="activity.intensity" placeholder="Select One">
+            <ion-select [(ngModel)]="activity.intensity" placeholder="Select intensity">
                 <ion-select-option *ngFor="let intensity of intensities">{{intensity}}</ion-select-option>
             </ion-select>
         </ion-item>
 
         <ion-item>
-            <ion-label>Start Date</ion-label>
-            <ion-datetime placeholder="Select Date" display-format="MMM DD, YYYY" [(ngModel)]="startDate"
+            <ion-label>Start date</ion-label>
+            <ion-datetime placeholder="Select date" display-format="MMM DD, YYYY" [(ngModel)]="startDate"
                           [max]="today"></ion-datetime>
         </ion-item>
         <ion-item>
-            <ion-label>Start Time</ion-label>
-            <ion-datetime placeholder="Select Time" display-format="HH:mm" [(ngModel)]="startTime"></ion-datetime>
+            <ion-label>Start time</ion-label>
+            <ion-datetime placeholder="Select time" display-format="HH:mm" [(ngModel)]="startTime"></ion-datetime>
         </ion-item>
         <ion-item>
             <ion-label>Duration</ion-label>
@@ -41,12 +41,12 @@
         </ion-item>
 
         <ion-item>
-            <a (click)="routeToInfoSingle()">*get infos</a>
+            <a (click)="routeToInfoSingle()">*more info on intensities</a>
             <!--<ion-button expand="block">Add activity</ion-button>-->
         </ion-item>
 
         <section>
-            <ion-button (click)=editActivity() color="secondary" slot="end">Edit activity</ion-button>
+            <ion-button (click)=editActivity() color="secondary" slot="end">Save Activity</ion-button>
             <!--<ion-button expand="block">Add activity</ion-button>-->
         </section>
 

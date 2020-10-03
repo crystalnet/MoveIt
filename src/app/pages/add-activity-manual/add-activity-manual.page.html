@@ -19,7 +19,7 @@
                         <h3>What did you do?</h3>
                     </div>
                     <ion-item>
-                        <ion-label>Type of activity</ion-label>
+                        <ion-label>Activity type</ion-label>
                         <ion-select [(ngModel)]="activity.type" placeholder="Select type" disabled="false">
                             <ion-select-option *ngFor="let type of types">{{type}}</ion-select-option>
                         </ion-select>
@@ -33,11 +33,11 @@
                     </ion-item>
 
                     <ion-item>
-                        <ion-label>Start Date</ion-label>
+                        <ion-label>Start date</ion-label>
                         <ion-datetime [max]="today" placeholder="Select date" [(ngModel)]="date"></ion-datetime>
                     </ion-item>
                     <ion-item>
-                        <ion-label>Start Time</ion-label>
+                        <ion-label>Start time</ion-label>
                         <ion-datetime placeholder="Select time" display-format="HH:mm" picker-format="HH:mm"
                                       [(ngModel)]="time"
                                       (ionChange)="convertDate()"></ion-datetime>
@@ -52,7 +52,7 @@
                         </ion-label>
                     </ion-item>
 
-                    <ion-label class="info-message"><a (click)="routeToInfoSingle()">*intensities explained</a>
+                    <ion-label class="info-message"><a (click)="routeToInfoSingle()">*more info on intensities</a>
                     </ion-label>
 
                     <!--<ion-button expand="block">Add activity</ion-button>-->

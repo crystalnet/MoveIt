@@ -10,7 +10,7 @@
     </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="ion-padding">
     <h1>Here you can change your {{goal.duration}} {{goal.type}} minutes goal!</h1>
     <!--<ion-segment [(ngModel)]="goals">
       <ion-segment-button value="trophies">
@@ -26,7 +26,7 @@
 
     <ion-list>
         <ion-item>
-            <ion-range min="0" max="1000" pin color="secondary" [(ngModel)]="goal.target">
+            <ion-range min="0" max="{{max}}" pin color="secondary" [(ngModel)]="goal.target">
                 <ion-icon slot="start" size="small" name="walk"></ion-icon>
                 <ion-icon slot="end" name="walk"></ion-icon>
             </ion-range>
@@ -34,7 +34,7 @@
 
         <ion-item>
             <ion-label>Goal</ion-label>
-            <ion-input type="number" slot="end" [(ngModel)]="goal.target"></ion-input>
+            <ion-input class="ion-text-right" type="number" slot="end" [(ngModel)]="goal.target"></ion-input>
         </ion-item>
         <!--<ion-item>
           <ion-label>Monthly goals</ion-label>
@@ -52,6 +52,6 @@
     </ion-list>
 
     <section>
-        <ion-button slot="end" color="secondary" (click)="editGoal()">Save goals</ion-button>
+        <ion-button slot="end" color="secondary" expand="block" (click)="editGoal()">Save Goal</ion-button>
     </section>
 </ion-content>

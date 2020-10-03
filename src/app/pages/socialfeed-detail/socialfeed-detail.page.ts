@@ -5,7 +5,7 @@ import {PostService} from '../../services/post/post.service';
 import {combineLatest, Observable} from 'rxjs';
 import {Location} from '@angular/common';
 import {UserService} from '../../services/user/user.service';
-import {first, map} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 import {User} from 'src/app/model/user';
 import {NavigationExtras, Router} from '@angular/router';
 
@@ -82,18 +82,15 @@ export class SocialfeedDetailPage implements OnInit {
 
     }
 
-    viewProfile(i) {
-        const postid = document.getElementsByName('userPlace')[i].id;
-        this.postService.getPost(postid).then(
-            res => {
-                const navigationExtras: NavigationExtras = {
-                    queryParams: {
-                        special: JSON.stringify(res.user)
-                    }
-                };
-                this.router.navigate(['/menu/profile/profile/view'], navigationExtras);
+    viewProfile(uid) {
+        console.log(uid);
+        const navigationExtras: NavigationExtras = {
+            queryParams: {
+                special: JSON.stringify(uid)
             }
-        );
+        };
+        console.log(navigationExtras);
+        this.router.navigate(['/menu/profile/profile/view'], navigationExtras);
     }
 
     getTimeDifference(date: Date) {
@@ -153,14 +150,16 @@ export class SocialfeedDetailPage implements OnInit {
         );
     }
 
-    newComment(post: Post, text, index: number) {
-        if (this.commentText.length !== 0) {
+    newComment(post: Post, text) {
+        console.log('here');
+        console.log(this.commentText);
+        if (this.commentText[post.id].length !== 0) {
             this.postService.createComment(post.id, text).then(
                 res => {
                     // @ts-ignore
-                    this.userService.getUsername().pipe(first()).subscribe(username => post.usernames.push(username));
+                    post.usernames.push(this.user.name);
                     console.log(res);
-                    this.commentText[index] = '';
+                    this.commentText[post.id] = '';
                 },
                 err => console.log(err)
             );

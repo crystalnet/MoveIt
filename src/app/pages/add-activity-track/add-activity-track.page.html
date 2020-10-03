@@ -19,7 +19,7 @@
                         <h3>Let's work out!</h3>
                     </div>
                     <ion-item>
-                        <ion-label>Kind of activity</ion-label>
+                        <ion-label>Activity type</ion-label>
                         <ion-select [(ngModel)]="activity.type" placeholder="Select One" disabled="false">
                             <ion-select-option *ngFor="let type of types">{{type}}</ion-select-option>
                         </ion-select>
@@ -33,7 +33,7 @@
                     </ion-item>
 
                     <div class="info-message">
-                        <a (click)="routeToInfoSingle()">*intensities explained</a>
+                        <a (click)="routeToInfoSingle()">*more info on intensities</a>
                     </div>
 
                     <div class="ion-padding-horizontal">

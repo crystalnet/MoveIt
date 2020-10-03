@@ -50,6 +50,7 @@ export class ProfileViewPage implements OnInit {
                 private storage: AngularFireStorage, private database: AngularFirestore) {
 
         this.route.queryParams.subscribe(params => {
+            console.log(params);
             const userid = JSON.parse(params.special);
             this.activities = this.activityService.getThisUsersActivities(userid);
             this.goals = this.goalService.getGoalsFromUser(userid).pipe(map(goals => goals.filter(goal => goal.type === 'active')));

@@ -24,24 +24,8 @@
 
     <ion-card>
         <ion-card-header>
-            <ion-card-title>
-                <ion-row>
-                    <ion-col size="4">
-                        Progress
-                    </ion-col>
-                    <ion-col size="8">
-                        <ion-item>
-                            <ion-segment [(ngModel)]="duration">
-                                <ion-segment-button value="day" (click)="prepareProgressChartData()">
-                                    Today
-                                </ion-segment-button>
-                                <ion-segment-button value="week" (click)="prepareActivitiesChartData()">
-                                    This Week
-                                </ion-segment-button>
-                            </ion-segment>
-                        </ion-item>
-                    </ion-col>
-                </ion-row>
+            <ion-card-title class="ion-text-center">
+                Progress
             </ion-card-title>
         </ion-card-header>
 
@@ -52,6 +36,15 @@
         <!--<canvas id="barChart" width="100%" #barChart></canvas>-->
 
         <ion-card-content [ngSwitch]="duration">
+            <ion-segment [(ngModel)]="duration">
+                <ion-segment-button value="day" (click)="prepareProgressChartData()">
+                    Goal
+                </ion-segment-button>
+                <ion-segment-button value="week" (click)="prepareActivitiesChartData()">
+                    Activity
+                </ion-segment-button>
+            </ion-segment>
+
             <div *ngSwitchCase="'day'">
                 <canvas #hrzBarChart5 height="300"></canvas>
             </div>
@@ -111,7 +104,7 @@
         <ion-slide>
             <ion-card>
                 <ion-card-header>
-                    <ion-card-title>Goals</ion-card-title>
+                    <ion-card-title >Goals</ion-card-title>
                 </ion-card-header>
                 <ion-card-content>
                     <ion-list *ngIf="dailyActivePromise | async">
@@ -286,7 +279,7 @@
 
     <ion-card>
         <ion-card-header>
-            <ion-card-title>Activities</ion-card-title>
+            <ion-card-title class="ion-text-center">Activities</ion-card-title>
         </ion-card-header>
         <ion-card-content>
             <ion-list>

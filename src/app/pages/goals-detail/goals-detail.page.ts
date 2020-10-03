@@ -13,6 +13,7 @@ import {TrackingService} from '../../services/tracking/tracking.service';
 })
 export class GoalsDetailPage implements OnInit {
     speed = 0;
+    max = 500;
 
     goal: any;
 
@@ -22,6 +23,10 @@ export class GoalsDetailPage implements OnInit {
 
         // this.goals = this.goalService.getGoals();
         this.router = router;
+
+        if (this.goal.duration === 'daily') {
+            this.max = 120;
+        }
     }
 
     ngOnInit() {

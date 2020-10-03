@@ -6,61 +6,49 @@
         <ion-buttons slot="end">
             <ion-menu-button></ion-menu-button>
         </ion-buttons>
-        <ion-title>Socialfeed</ion-title>
+        <ion-title>Social Feed</ion-title>
     </ion-toolbar>
 </ion-header>
 
-<ion-content class="cards-bg social-cards">
-    <!--
-    <ion-button type="button" (click)='newPost()'>New Post</ion-button>
-    <ion-button type="button" (click)='editPost()'>Edit Post</ion-button>
-    <ion-button type="button" (click)='like()'>Like</ion-button>
-    <ion-button type="button" (click)='unlike()'>Unlike</ion-button>
-    <ion-button type="button" (click)='getPost()'>Get Post</ion-button>
-    <ion-button type="button" (click)='getAllPosts()'>Get All Posts</ion-button>
-    <ion-button type="button" (click)='newComment()'>New Comment</ion-button>
-    <ion-button type="button" (click)='editComment()'>Edit Comment</ion-button>
-    <ion-button type="button" (click)='getComment()'>Get Comment</ion-button>
-    <ion-button type="button" (click)='getAllComments()'>Get All Comments</ion-button>
-    -->
-
+<ion-content class="">
     <ion-card>
-        <ion-card-header>
-            <h2> What's up?</h2>
-        </ion-card-header>
+        <ion-item lines="none">
+            <h2>What's up?</h2>
+        </ion-item>
+        <ion-item>
+            <p class="small">Write your own post. You and ask others to meet for a run or another activity for
+                example.
+            </p>
+        </ion-item>
+
         <form>
-            <ion-item id="form">
+            <ion-item>
                 <ion-input name="post" type="text" [(ngModel)]="postText"
-                           placeholder="Create your own post"></ion-input>
-                <ion-icon name="send" id="icons" (click)="newPost(postText)"></ion-icon>
+                           placeholder="Your post message">
+                </ion-input>
+                <ion-icon name="send" id="icons" class="ion-float-right" (click)="newPost(postText)"></ion-icon>
             </ion-item>
         </form>
     </ion-card>
 
 
-    <ion-card *ngFor="let post of (displayedPosts | async); let i = index;">
+    <ion-card *ngFor="let post of (displayedPosts | async)">
         <ion-item>
             <ion-avatar slot="start">
-                <img src="{{post.profilePictureUrl }}" (click)="viewProfile(i)">
+                <img src="{{post.profilePictureUrl }}" (click)="viewProfile(post.user)">
                 <!--img [src]="post.image"-->
             </ion-avatar>
             <ion-label id="{{post.id}}">
-                <h2 (click)="viewProfile(i)">{{ post.title }}</h2>
-                <p (click)="viewProfile(i)">
+                <h2 (click)="viewProfile(post.user)">{{ post.title }}</h2>
+                <p (click)="viewProfile(post.user)">
                     by {{ post.username }} at
                     <!--ion-icon name="time"></ion-icon-->
                     {{ post.createdAt | date:'HH:mm on dd. MMM' }}
                 </p>
             </ion-label>
         </ion-item>
-        <!--<img src="../assets/Laufschuhe.jpg">-->
 
-        <ion-card-content>
-            {{post.content}}
-        </ion-card-content>
-
-
-        <ion-row *ngIf="(userObservable | async)">
+        <ion-row *ngIf="(userObservable | async)" class="ion-justify-content-start">
             <ion-col>
                 <ng-container *ngIf="post.likes.includes(user.id); else running">
                     <ion-button id="like" color="secondary" type="button" (click)='like(post.id)'>
@@ -83,27 +71,41 @@
                 </ion-button>
             </ion-col>
         </ion-row>
-        <ion-list *ngIf="post.comments?.length != 0">
-            <div *ngFor="let c of post.comments; let i = index">
-                <ion-item lines="none" *ngIf="i < (post.commentPage * 3)">
-                    <!--<ion-label><h3>{{ (post.usernames[i] | async)}}</h3> -->
-                    <ion-label><h3>{{ c.user}}</h3>
-                        <p>{{c.text}}</p></ion-label>
-                </ion-item>
+        <!--<img src="../assets/Laufschuhe.jpg">-->
+
+        <ion-item *ngIf="post.content">
+            {{post.content}}
+        </ion-item>
+
+
+        <div *ngIf="post.comments?.length != 0">
+            <ion-list-header>
+                Comments
+            </ion-list-header>
+            <div class="ion-padding-horizontal">
+                <div *ngFor="let c of post.comments; let i = index">
+                    <ion-item *ngIf="i < (post.commentPage * 3)" class="comments">
+                        <ion-col size="8"><p class="ion-no-margin">{{c.text}}</p></ion-col>
+                        <ion-col size="4">
+                            <p class="ion-text-right ion-no-margin">{{ c.user}},<br/>
+                                {{ c.createdAt | date:'H:mm, d.M.'}}</p>
+                        </ion-col>
+                    </ion-item>
+                </div>
+                <p class="more" id="showAll" (click)="nextCommentPage(post)">Show all comments</p>
             </div>
-            <p class="more" id="showAll" (click)="nextCommentPage(post)">Show all comments</p>
             <!--
               <ion-item>
               <ion-label><p id="allComments">all comments</p></ion-label>
             </ion-item>
             -->
-        </ion-list>
+        </div>
         <ion-row>
             <form>
                 <ion-item id="form">
-                    <ion-input name="comment" type="text" [(ngModel)]="commentText[i]"
+                    <ion-input name="comment" type="text" [(ngModel)]="commentText[post.id]"
                                placeholder="Your comment..."></ion-input>
-                    <ion-icon id="icons" name="send" (click)="newComment(post, commentText[i], i)"></ion-icon>
+                    <ion-icon id="icons" name="send" (click)="newComment(post, commentText[post.id])"></ion-icon>
                 </ion-item>
             </form>
         </ion-row>
