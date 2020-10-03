@@ -33,7 +33,7 @@ export class AddOverviewPage implements OnInit {
     async synchronizeActivities() {
         const loading = await this.loadingController.create({
             cssClass: 'my-custom-class',
-            message: 'Loading...'
+            message: 'Synchronizing...'
         });
         await loading.present();
 

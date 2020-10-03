@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {Activity} from '../../model/activity';
 import {ActivityService} from '../../services/activity/activity.service';
 import {Location} from '@angular/common';
-import {ToastController} from '@ionic/angular';
+import {LoadingController, ToastController} from '@ionic/angular';
 import {FormBuilder, FormGroup} from '@angular/forms';
 import {NavigationExtras, Router} from '@angular/router';
 
@@ -31,13 +31,11 @@ export class AddActivityManualPage implements OnInit {
 
 
     constructor(private activityService: ActivityService, private location: Location, public toastController: ToastController,
-                private formBuilder: FormBuilder, private router: Router) {
+                private formBuilder: FormBuilder, private router: Router, private loadingController: LoadingController) {
         this.activity = new Activity();
         this.location = location;
         this.types = Activity.types;
         this.intensities = Activity.intensities;
-
-
     }
 
     goBack() {
@@ -45,10 +43,6 @@ export class AddActivityManualPage implements OnInit {
     }
 
     ngOnInit() {
-    }
-
-    tryAdd(value) {
-
     }
 
     checkInput() {
@@ -64,7 +58,6 @@ export class AddActivityManualPage implements OnInit {
         };
         this.router.navigate(['/menu/information'], navigationExtras);
     }
-
 
     convertDate() {
         const date = this.date;
@@ -102,17 +95,13 @@ export class AddActivityManualPage implements OnInit {
           console.log(result);*/
     }
 
-    addActivity() {
+    async addActivity() {
         if (this.minutes <= 0) {
             return;
         }
 
         if (this.time == null || this.date == null || this.minutes == null) {
             this.error = true;
-            const that = this;
-            setTimeout(() => {
-                that.error = false;
-            }, 3000);
             return;
         }
         const date = this.date;
@@ -132,23 +121,27 @@ export class AddActivityManualPage implements OnInit {
 
         if ((this.todayA.getTime() - this.activity.startTime.getTime()) < 0) {
             this.error = true;
-            setTimeout(() => {
-                this.error = false;
-            }, 3000);
             return;
         }
 
+        const loading = await this.loadingController.create({
+            cssClass: 'my-custom-class',
+            message: 'Adding activity...'
+        });
+        await loading.present();
 
         this.activityService.createActivity(this.activity).then(
             (activity) => {
                 console.log(activity);
                 this.presentAlert();
+                loading.dismiss();
                 this.router.navigateByUrl('/menu/progress');
             })
-            .catch(err => console.error(err)
+            .catch(err => {
+                loading.dismiss();
+                console.error(err);
+                }
             );
-
-
     }
 
 

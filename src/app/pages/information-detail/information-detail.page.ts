@@ -15,7 +15,8 @@ export class InformationDetailPage implements OnInit {
     static: any;
     dynamic: any;
 
-    constructor(private informationService: InformationService, private location: Location, private router: Router, private route: ActivatedRoute) {
+    constructor(private informationService: InformationService, private location: Location, private router: Router,
+                private route: ActivatedRoute) {
         this.location = location;
         informationService.getAllInformation().subscribe(dynamic => this.dynamic = dynamic);
         informationService.getAllInformation().subscribe(dynamic => console.log(dynamic));
@@ -23,16 +24,16 @@ export class InformationDetailPage implements OnInit {
 
         this.static = [
             {
-                title: 'moderate vs. vigorous',
-                description: 'What is Moderate-intensity and Vigorous-intensity Physical Activity?',
-                content: 'Intensity refers to the rate at which the activity is being performed or the magnitude of the effort required to perform an activity or exercise. It can be thought of How hard a person works to do the activity. The intensity of different forms of physical activity varies between people. The intensity of physical activity depends on an individuals previous exercise experience and their relative level of fitness. Consequently, the examples given below are provided as a guide only and will vary between individuals.',
-                picture: 'Stopwatch.jpg'
+                title: 'Moderate vs. vigorous activity',
+                description: 'What does moderate or vigorous physical activity mean?',
+                content: 'Intensity refers to the rate at which the activity is being performed or the magnitude of the effort required to perform an activity or exercise. It can be thought of how hard a person works to do the activity. The intensity of different forms of physical activity varies between people. The intensity of physical activity depends on an individuals previous exercise experience and their relative level of fitness. Consequently, the examples given below are provided as a guide only and will vary between individuals.',
+                picture: 'stopwatch.png'
             },
             {
-                title: 'WHO Guidelines',
+                title: 'WHO Activity Recommendations',
                 description: 'Recommended levels of physical activity for adults aged 18 - 64 years',
                 content: 'Adults aged 18–64 should do at least 150 minutes of moderate-intensity aerobic physical activity throughout the week or do at least 75 minutes of vigorous-intensity aerobic physical activity throughout the week or an equivalent combination of moderate- and vigorous-intensity activity. Aerobic activity should be performed in bouts of at least 10 minutes duration. For additional health benefits, adults should increase their moderate-intensity aerobic physical activity to 300 minutes per week, or engage in 150 minutes of vigorous-intensity aerobic physical activity per week, or an equivalent combination of moderate- and vigorous-intensity activity. Muscle-strengthening activities should be done involving major muscle groups on 2 or more days a week.',
-                picture: 'Stopwatch.jpg'
+                picture: 'challenges2.png'
             },
         ];
 

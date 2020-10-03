@@ -1,101 +1,77 @@
 <ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start" >
-      <ion-back-button class="show-back-button" (click)="goBack()"></ion-back-button>
-  </ion-buttons>
-    <ion-buttons slot="end">
-      <ion-menu-button></ion-menu-button>
-    </ion-buttons>
-    <ion-title>Add Activity</ion-title>
-  </ion-toolbar>
+    <ion-toolbar color="primary">
+        <ion-buttons slot="start">
+            <ion-back-button class="show-back-button" (click)="goBack()"></ion-back-button>
+        </ion-buttons>
+        <ion-buttons slot="end">
+            <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+        <ion-title>Add Activity</ion-title>
+    </ion-toolbar>
 </ion-header>
-  
+
 <ion-content fullscreen>
-  
-  <ion-list>
-    <ion-item>
-      <ion-label>Kind of activity</ion-label>
-      <ion-select [(ngModel)]="activity.type" placeholder="Select One" disabled="false">
-        <ion-select-option *ngFor="let type of types">{{type}}</ion-select-option>
-      </ion-select>
-    </ion-item>
+    <ion-grid>
+        <ion-row class="ion-justify-content-center">
+            <ion-col class="ion-align-self-center" size-md="6" size-lg="5" size-xs="12">
+                <div>
+                    <div class="ion-padding-horizontal">
+                        <h3>Let's work out!</h3>
+                    </div>
+                    <ion-item>
+                        <ion-label>Kind of activity</ion-label>
+                        <ion-select [(ngModel)]="activity.type" placeholder="Select One" disabled="false">
+                            <ion-select-option *ngFor="let type of types">{{type}}</ion-select-option>
+                        </ion-select>
+                    </ion-item>
 
-    <ion-item>
-        <ion-label>Intensity*</ion-label>
-        <ion-select [(ngModel)]="activity.intensity" placeholder="Select One">
-          <ion-select-option *ngFor="let intensity of intensities">{{intensity}}</ion-select-option>
-        </ion-select>
-      </ion-item> 
+                    <ion-item>
+                        <ion-label>Intensity*</ion-label>
+                        <ion-select [(ngModel)]="activity.intensity" placeholder="Select One">
+                            <ion-select-option *ngFor="let intensity of intensities">{{intensity}}</ion-select-option>
+                        </ion-select>
+                    </ion-item>
 
-    <ion-item>
-        <a (click)="routeToInfoSingle()">*get infos</a>
-        <!--<ion-button expand="block">Add activity</ion-button>-->
-    </ion-item>
-  
-    <!--<ion-item>
-      <ion-input [(ngModel)]="minutes" type="number" placeholder="Minutes"></ion-input>
-    </ion-item> -->
+                    <div class="info-message">
+                        <a (click)="routeToInfoSingle()">*intensities explained</a>
+                    </div>
 
-  </ion-list>
+                    <div class="ion-padding-horizontal">
+                        <h4>Track your time!</h4>
+                    </div>
+                    <div class="ion-align-items-center">
+                        <p>
+                            {{elapsed.h}}:{{elapsed.m}}:{{elapsed.s}}<br/>
 
-<div padding text-decoration="underline">
-  <ion-row>
-    <h2>Track your time!</h2>
-  </ion-row>
-<p>{{elapsed.h}}:{{elapsed.m}}:{{elapsed.s}}</p>
-</div>
+                            <ng-container *ngIf="counter > 0">
+                                <ion-icon color="primary" name="close-circle-outline" (click)="stopTimer()"></ion-icon>
+                            </ng-container>
 
+                            <ng-container *ngIf="overallTimer == false; else running">
+                                <ng-container *ngIf="counter > 0">
+                                    <ion-icon color="primary" name="play-circle-outline" (click)="startAgain()"></ion-icon>
+                                </ng-container>
+                                <ng-container *ngIf="counter === 0">
+                                    <ion-icon color="primary" name="play-circle" (click)="startAgain()"></ion-icon>
+                                </ng-container>
+                            </ng-container>
 
-<section>
-  <ion-button class="watch" (click)=addActivity() color="secondary" slot="end" float-right>Add activity</ion-button>
-</section>
+                            <ng-template #running>
+                                <ion-icon color="primary" name="pause-circle-outline" (click)="pauseTimer()"></ion-icon>
+                            </ng-template>
 
-<ng-container *ngIf="overallTimer == false; else running">
-  <ion-button class="watch" (click)="startAgain()" float-right>
-    Start
-  </ion-button>
-</ng-container>
-<ng-template #running>
-  <ion-button class="watch" (click)="pauseTimer()" float-right> 
-    Pause
-  </ion-button>
-</ng-template>
-
-<ion-button class="watch" (click)="stopTimer()" float-right>
-  Cancel
-</ion-button>
-
-
-
-
-
-
-
-
-
-<!--<ion-fab vertical="bottom" horizontal="end" slot="fixed">
-  <ng-container *ngIf="overallTimer == false; else running">
-    <ion-fab-button (click)="startAgain()">
-      <ion-icon name="play"></ion-icon>
-    </ion-fab-button>
-  </ng-container>
-  <ng-template #running>
-    <ion-fab-button (click)="pauseTimer()">
-      <ion-icon name="pause"></ion-icon>
-    </ion-fab-button>
-  </ng-template>
-
-  <ion-fab-button (click)="stopTimer()">
-    <ion-icon name="square"></ion-icon>
-  </ion-fab-button>
-
- <ion-fab-button (click)="startAgain()">
-    <ion-icon name="airplane"></ion-icon>
-  </ion-fab-button>
-</ion-fab>-->
+                            <ng-container *ngIf="counter > 0">
+                                <ion-icon color="primary" name="checkmark-circle" (click)="addActivity()"></ion-icon>
+                            </ng-container>
+                        </p>
+                    </div>
+                </div>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+</ion-content>
 
 
-  </ion-content>
 
   
 

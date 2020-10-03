@@ -1,9 +1,17 @@
 p {
-    font-size:3em;
-    width: 100%;
-    text-align: center;
+  font-size: 3em;
+  width: 100%;
+  text-align: center;
 }
 
-.watch{
-    width: 32%;
+.watch {
+  width: 32%;
+}
+
+.info-message {
+  margin-top: 4px;
+  margin-bottom: 8px;
+  margin-left: 13px;
+  display: flex;
+  //vertical-align: middle;
 }

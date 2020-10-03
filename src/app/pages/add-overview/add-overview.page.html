@@ -10,30 +10,23 @@
     </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content scroll-y="false" class="card-background-page">
+    <ion-card routerLink='/menu/add-activity/add/manual'>
+        <img src="../assets/manually.png"/>
+        <div class="card-title">Add activity manually!</div>
+    </ion-card>
 
-    <ion-content scroll-y="false" class="card-background-page">
+    <ion-card routerLink='/menu/add-activity/add/track'>
+        <img src="../assets/stopwatch.png"/>
+        <div class="card-title">Track your activity!</div>
+    </ion-card>
 
-        <ion-card routerLink='/menu/add-activity/add/manual'>
-            <img src="../assets/manually.png"/>
-            <div class="card-title">Add activity manually!</div>
-        </ion-card>
-
-
-        <ion-card routerLink='/menu/add-activity/add/track'>
-            <img src="../assets/stopwatch.png"/>
-            <div class="card-title">Track your activity!</div>
-        </ion-card>
-
-
-        <ion-card (click)='synchronizeActivities()'>
-            <img src="../assets/sync.png"/>
-            <div class="card-title">
-                Synchronize Activities<br/>
-                <div style="font-size: small">Last synchronized: {{ lastDate | date : 'medium'}}</div>
-            </div>
-
-        </ion-card>
-    </ion-content>
-
+    <ion-card (click)='synchronizeActivities()'>
+        <img src="../assets/sync.png"/>
+        <div class="card-title">
+            Synchronize Activities<br/>
+            <div style="font-size: small">Last synchronized: {{ lastDate | date : 'medium'}}</div>
+        </div>
+    </ion-card>
 </ion-content>
+

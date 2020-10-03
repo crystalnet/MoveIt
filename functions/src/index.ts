@@ -322,7 +322,7 @@ exports.resetLeaderboard = functions
 
 exports.dailyCleanUp = functions
     .region('europe-west1')
-    .pubsub.schedule('39 9 * * *')
+    .pubsub.schedule('0 0 * * *')
     .timeZone('Europe/Berlin')
     .onRun((context: any) => {
         let goals: any;
@@ -410,7 +410,6 @@ function resetDailyGoals(goals: any, leaderboard: any) {
             if (goal.split('-')[0] === 'daily') {
                 element.relative = 0;
                 element.current = 0;
-                console.log(`${user} ${goal}`);
             }
         }
     }

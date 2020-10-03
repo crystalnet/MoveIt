@@ -73,9 +73,8 @@ export class AddActivityTrackPage implements OnInit {
 
         const loading = await this.loadingController.create({
             cssClass: 'my-custom-class',
-            message: 'Loading...'
+            message: 'Adding activity...'
         });
-
         await loading.present();
 
         const newDateObj =
@@ -97,11 +96,9 @@ export class AddActivityTrackPage implements OnInit {
             }
         );
         this.stopTimer();
-
     }
 
     routeToInfoSingle() {
-
         const navigationExtras: NavigationExtras = {
             queryParams: {
                 infoId: 0
@@ -111,15 +108,12 @@ export class AddActivityTrackPage implements OnInit {
     }
 
     startTimer() {
-
-
         /* if(this.timer){
            clearInterval(this.timer);
          }*/
         if (!this.overallTimer) {
             this.progressTimer();
         }
-
         /*this.timer = false;
         this.percent = 0;
         this.progress = 0;
@@ -174,7 +168,6 @@ export class AddActivityTrackPage implements OnInit {
         console.log(this.activity.startTime);
         this.overallTimer = true;
         this.progressTimer();
-
 
     }
 
