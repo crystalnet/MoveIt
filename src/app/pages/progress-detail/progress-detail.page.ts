@@ -77,7 +77,7 @@ export class ProgressDetailPage implements OnInit {
                 private health: Health, private platform: Platform, private router: Router, private navCtrl: NavController) {
         const history = this.goalService.getGoalHistory();
         const current = this.goalService.getGoals();
-        combineLatest(history, current).subscribe((results) => {
+        combineLatest([history, current]).subscribe((results) => {
             console.log('ENTERED');
             this.goalHistory = results[0];
             this.currentGoals = results[1];
@@ -122,13 +122,12 @@ export class ProgressDetailPage implements OnInit {
             weeklyProgress[intensity] = new Array(7);
             for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
                 let value = 0;
-                const history = this.goalHistory[`${duration}-${intensity}`];
                 if (dayOfWeek > today) {
                     value = null;
                 } else if (dayOfWeek === today) {
                     value = this.currentGoals.filter(el => el.name === `${duration}-${intensity}`)[0].relative;
-                } else if (history && history.hasOwnProperty(current.valueOf())) {
-                    value = history[current.valueOf()].relative;
+                } else if (this.goalHistory.hasOwnProperty(current.valueOf())) {
+                    value = this.goalHistory[current.valueOf()][`${duration}-${intensity}`].relative;
                 }
                 weeklyProgress[intensity][dayOfWeek] = value;
                 if (that.chartLabelsProgress.length < 7) {
@@ -156,24 +155,27 @@ export class ProgressDetailPage implements OnInit {
         const current = start.clone();
 
         // Prepare weekly activities with days -6 days until today as indices and initialize with empty array
+        current.set(start.toObject());
         for (const intensity of intensities) {
-            current.set(start.toObject());
             weeklyActivities[intensity] = new Array(7);
-            for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
-                let value = 0;
-                const history = this.goalHistory[`${duration}-${intensity}`];
-                if (history && history.hasOwnProperty(current.valueOf())) {
-                    value = history[current.valueOf()].current;
+        }
+        for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+            if (this.goalHistory.hasOwnProperty(current.valueOf())) {
+                for (const intensity of intensities) {
+                    const value = this.goalHistory[current.valueOf()][`${duration}-${intensity}`].current;
+                    weeklyActivities[intensity][dayOfWeek] = value;
                 }
-                weeklyActivities[intensity][dayOfWeek] = value;
-                if (that.chartLabelsActivities.length < 7) {
-                    that.chartLabelsActivities.push(current.format('ddd'));
-                }
-                current.add(1, 'day');
             }
-            console.log(this.currentGoals);
+            if (that.chartLabelsActivities.length < 7) {
+                that.chartLabelsActivities.push(current.format('ddd'));
+            }
+            current.add(1, 'day');
+        }
+        console.log(this.currentGoals);
+        for (const intensity of intensities) {
             weeklyActivities[intensity][6] = this.currentGoals.filter(el => el.name === `${duration}-${intensity}`)[0].current;
         }
+
         this.activitiesChartData = weeklyActivities;
         console.log(weeklyActivities);
         console.log(that.chartLabelsActivities);

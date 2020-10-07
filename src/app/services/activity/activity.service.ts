@@ -10,8 +10,6 @@ import {GoalService} from '../goal/goal.service';
 import {RewardsService} from '../rewards/rewards.service';
 import {Health} from '@ionic-native/health/ngx';
 import {Storage} from '@ionic/storage';
-import {forkJoin} from 'rxjs';
-import {Goal} from '../../model/goal';
 import * as moment from 'moment';
 
 @Injectable({
@@ -24,10 +22,25 @@ export class ActivityService {
                 private rewardsService: RewardsService, private health: Health, private storage: Storage) {
     }
 
-    writeActivitytoFirebase(activity: Activity) {
+    writeActivitytoFirebase(activity: Activity, createPost: boolean = true, message?) {
+        const promises = [];
         activity.id = activity.startTime.getTime().toString();
-        return this.fireDatabase.database.ref('/activities/' + firebase.auth().currentUser.uid + '/' + activity.id)
-            .set(activity.toFirebaseObject());
+        promises.push(this.fireDatabase.database.ref('/activities/' + firebase.auth().currentUser.uid + '/' + activity.id)
+            .set(activity.toFirebaseObject()));
+
+        const post = new Post();
+        post.id = activity.endTime.getTime().toString();
+        post.activity = activity.id;
+        post.type = 'activity';
+        post.title = activity.getDuration() + ' min ' + activity.type;
+        if (message) {
+            post.content = message;
+        } else {
+            post.content = 'Look, I did ' + activity.getDuration() + ' minutes of ' + activity.type;
+        }
+        promises.push(this.postService.createPost(post));
+
+        return Promise.all(promises);
     }
 
     /**
@@ -38,23 +51,24 @@ export class ActivityService {
     createActivity(activity: Activity) {
         return new Promise<any>((resolve, reject) => {
             const promises = [];
+            const newActivities = [activity];
             promises.push(this.writeActivitytoFirebase(activity));
             promises.push(this.synchronizeApi(false).then(
-                () => {
+                (activities: Activity[]) => {
+                    newActivities.push(...activities);
                     // Returns the activity with the new id
                     return this.writeFitnessApi(activity);
                 },
                 err => reject(err)
             ));
 
-            const message = 'Look, I did ' + activity.getDuration() + ' minutes of ' + activity.type;
-            promises.push(this.runUpdates(activity, true, message).then(
-                () => resolve(activity),
-                err => reject(err)
-            ));
-
             Promise.all(promises).then(
-                () => resolve(),
+                () => {
+                    return this.runUpdates([activity]).then(
+                        () => resolve(activity),
+                        err => reject(err)
+                    );
+                },
                 err => reject(err)
             );
         });
@@ -72,7 +86,7 @@ export class ActivityService {
                 .set(activity.toFirebaseObject()).then(
                 () => {
                     // const message = 'I edited my activity, I did ' + activity.getDuration() + ' minutes of ' + activity.type;
-                    this.runUpdates(activity, false).then(
+                    this.runUpdates([activity]).then(
                         () => resolve(activity),
                         err => reject(err)
                     );
@@ -82,39 +96,29 @@ export class ActivityService {
         });
     }
 
-    runUpdates(activity?: Activity, sendPost: boolean = true, message?: string) {
+    runUpdates(newActivities: Activity[]) {
         return new Promise<any>((resolve, reject) => {
-            const activities = this.getAllUserActivities(100).pipe(first());
-            const goals = this.goalService.getGoals().pipe(first());
-            forkJoin([activities, goals]).subscribe(
-                (result: [Activity[], Goal[]]) => {
+            const startTimes = newActivities.map((activity: Activity) => activity.startTime.getTime());
+            const start = Math.min(...startTimes);
+            const end = Math.max(...startTimes);
+
+            const startDate = moment(start).startOf('week').startOf('day').add(1, 'day');
+            const endDate = moment(end).endOf('week').endOf('day').add(1, 'day');
+
+            const activities = this.getUserActivities(startDate.valueOf(), endDate.valueOf()).pipe(first());
+            activities.subscribe(
+                (result: Activity[]) => {
                     console.log(activities);
                     const promises = [];
-                    promises.push(this.goalService.updateGoals(result[1], result[0]));
-                    if (moment(activity.startTime).get('date') !== moment().get('date')) {
-                        promises.push(this.goalService.updatePreviousGoals(activity));
-                    }
+                    promises.push(this.goalService.updateGoals(startDate, endDate, result));
+
                     // TODO temporarily disabled
                     // promises.push(this.rewardsService.updateTrophies(activities, goals));
-
-                    if (activity && sendPost) {
-                        const post = new Post();
-                        post.activity = activity.id;
-                        post.type = 'activity';
-                        post.title = activity.getDuration() + ' min ' + activity.type;
-                        if (message) {
-                            post.content = message;
-                        } else {
-                            post.content = 'Look, I did ' + activity.getDuration() + ' minutes of ' + activity.type;
-                        }
-                        promises.push(this.postService.createPost(post));
-                    }
 
                     Promise.all(promises).then(
                         () => resolve(),
                         err => reject(err));
                 });
-
         });
     }
 
@@ -143,8 +147,19 @@ export class ActivityService {
     getAllUserActivities(limit = 5) {
         const ref = this.fireDatabase
             .list<Activity>(this.activityLocation + firebase.auth().currentUser.uid, query => query.orderByKey().limitToLast(limit));
-        console.log('ACTIVITIES FUNCTION RUN');
         return ref.snapshotChanges().pipe(tap(x => console.log('ACTIVITIES SNAPSHOT CHANGED', x)), map(activities => activities.map(
+            activitySnapshot => Activity.fromFirebaseObject(activitySnapshot.key, activitySnapshot.payload.val())).reverse()));
+    }
+
+    /**
+     * Retrieve activities of the current user within a certain timeframe
+     */
+    getUserActivities(startAt, endAt) {
+        const ref = this.fireDatabase
+            .list<Activity>(
+                this.activityLocation + firebase.auth().currentUser.uid,
+                query => query.orderByKey().startAt(startAt.toString()).endAt(endAt.toString()));
+        return ref.snapshotChanges().pipe(map(activities => activities.map(
             activitySnapshot => Activity.fromFirebaseObject(activitySnapshot.key, activitySnapshot.payload.val())).reverse()));
     }
 
@@ -223,14 +238,14 @@ export class ActivityService {
                         () => {
                             this.updateLastDate();
                             if (runUpdates) {
-                                this.runUpdates().then(
+                                this.runUpdates(activities).then(
                                     () => {
                                         resolve();
                                     },
                                     err => reject(err)
                                 );
                             } else {
-                                resolve();
+                                resolve(activities);
                             }
                         },
                         err => reject(err)

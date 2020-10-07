@@ -12,6 +12,7 @@ import {TrackingService} from '../tracking/tracking.service';
 import {ActionLog} from '../../model/actionLog';
 import * as moment from 'moment';
 import {Moment} from 'moment';
+import {forkJoin} from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -152,6 +153,15 @@ export class GoalService {
         return ref.valueChanges();
     }
 
+    getGoalHistoryTimeframe(startAt, endAt, userId: string = firebase.auth().currentUser.uid) {
+        const ref = this.fireDatabase
+            .list<any>(
+                'goalHistory/' + userId,
+                query => query.orderByKey().startAt(startAt.toString()).endAt(endAt.toString()));
+        return ref.snapshotChanges().pipe(map(
+            historyEntries => historyEntries.reduce((a, entry) => Object.assign(a, { [entry.key]: entry.payload.val() }), {})));
+    }
+
     /**
      * Get all goalsWins of the current user
      */
@@ -180,25 +190,101 @@ export class GoalService {
      * Update all goals and set the new progress
      *
      * Recalculates the active minutes for each goal and updates the goals by setting the new progress value
-     * @param goals list of goals to be updated
+     * @param startDate for activities
+     * @param endDate for activities
      * @param activities list of activities to measure the goals on
      */
-    updateGoals(goals: Array<Goal>, activities: Array<Activity>) {
+    updateGoals(startDate: Moment, endDate: Moment, activities: Array<Activity>) {
         return new Promise<any>((resolve, reject) => {
-            for (const goal of goals) {
-                this.updateGoal(goal, activities).then(
-                    res => console.log(res),
-                    err => reject(err)
-                );
-
-                if (goal.type === 'active' && goal.current >= goal.target) {
-                    this.winGoal(goal).then(
-                        res => console.log(res),
-                        err => reject(err)
-                    );
-                }
+            const observables = [];
+            observables.push(this.getGoalHistoryTimeframe(startDate.endOf('day').valueOf(), endDate.endOf('day').valueOf()).pipe(first()));
+            if (endDate.isSameOrAfter(moment())) {
+                observables.push(this.getGoals().pipe(first()));
             }
-            resolve('Successfully updated goals');
+
+            forkJoin(observables).subscribe((result: [any[], Goal[]?]) => {
+                console.log(result);
+                const goalHistory = result[0];
+                const progress = {};
+                // for (const defaultGoal of Goal.defaultGoals) {
+                //     progress[defaultGoal.name] = {};
+                // }
+
+                for (const activity of activities) {
+                    const time = moment(activity.startTime);
+                    if (time.isSameOrAfter(startDate, 'day') && time.isSameOrBefore(endDate, 'day')) {
+                        const intensityGoals = [`daily-${activity.intensity}`, `weekly-${activity.intensity}`];
+                        const activeGoals = ['daily-active', 'weekly-active'];
+                        time.endOf('day');
+                        const key = time.valueOf();
+                        if (!(key in progress)) {
+                            progress[key] = {};
+                            for (const defaultGoal of Goal.defaultGoals) {
+                                progress[key][defaultGoal.name] = 0;
+                            }
+                        }
+
+                        if (!(key in goalHistory)){
+                            goalHistory[key] = {};
+                            for (const defaultGoal of Goal.defaultGoals) {
+                                goalHistory[key][defaultGoal.name] = defaultGoal.toFirebaseObject();
+                            }
+                        }
+
+                        for (const i of [0, 1]) {
+                            progress[key][intensityGoals[i]] += activity.getDuration();
+                            goalHistory[key][intensityGoals[i]].current = progress[key][intensityGoals[i]];
+
+                            const value = activity.intensity === 'vigorous' ? 2 * activity.getDuration() : activity.getDuration();
+                            progress[key][activeGoals[i]] += value;
+                            goalHistory[key][activeGoals[i]].current = progress[key][activeGoals[i]];
+                        }
+                    }
+                }
+
+                let lastKey = '';
+                while (startDate.isSameOrBefore(endDate)) {
+                    const key = startDate.endOf('day').valueOf().toString();
+
+                    if (!(key in goalHistory)) {
+                        goalHistory[key] = {};
+                        for (const defaultGoal of Goal.defaultGoals) {
+                            if (defaultGoal.duration === 'weekly' && startDate.get('day') !== 1 && lastKey in goalHistory) {
+                                goalHistory[key][defaultGoal.name] = goalHistory[lastKey][defaultGoal.name];
+                            } else {
+                                goalHistory[key][defaultGoal.name] = defaultGoal.toFirebaseObject();
+                            }
+                        }
+                    } else {
+                        for (const defaultGoal of Goal.defaultGoals) {
+                            if (defaultGoal.duration === 'weekly' && startDate.get('day') !== 1 && lastKey in goalHistory) {
+                                const current = goalHistory[key][defaultGoal.name];
+                                current.current += goalHistory[lastKey][defaultGoal.name].current;
+                                current.relative = current.current / current.target;
+                            } else {
+                                const current = goalHistory[key][defaultGoal.name];
+                                current.relative = current.current / current.target;
+                            }
+                        }
+                    }
+                    // TODO check if key is present, if not set to 0
+                    // subsequently increase weekly goal
+
+                    this.fireDatabase.database.ref('goalHistory/' + firebase.auth().currentUser.uid + '/' + key).set(goalHistory[key]);
+
+                    if (startDate.isSame(moment(), 'day')) {
+                        const goals = result[1];
+                        for (const goal of goals) {
+                            goal.current = goalHistory[key][goal.name].current;
+                            goal.relative = goal.current / goal.target;
+                            this.updateGoal(goal);
+                        }
+                    }
+                    lastKey = key.toString();
+                    startDate.add(1, 'day');
+                }
+                resolve('Successfully updated goals');
+            });
         });
     }
 
@@ -274,17 +360,6 @@ export class GoalService {
         } else {
             return 0;
         }
-    }
-
-    getStartOf(week = false) {
-        let startDate = new Date();
-        startDate.setHours(0, 0, 0, 0); // Set to start of the day (= 0:00:00)
-        if (week) {
-            // If it's a weekly goal, set to start of the week (week starts on Sunday)
-            const startOfWeek = startDate.getDate() - startDate.getDay();
-            startDate = new Date(startDate.setDate(startOfWeek));
-        }
-        return startDate;
     }
 
     /**

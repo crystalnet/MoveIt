@@ -8,7 +8,8 @@
 // });
 
 import {isObject} from 'util';
-import * as moment from 'moment-timezone';
+
+const moment = require('moment-timezone');
 
 const functions = require('firebase-functions');
 
@@ -322,7 +323,7 @@ exports.resetLeaderboard = functions
 
 exports.dailyCleanUp = functions
     .region('europe-west1')
-    .pubsub.schedule('0 0 * * *')
+    .pubsub.schedule('11 43 * * *')
     .timeZone('Europe/Berlin')
     .onRun((context: any) => {
         let goals: any;
@@ -379,7 +380,7 @@ exports.dailyCleanUp = functions
 
 function logGoalProgress(goalHistory: any, goals: any) {
     if (!goalHistory || !goals || !isObject(goalHistory) || !isObject(goals)) {
-        console.log('goalhistory or goals not set ', goals);
+        console.log('goalHistory or goals not set ', goals);
         return;
     }
 
@@ -388,7 +389,7 @@ function logGoalProgress(goalHistory: any, goals: any) {
 
     for (const user of Object.keys(goals)) {
         for (const goal of Object.keys(goals[user])) {
-            goalHistory[user][goal][time.valueOf()] = goals[user][goal];
+            goalHistory[user][time.valueOf()][goal] = goals[user][goal];
         }
     }
 
@@ -459,7 +460,7 @@ class NotificationData {
                 rejectButtonText?: string) {
         this.header = header || 'New Notification';
         this.text = text || 'Lorem ipsum dolor sit amet.';
-        this.id = id || moment('','Europe/Berlin').valueOf().toString();
+        this.id = id || moment('', 'Europe/Berlin').valueOf().toString();
         this.type = type || '';
         this.target = target || '';
         this.confirmButtonText = confirmButtonText || 'Nice';

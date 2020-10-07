@@ -32,13 +32,15 @@ export class PostService {
             this.user.pipe(first()).subscribe(user => {
                 post.group = user.group;
                 post.user = user.id;
-                const postId = post.createdAt.getTime().toString();
+                if (!post.id) {
+                    post.id = post.createdAt.getTime().toString();
+                }
                 console.log(post);
 
                 const promises = [];
-                promises.push(this.fireDatabase.database.ref('/posts/groups/' + user.group + '/' + postId)
+                promises.push(this.fireDatabase.database.ref('/posts/groups/' + user.group + '/' + post.id)
                     .set(post.toFirebaseObject()));
-                promises.push(this.fireDatabase.database.ref('/posts/users/' + user.id + '/' + postId)
+                promises.push(this.fireDatabase.database.ref('/posts/users/' + user.id + '/' + post.id)
                     .set(post.group));
                 return Promise.all(promises).then(
                     res => resolve(res),
