@@ -22,8 +22,8 @@ exports.automaticNotifications = functions
     .pubsub.schedule('every 15 minutes')
     .timeZone('Europe/Berlin')
     .onRun((context: any) => {
-        const time = moment('', 'Europe/Berlin');
-        console.log('System Time: ', moment(time.valueOf()).toISOString(true));
+        const time = moment().tz('Europe/Berlin');
+        console.log('System Time: ', time.toLocaleString())
         time.set('minutes', time.get('minutes') % 15); // Round down to last quarter hour (00, 15, 30 or 45)
         console.log('checking path ' + '/times/' + time.get('hours') + '/' + time.get('minutes'));
         return admin.database().ref('/times/' + time.get('hours') + '/' + time.get('minutes')).once('value').then(
@@ -70,7 +70,7 @@ exports.automaticNotifications = functions
                             response: 'not send',
                             error: err
                         };
-                        admin.database().ref('/tracking/' + uid + '/reactions/' + moment('', 'Europe/Berlin').valueOf().toString()).set(dbNotification).then(
+                        admin.database().ref('/tracking/' + uid + '/reactions/' + moment().tz('Europe/Berlin').valueOf().toString()).set(dbNotification).then(
                             () => console.log('created db entry', dbNotification),
                             (err: any) => console.log(err)
                         );
@@ -172,7 +172,7 @@ function commentNotification(uid: string, group: string, postId: string) {
             const botUserId = 'DyvMnL4Tv0OwOrWL9U2pyJJ8oKV2';
             const botUserName = 'Kon Sti';
             const comment = {
-                createdAt: moment('', 'Europe/Berlin').valueOf().toString(),
+                createdAt: moment().tz('Europe/Berlin').valueOf().toString(),
                 text: 'Well done',
                 user: botUserName,
                 uid: botUserId
@@ -323,7 +323,7 @@ exports.resetLeaderboard = functions
 
 exports.dailyCleanUp = functions
     .region('europe-west1')
-    .pubsub.schedule('11 43 * * *')
+    .pubsub.schedule('0 0 * * *')
     .timeZone('Europe/Berlin')
     .onRun((context: any) => {
         let goals: any;
@@ -332,7 +332,7 @@ exports.dailyCleanUp = functions
         let publicUserData: any;
         let goalHistory: any;
         const promises = [];
-        console.log('dailyCleanUp: system time ' + moment('', 'Europe/Berlin').toISOString(true));
+        console.log('dailyCleanUp: system time ' + moment().tz('Europe/Berlin').toISOString(true));
 
         promises.push(admin.database().ref('/goals/').once('value')
             .then((snap: any) => {
@@ -385,7 +385,7 @@ function logGoalProgress(goalHistory: any, goals: any) {
     }
 
     // Get end of yesterday
-    const time = moment('', 'Europe/Berlin').subtract(1, 'day').endOf('day');
+    const time = moment().tz('Europe/Berlin').subtract(1, 'day').endOf('day');
 
     for (const user of Object.keys(goals)) {
         for (const goal of Object.keys(goals[user])) {
@@ -460,7 +460,7 @@ class NotificationData {
                 rejectButtonText?: string) {
         this.header = header || 'New Notification';
         this.text = text || 'Lorem ipsum dolor sit amet.';
-        this.id = id || moment('', 'Europe/Berlin').valueOf().toString();
+        this.id = id || moment().tz('Europe/Berlin').valueOf().toString();
         this.type = type || '';
         this.target = target || '';
         this.confirmButtonText = confirmButtonText || 'Nice';

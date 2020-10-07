@@ -102,7 +102,7 @@ export class ActivityService {
             const start = Math.min(...startTimes);
             const end = Math.max(...startTimes);
 
-            const startDate = moment(start).startOf('week').startOf('day').add(1, 'day');
+            const startDate = moment(start).startOf('day');
             const endDate = moment(end).endOf('week').endOf('day').add(1, 'day');
 
             const activities = this.getUserActivities(startDate.valueOf(), endDate.valueOf()).pipe(first());

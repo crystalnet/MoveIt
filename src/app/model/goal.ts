@@ -82,6 +82,7 @@ export class Goal {
         delete copy.name;
         delete copy.type;
         delete copy.duration;
+        delete copy.history;
         return copy;
     }
 }
