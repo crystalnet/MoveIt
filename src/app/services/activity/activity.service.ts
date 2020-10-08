@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Injectable, PlatformRef} from '@angular/core';
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import {AngularFireDatabase} from '@angular/fire/database';
@@ -11,6 +11,7 @@ import {RewardsService} from '../rewards/rewards.service';
 import {Health} from '@ionic-native/health/ngx';
 import {Storage} from '@ionic/storage';
 import * as moment from 'moment';
+import {Platform} from '@ionic/angular';
 
 @Injectable({
     providedIn: 'root'
@@ -19,7 +20,10 @@ export class ActivityService {
     activityLocation = '/activities/';
 
     constructor(private fireDatabase: AngularFireDatabase, private postService: PostService, private goalService: GoalService,
-                private rewardsService: RewardsService, private health: Health, private storage: Storage) {
+                private rewardsService: RewardsService, private health: Health, private storage: Storage, private platform: Platform) {
+        platform.resume.subscribe(() => {
+            this.synchronizeApi().then(() => console.log('DIGEST SYNCHRONIZATION'));
+        });
     }
 
     writeActivitytoFirebase(activity: Activity, createPost: boolean = true, message?) {

@@ -8,6 +8,8 @@ import {TrackingService} from '../../services/tracking/tracking.service';
 import {ActionLog} from '../../model/actionLog';
 import {FCM} from 'cordova-plugin-fcm-with-dependecy-updated/ionic/ngx';
 import {INotificationPayload} from 'cordova-plugin-fcm-with-dependecy-updated';
+import {Storage} from '@ionic/storage';
+import {ActivityService} from '../../services/activity/activity.service';
 
 @Component({
     selector: 'app-menu',
@@ -23,7 +25,7 @@ export class MenuPage implements OnInit, OnDestroy {
 
     constructor(private router: Router, private auth: AuthenticateService, private userService: UserService, private fcm: FCM,
                 private navCtrl: NavController, public alertController: AlertController, private trackingService: TrackingService,
-                private platform: Platform) {
+                private platform: Platform, private storage: Storage, private activityService: ActivityService) {
         this.router.events.subscribe((event: RouterEvent) => {
             if (event && event.url) {
                 this.selectedPath = event.url;
@@ -49,6 +51,7 @@ export class MenuPage implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.trackingService.startRecordingViewTime('menu');
+        this.activityService.synchronizeApi().then(() => console.log('MENU DIGEST SYNCHRONIZATION'));
     }
 
     ngOnDestroy() {
