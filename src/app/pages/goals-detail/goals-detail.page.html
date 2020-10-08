@@ -11,47 +11,53 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-    <h1>Here you can change your {{goal.duration}} {{goal.type}} minutes goal!</h1>
-    <!--<ion-segment [(ngModel)]="goals">
-      <ion-segment-button value="trophies">
-        moderate
-      </ion-segment-button>
-      <ion-segment-button (click)="vigorous()" value="vigorous">
-        vigorous
-      </ion-segment-button>
-      <ion-segment-button (click)="weight()" value="weight">
-        weight training
-      </ion-segment-button>
-    </ion-segment>-->
+    <div *ngIf="goalPromise | async as goals">
+        <ion-card>
+            <ion-card-header>
+                <ion-card-title>Daily Goal</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+                <p>Here you can set your {{goals[0].duration}} goal!
+                </p>
+                <ion-item>
+                    <ion-range min="0" max="120" pin color="primary" [(ngModel)]="goals[0].target">
+                        <ion-icon slot="start" size="small" name="walk"></ion-icon>
+                        <ion-icon slot="end" name="walk"></ion-icon>
+                    </ion-range>
+                </ion-item>
+                <ion-item lines="none">
+                    <ion-label>Goal</ion-label>
+                    <ion-input type="number" slot="end" class="ion-text-right"
+                               [(ngModel)]="goals[0].target"></ion-input>
+                </ion-item>
+            </ion-card-content>
+        </ion-card>
 
-    <ion-list>
-        <ion-item>
-            <ion-range min="0" max="{{max}}" pin color="secondary" [(ngModel)]="goal.target">
-                <ion-icon slot="start" size="small" name="walk"></ion-icon>
-                <ion-icon slot="end" name="walk"></ion-icon>
-            </ion-range>
-        </ion-item>
+        <ion-card>
+            <ion-card-header>
+                <ion-card-title>Weekly Goal</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+                <p>Here you can set your {{goals[1].duration}} goal!
+                </p>
 
-        <ion-item>
-            <ion-label>Goal</ion-label>
-            <ion-input class="ion-text-right" type="number" slot="end" [(ngModel)]="goal.target"></ion-input>
-        </ion-item>
-        <!--<ion-item>
-          <ion-label>Monthly goals</ion-label>
-          <ion-input placeholder="1500"></ion-input>
-        </ion-item>
+                <ion-item>
+                    <ion-range min="0" max="600" pin color="secondary" [(ngModel)]="goals[1].target">
+                        <ion-icon slot="start" size="small" name="walk"></ion-icon>
+                        <ion-icon slot="end" name="walk"></ion-icon>
+                    </ion-range>
+                </ion-item>
 
-           <ion-item>
-            <ion-label>Daily goals</ion-label>
-            <ion-input id="daily" placeholder="500"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label>Monthly goals</ion-label>
-            <ion-input id="weekly" placeholder="1500"></ion-input>
-          </ion-item>-->
-    </ion-list>
+                <ion-item lines="none">
+                    <ion-label>Goal</ion-label>
+                    <ion-input type="number" slot="end" class="ion-text-right"
+                               [(ngModel)]="goals[1].target"></ion-input>
+                </ion-item>
+            </ion-card-content>
+        </ion-card>
+    </div>
 
     <section>
-        <ion-button slot="end" color="secondary" expand="block" (click)="editGoal()">Save Goal</ion-button>
+        <ion-button slot="end" color="secondary" expand="block" (click)="save()">Save Goals</ion-button>
     </section>
 </ion-content>

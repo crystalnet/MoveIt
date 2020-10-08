@@ -44,7 +44,7 @@ export class Activity {
     }
 
     static types = ['basketball', 'biking', 'dancing', 'handball', 'football', 'running', 'swimming', 'volleyball', 'walking', 'other'];
-    static intensities = ['moderate', 'vigorous', 'weight training'];
+    static intensities = ['moderate', 'vigorous'];
     startDateIso: string;
     startTimeIso: string;
     minutes: number;

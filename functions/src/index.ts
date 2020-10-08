@@ -23,7 +23,7 @@ exports.automaticNotifications = functions
     .timeZone('Europe/Berlin')
     .onRun((context: any) => {
         const time = moment().tz('Europe/Berlin');
-        console.log('System Time: ', time.toLocaleString())
+        console.log('System Time: ', time.toLocaleString());
         time.set('minutes', time.get('minutes') % 15); // Round down to last quarter hour (00, 15, 30 or 45)
         console.log('checking path ' + '/times/' + time.get('hours') + '/' + time.get('minutes'));
         return admin.database().ref('/times/' + time.get('hours') + '/' + time.get('minutes')).once('value').then(
@@ -111,7 +111,7 @@ function generateLeaderboardNotification(uid: string) {
             data.header = (userRank - 1).toString() + ' to go';
             data.text = 'Your rank is ' + userRank.toString();
             data.target = 'menu/leaderboard/leaderboard/detail';
-            data.type = 'leaderboardNotification';
+            data.type = 'leaderboard-notification';
             return data;
         },
         (err: any) => console.log(err)
@@ -159,7 +159,7 @@ function likeNotification(uid: string, group: string, postId: string) {
             data.header = 'Your post received a new like';
             data.text = 'Your post was liked by someone, go check it out!';
             data.target = '/menu/socialfeed/socialfeed/detail';
-            data.type = 'likeNotification';
+            data.type = 'like-socialfeed-notification';
             return data;
         },
         (err: any) => console.log(err));
@@ -189,7 +189,7 @@ function commentNotification(uid: string, group: string, postId: string) {
             data.header = 'Your post has a new comment';
             data.text = 'Your post was commented by someone, go check it out!';
             data.target = '/menu/socialfeed/socialfeed/detail';
-            data.type = 'commentNotification';
+            data.type = 'comment-socialfeed-Notification';
             return data;
         },
         (err: any) => console.log(err));
@@ -211,6 +211,7 @@ exports.progressNotification = functions.database.ref('/leaderboard/relative/wee
                 return;
             }
             data.target = '/menu/progress/progress/detail';
+            data.type = 'progress-notification';
             const notification = new UserNotification(context.params.userId, data);
             return notification.send();
         } else {
@@ -219,29 +220,26 @@ exports.progressNotification = functions.database.ref('/leaderboard/relative/wee
     });
 
 
-exports.sendNotificationTrophyWin = functions.database.ref('/wins/{userId}').onWrite((event: any, context: any) => {
-
-    //get the userId of the person receiving the notification because we need to get their token
+exports.sendNotificationTrophyWin = functions.database.ref('/wins/{userId}/{goal}').onWrite((event: any, context: any) => {
+    // get the userId of the person receiving the notification because we need to get their token
     // console.log("context: ");
     // console.log(context);
     // console.log("event: ");
     // console.log(event);
     const winnerId = context.params.userId;
+    const goalName = context.params.goal;
+    const operation = context.eventType;
     console.log('winnerId: ', winnerId);
+    console.log('goal: ', goalName);
+
+    if (!goalName.includes('active') || operation.includes('delete')) {
+        console.log('no active goal but: ', goalName);
+        return;
+    }
 
     //get the token of the user receiving the message
     return admin.database().ref('/users/' + winnerId).once('value').then(
-        (snap: {
-            child: (arg0: string) =>
-                {
-                    (): any;
-                    new(): any;
-                    val: {
-                        (): any;
-                        new(): any;
-                    };
-                };
-        }) => {
+        (snap: any) => {
             const token = snap.child('token').val();
             console.log('token: ', token);
 
@@ -251,6 +249,7 @@ exports.sendNotificationTrophyWin = functions.database.ref('/wins/{userId}').onW
             const data = new NotificationData();
             data.header = 'You reached your goal!';
             data.text = 'Congratulations - you reached your goal!';
+            data.type = 'goal-win-notification'
 
             const notification = new UserNotification(winnerId, data);
             notification.send();
@@ -323,7 +322,7 @@ exports.resetLeaderboard = functions
 
 exports.dailyCleanUp = functions
     .region('europe-west1')
-    .pubsub.schedule('0 0 * * *')
+    .pubsub.schedule('13 10 * * *')
     .timeZone('Europe/Berlin')
     .onRun((context: any) => {
         let goals: any;
@@ -388,6 +387,7 @@ function logGoalProgress(goalHistory: any, goals: any) {
     const time = moment().tz('Europe/Berlin').subtract(1, 'day').endOf('day');
 
     for (const user of Object.keys(goals)) {
+        goalHistory[user][time.valueOf()] = {};
         for (const goal of Object.keys(goals[user])) {
             goalHistory[user][time.valueOf()][goal] = goals[user][goal];
         }
@@ -445,6 +445,30 @@ function updatePublicUserData(users: any, publicUserData: any) {
     // Objects are edited in place, therefore no return value is necessary
     return;
 }
+
+exports.setGoals = functions
+    .region('europe-west1')
+    .pubsub.schedule('0 9 * * 5')
+    .timeZone('Europe/Berlin')
+    .onRun((context: any) => {
+        return admin.database().ref('/users/').once('value')
+            .then((snap: any) => {
+                const users = snap.val();
+                const data = new NotificationData();
+                data.header = 'Time for new goals';
+                data.text = 'Adjust your goals based on your last week. Don\'t make them too easy :) Want to set goals now?';
+                data.type = 'weekly-set-goals';
+                data.target = '/menu/goals/goals/detail';
+                data.confirmButtonText = 'Yes';
+                data.rejectButtonText = 'No';
+                for (const userKV of Object.entries(users)) {
+                    console.log(userKV[0]);
+                    const notification = new UserNotification(userKV[0], data);
+                    notification.send();
+                }
+
+            });
+    });
 
 
 class NotificationData {
@@ -550,8 +574,6 @@ class UserNotification {
                     return;
                 } else {
                     this.generatePayload();
-                    console.log(this.payload);
-
                     this.createDbEntry();
 
                     return admin.messaging().sendToDevice(token, this.payload)

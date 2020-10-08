@@ -48,7 +48,7 @@ export class InitialSetupPage implements OnInit {
         const weeklyActive = this.goalService.getGoal('weekly-active');
         this.userObservable = this.userService.getUser();
         this.userObservable.subscribe(user => this.user = user);
-        this.goalPromise = combineLatest(dailyActive, weeklyActive);
+        this.goalPromise = combineLatest([dailyActive, weeklyActive]);
         this.goalPromise.subscribe(res => {
             this.dailyActive = res[0];
             this.weeklyActive = res[1];

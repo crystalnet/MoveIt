@@ -37,7 +37,7 @@
         </ion-item>
         <ion-item>
             <ion-label>Duration</ion-label>
-            <ion-input [(ngModel)]="minutes" type="number" slot="end" placeholder="Minutes"></ion-input>
+            <ion-input [(ngModel)]="minutes" type="number" class="ion-text-right" placeholder="Minutes"></ion-input>
         </ion-item>
 
         <ion-item>
@@ -46,7 +46,7 @@
         </ion-item>
 
         <section>
-            <ion-button (click)=editActivity() color="secondary" slot="end">Save Activity</ion-button>
+            <ion-button (click)=editActivity() color="secondary" expand="block">Save Activity</ion-button>
             <!--<ion-button expand="block">Add activity</ion-button>-->
         </section>
 

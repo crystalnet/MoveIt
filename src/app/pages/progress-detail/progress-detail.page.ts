@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {ActivityService} from '../../services/activity/activity.service';
 import {Activity} from '../../model/activity';
 import {combineLatest, Observable} from 'rxjs';
@@ -28,50 +28,31 @@ export class ProgressDetailPage implements OnInit {
     goalHistory: any;
 
     nActivities = 0;
+    slide = 0;
 
     activities: Observable<Activity[]>;
     // Array which contains the displayed activities
     displayedActivities: Observable<Activity[]>;
     duration = 'day';
 
-    activitiesChartData;
-    public chartLabelsProgress: any = [];
-    public chartValuesModerate: any = [];
-    public chartValuesVigorous: any = [];
-    public chartValuesWeight: any = [];
-    public chartColours: any = [];
-    public chartHoverColours: any = [];
-
 
     @ViewChild('slides', {static: false}) slides: IonSlides;
-    @ViewChild('barChart', {static: false}) barChart: { nativeElement: any; };
-    @ViewChild('hrzBarChart5', {static: false}) hrzBarChart5: { nativeElement: any; };
-    @ViewChild('weeklyChart', {static: false}) weeklyChart: { nativeElement: any; };
+    @ViewChild('barChart', {static: false}) barChart: QueryList<ElementRef>;
+    @ViewChildren('progressChart') progressChartElement: QueryList<ElementRef>;
+    @ViewChildren('activitiesChart') activitiesChartElement: QueryList<ElementRef>;
 
-    // barChart: any;
-
-    hrzBars5: any;
-    weeklyBarChart: any;
-    progressChartData: any;
-    public chartLabelsActivities: any = [];
+    progressChart = new Array(4);
+    activitiesChart = new Array(4);
+    progressChartData = new Array(4);
+    activitiesChartData = new Array(4);
+    public chartLabelsProgress = new Array(4);
+    public chartLabelsActivities = new Array(4);
 
     slideOpts = {
-        initialSlide: 4
+        initialSlide: 4,
+        scrollbar: true,
+        pager: true
     };
-    wonGoals: any;
-    wonGoalsName: any;
-    allInfo: any[] = [];
-    goalsHistory: Array<Goal>;
-    lastGoalM = 0;
-    lastGoalV = 0;
-    lastGoalW = 0;
-    activitiesGoals: Array<Activity>;
-    relative: number;
-    wholeDuration: any[];
-    relativeV: number;
-    relativeW: number;
-
-    oldGoals: any[] = [];
 
     constructor(private activityService: ActivityService, private goalService: GoalService, private location: Location,
                 private health: Health, private platform: Platform, private router: Router, private navCtrl: NavController) {
@@ -81,17 +62,15 @@ export class ProgressDetailPage implements OnInit {
             console.log('ENTERED');
             this.goalHistory = results[0];
             this.currentGoals = results[1];
-            this.prepareProgressChartData();
+
+            this.updateProgress();
+            this.updateActivities();
         });
 
         this.loadMoreActivities();
 
         this.dailyActivePromise = this.goalService.getGoal('daily-active').then(res => this.dailyActive = res, err => console.log(err));
         this.weeklyActivePromise = this.goalService.getGoal('weekly-active').then(res => this.weeklyActive = res, err => console.log(err));
-
-        // this.prepareProgressChartData();
-        // this.defineChartData();
-        // this.loadOldGoals();
     }
 
     ionViewDidEnter() {
@@ -105,14 +84,32 @@ export class ProgressDetailPage implements OnInit {
         }
     }
 
-    prepareProgressChartData() {
-        const that = this;
+    updateProgress() {
+        this.progressChartElement.forEach((ref, index) => {
+            index = 3 - index;
+            this.prepareProgressChartData(index);
+            this.createProgressChart(index, ref);
+        });
+    }
 
-        this.chartLabelsProgress = [];
+    updateActivities() {
+        this.activitiesChartElement.forEach((ref, index) => {
+            index = 3 - index;
+            this.prepareActivitiesChartData(index);
+            this.createActivitiesChart(index, ref);
+        });
+    }
+
+    prepareProgressChartData(index) {
+        const that = this;
+        const n = index;
+
+        this.chartLabelsProgress[n] = [];
         const weeklyProgress = [];
         const intensities = ['active'];
         const duration = Goal.durations[1]; // 'weekly'
         const start = moment().startOf('week').endOf('day').add(1, 'day');
+        start.subtract(n * 7, 'day');
         const current = start.clone();
         const today = (moment().get('day') + 7 - 1) % 7;
 
@@ -122,37 +119,37 @@ export class ProgressDetailPage implements OnInit {
             weeklyProgress[intensity] = new Array(7);
             for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
                 let value = 0;
-                if (dayOfWeek > today) {
+                if (n === 0 && dayOfWeek > today) {
                     value = null;
-                } else if (dayOfWeek === today) {
+                } else if (n === 0 && dayOfWeek === today) {
                     value = this.currentGoals.filter(el => el.name === `${duration}-${intensity}`)[0].relative;
                 } else if (this.goalHistory.hasOwnProperty(current.valueOf())) {
                     value = this.goalHistory[current.valueOf()][`${duration}-${intensity}`].relative;
                 }
                 weeklyProgress[intensity][dayOfWeek] = value;
-                if (that.chartLabelsProgress.length < 7) {
-                    that.chartLabelsProgress.push(current.format('ddd'));
+                if (that.chartLabelsProgress[n].length < 7) {
+                    that.chartLabelsProgress[n].push(current.format('ddd'));
                 }
                 current.add(1, 'day');
             }
         }
-        this.progressChartData = weeklyProgress;
+        that.progressChartData[n] = weeklyProgress;
         console.log(weeklyProgress);
-        console.log(that.chartLabelsProgress);
-
-        that.createProgressChart();
     }
 
     // weekly
-    prepareActivitiesChartData() {
+    prepareActivitiesChartData(index) {
         const that = this;
+        const n = index;
 
-        this.chartLabelsActivities = [];
+        this.chartLabelsActivities[n] = [];
         const weeklyActivities = [];
         const intensities = Goal.intensities; // ['moderate','vigorous']
         const duration = Goal.durations[0]; // 'daily'
-        const start = moment().endOf('day').subtract(6, 'day');
+        const start = moment().startOf('week').endOf('day').add(1, 'day');
+        start.subtract(n * 7, 'day');
         const current = start.clone();
+        const today = (moment().get('day') + 7 - 1) % 7;
 
         // Prepare weekly activities with days -6 days until today as indices and initialize with empty array
         current.set(start.toObject());
@@ -162,44 +159,42 @@ export class ProgressDetailPage implements OnInit {
         for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
             if (this.goalHistory.hasOwnProperty(current.valueOf())) {
                 for (const intensity of intensities) {
-                    const value = this.goalHistory[current.valueOf()][`${duration}-${intensity}`].current;
+                    let value = 0;
+                    if (n === 0 && dayOfWeek > today) {
+                        value = null;
+                    } else if (n === 0 && dayOfWeek === today) {
+                        value = this.currentGoals.filter(el => el.name === `${duration}-${intensity}`)[0].current;
+                    } else if (this.goalHistory.hasOwnProperty(current.valueOf())) {
+                        value = this.goalHistory[current.valueOf()][`${duration}-${intensity}`].current;
+                    }
                     weeklyActivities[intensity][dayOfWeek] = value;
                 }
             }
-            if (that.chartLabelsActivities.length < 7) {
-                that.chartLabelsActivities.push(current.format('ddd'));
+            if (that.chartLabelsActivities[n].length < 7) {
+                that.chartLabelsActivities[n].push(current.format('ddd'));
             }
             current.add(1, 'day');
         }
-        console.log(this.currentGoals);
-        for (const intensity of intensities) {
-            weeklyActivities[intensity][6] = this.currentGoals.filter(el => el.name === `${duration}-${intensity}`)[0].current;
-        }
-
-        this.activitiesChartData = weeklyActivities;
+        that.activitiesChartData[n] = weeklyActivities;
         console.log(weeklyActivities);
-        console.log(that.chartLabelsActivities);
-
-        that.createActivitiesChart();
     }
 
 
-    createProgressChart() {
-        if (this.hrzBars5) {
-            this.hrzBars5.destroy();
+    createProgressChart(n, elementRef) {
+        if (this.progressChart[n]) {
+            this.progressChart[n].destroy();
         }
 
-        const ctx = this.hrzBarChart5.nativeElement;
-        // ctx.height = 400;
+        const ctx = elementRef.nativeElement;
 
-        this.hrzBars5 = new Chart(ctx, {
+        this.progressChart[n] = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: this.chartLabelsProgress,
+                labels: this.chartLabelsProgress[n],
                 datasets: [
                     {
                         label: 'Weekly goal',
-                        data: this.progressChartData.active,
+                        data: this.progressChartData[n].active,
                         backgroundColor: '#F61067', // array should have same number of elements as number of dataset
                         borderColor: '#F61067', // array should have same number of elements as number of dataset
                         borderWidth: 1
@@ -252,29 +247,27 @@ export class ProgressDetailPage implements OnInit {
     }
 
 
-    createActivitiesChart() {
-        if (this.weeklyBarChart) {
-            this.weeklyBarChart.destroy();
+    createActivitiesChart(n, elementRef) {
+        if (this.activitiesChart[n]) {
+            this.activitiesChart[n].destroy();
         }
 
-        const ctx = this.weeklyChart.nativeElement;
-        // ctx.height = 400;
-
-        this.weeklyBarChart = new Chart(ctx, {
+        const ctx = elementRef.nativeElement;
+        this.activitiesChart[n] = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: this.chartLabelsActivities,
+                labels: this.chartLabelsActivities[n],
                 datasets: [
                     {
                         label: 'moderate',
-                        data: this.activitiesChartData.moderate,
+                        data: this.activitiesChartData[n].moderate,
                         backgroundColor: '#F61067', // array should have same number of elements as number of dataset
                         borderColor: '#F61067', // array should have same number of elements as number of dataset
                         borderWidth: 1
                     },
                     {
                         label: 'vigorous',
-                        data: this.activitiesChartData.vigorous,
+                        data: this.activitiesChartData[n].vigorous,
                         backgroundColor: '#6DECAF', // array should have same number of elements as number of dataset
                         borderColor: '#6DECAF', // array should have same number of elements as number of dataset
                         borderWidth: 1

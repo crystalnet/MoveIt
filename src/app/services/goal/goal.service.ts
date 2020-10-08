@@ -85,6 +85,7 @@ export class GoalService {
             goal.current = this.calculateGoalProgress(goal, activities);
         }
         goal.relative = goal.current / goal.target;
+
         return new Promise<any>((resolve, reject) => {
             const promises = [];
             promises.push(this.fireDatabase.database
@@ -93,6 +94,9 @@ export class GoalService {
                 .ref('/leaderboard/relative/' + goal.name + '/' + firebase.auth().currentUser.uid).set(goal.relative));
             promises.push(this.fireDatabase.database
                 .ref('/leaderboard/absolute/' + goal.name + '/' + firebase.auth().currentUser.uid).set(goal.current));
+            if (goal.relative >= 1) {
+                promises.push(this.winGoal(goal));
+            }
             Promise.all(promises).then(
                 () => resolve(),
                 err => reject(err)
@@ -276,11 +280,12 @@ export class GoalService {
                                 current.current = progress[key][defaultGoal.name];
                                 current.relative = current.current / current.target;
                             }
+                            if (goalHistory[key][defaultGoal.name].relative >= 1) {
+                                const goal = Goal.fromFirebaseObject(defaultGoal.name, goalHistory[key][defaultGoal.name]);
+                                // this.winGoal(goal, startDate, false);
+                            }
                         }
                     }
-                    // TODO check if key is present, if not set to 0
-                    // subsequently increase weekly goal
-
                     this.fireDatabase.database.ref('goalHistory/' + firebase.auth().currentUser.uid + '/' + key).set(goalHistory[key]);
 
                     if (startDate.isSame(moment(), 'day')) {
@@ -377,32 +382,32 @@ export class GoalService {
      * Win a goal and add current time to the list of wins
      *
      * @param goal to be won
+     * @param time reference time point
+     * @param createPost whether to create a post
      */
-    winGoal(goal: Goal) {
+    winGoal(goal: Goal, time: Moment = moment(), createPost = true) {
         return new Promise<any>((resolve, reject) => {
             // Get the current list of wins
             this.fireDatabase.database.ref('/wins/' + firebase.auth().currentUser.uid + '/' + goal.name)
                 .once('value').then(
                 (winsSnapshot) => {
                     let wins = winsSnapshot.val();
-                    let createPost = true;
+                    time.startOf('day');
                     if (Array.isArray(wins)) {
                         // If the list exists, check if the goal was already won today
-                        const lastWin = moment(wins.slice(-1)[0]);
-                        const now = moment();
-                        if (goal.duration === 'weekly' && lastWin.isSame(now, 'week')) {
+                        const unit = goal.duration === 'weekly' ? 'week' : 'day';
+                        const lastWin = wins.filter(win => moment(win).isSame(time, unit));
+                        if (lastWin.length > 0) {
                             resolve(goal.name + ' goal was already won');
                             createPost = false;
-                        } else if (goal.duration === 'daily' && lastWin.isSame(now, 'day')) {
-                            resolve(goal.name + ' goal was already won');
-                            createPost = false;
+                            return;
                         } else {
                             // If not, append it to the wins list
-                            wins.push((new Date()).getTime());
+                            wins.push(time.valueOf());
                         }
                     } else {
                         // If it doesn't exist, create a new array with the current win
-                        wins = [(new Date()).getTime()];
+                        wins = [time.valueOf()];
                     }
                     this.fireDatabase.database.ref('/leaderboard/' + '/nWins/' + goal.name + '/' + firebase.auth().currentUser.uid)
                         .set(wins.length).catch(err => console.log(err));

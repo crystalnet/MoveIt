@@ -15,7 +15,6 @@ import * as moment from 'moment';
 export class AddActivityManualPage implements OnInit {
     activity: Activity;
     minutes: number;
-    date: string;
     time: string;
     types: Array<string>;
     intensities: Array<string>;
@@ -24,6 +23,7 @@ export class AddActivityManualPage implements OnInit {
     successMessage = '';
     todayA: Date = new Date();
     today: string = new Date().toISOString();
+    date: string = new Date().toISOString();
     minDate: string = moment().startOf('day').subtract(2, 'day').toISOString(true);
     check = false;
     validationMessage: string;
@@ -133,6 +133,7 @@ export class AddActivityManualPage implements OnInit {
         this.activityService.createActivity(this.activity).then(
             (activity) => {
                 console.log(activity);
+                this.activity = new Activity();
                 this.presentAlert();
                 loading.dismiss();
                 this.router.navigateByUrl('/menu/progress');
