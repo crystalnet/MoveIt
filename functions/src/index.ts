@@ -24,7 +24,7 @@ exports.automaticNotifications = functions
     .onRun((context: any) => {
         const time = moment().tz('Europe/Berlin');
         console.log('System Time: ', time.toLocaleString());
-        time.set('minutes', time.get('minutes') % 15); // Round down to last quarter hour (00, 15, 30 or 45)
+        time.subtract('minutes', time.get('minutes') % 15); // Round down to last quarter hour (00, 15, 30 or 45)
         console.log('checking path ' + '/times/' + time.get('hours') + '/' + time.get('minutes'));
         return admin.database().ref('/times/' + time.get('hours') + '/' + time.get('minutes')).once('value').then(
             (snapshot: any) => {
