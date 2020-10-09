@@ -30,7 +30,7 @@
                 </div>-->
 
                 <ion-button color="secondary" (click)="uploadBtn.click()">
-                    Upload picture
+                    Upload Pic
                 </ion-button>
                 <input #uploadBtn
                        id="uploadBtn"
@@ -85,36 +85,36 @@
 
 
     <ion-card>
-        <ion-list-header>
-            Goals
-        </ion-list-header>
-        <ion-list *ngFor="let goal of (goals | async)">
+        <ion-card-header>
+            <ion-card-title class="ion-text-center">Goals</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+            <ion-list *ngFor="let goal of (goals | async)">
 
-            <ion-item>
-                <ion-label>
-                    <h3> {{goal.duration}} </h3>
-                    <p> {{goal.type}}</p>
-                </ion-label>
-                <ion-label class="ion-text-right">
-                    <h3>{{goal.current}} / {{goal.target}} min</h3>
-                </ion-label>
-            </ion-item>
+                <ion-item>
+                    <ion-label>
+                        <h3> {{goal.duration}} </h3>
+                        <p> {{goal.type}}</p>
+                    </ion-label>
+                    <ion-label class="ion-text-right">
+                        <h3>{{goal.current}} / {{goal.target}} min</h3>
+                    </ion-label>
+                </ion-item>
 
-            <ng-container *ngIf="goal.duration == 'weekly'">
-                <ion-progress-bar color="secondary" [value]="goal.relative"></ion-progress-bar>
-            </ng-container>
-            <ion-progress-bar *ngIf="goal.duration == 'daily'" color="primary"
-                              [value]="goal.relative"></ion-progress-bar>
-
-
-        </ion-list>
+                <ng-container *ngIf="goal.duration == 'weekly'">
+                    <ion-progress-bar color="secondary" [value]="goal.relative"></ion-progress-bar>
+                </ng-container>
+                <ion-progress-bar *ngIf="goal.duration == 'daily'" color="primary"
+                                  [value]="goal.relative"></ion-progress-bar>
+            </ion-list>
+        </ion-card-content>
     </ion-card>
 
     <ion-card>
-        <ion-list>
-            <ion-list-header>
-                Activities
-            </ion-list-header>
+        <ion-card-header>
+            <ion-card-title class="ion-text-center">Activities</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
             <ion-item *ngFor="let activity of (displayedActivities | async)">
                 <ion-label>
                     <h3>{{ activity.startTime | date:'dd.MM.' }} {{activity.getDuration()}} minutes </h3>
@@ -122,7 +122,7 @@
                     <p>{{activity.type}}-{{activity.intensity}}</p>
                 </ion-label>
             </ion-item>
-        </ion-list>
+        </ion-card-content>
 
         <ion-button *ngIf="(activities | async)?.length > 5" expand="block" color="secondary"
                     (click)="loadMoreActivities()">Read more

@@ -10,50 +10,58 @@
     </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding-horizontal">
-    <ion-list>
-        <ion-item>
-            <ion-label>Activity type</ion-label>
-            <ion-select [(ngModel)]="activity.type" placeholder="Select type" disabled="false">
-                <ion-select-option *ngFor="let type of types">{{type}}</ion-select-option>
-            </ion-select>
-        </ion-item>
+<ion-content>
+    <ion-card>
+        <ion-card-header>
+            <ion-card-title class="ion-text-center">
+                Edit your activity
+            </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+            <ion-item>
+                <ion-label>Activity type</ion-label>
+                <ion-select [(ngModel)]="activity.type" placeholder="Select type">
+                    <ion-select-option *ngFor="let type of types">{{type | titlecase }}</ion-select-option>
+                </ion-select>
+            </ion-item>
 
-        <ion-item>
-            <ion-label>Intensity*</ion-label>
-            <ion-select [(ngModel)]="activity.intensity" placeholder="Select intensity">
-                <ion-select-option *ngFor="let intensity of intensities">{{intensity}}</ion-select-option>
-            </ion-select>
-        </ion-item>
+            <ion-item>
+                <ion-label>Intensity*</ion-label>
+                <ion-select [(ngModel)]="activity.intensity" placeholder="Select intensity">
+                    <ion-select-option
+                            *ngFor="let intensity of intensities">{{intensity | titlecase}}</ion-select-option>
+                </ion-select>
+            </ion-item>
 
-        <ion-item>
-            <ion-label>Start date</ion-label>
-            <ion-datetime placeholder="Select date" display-format="MMM DD, YYYY" [(ngModel)]="startDate"
-                          [max]="today"></ion-datetime>
-        </ion-item>
-        <ion-item>
-            <ion-label>Start time</ion-label>
-            <ion-datetime placeholder="Select time" display-format="HH:mm" [(ngModel)]="startTime"></ion-datetime>
-        </ion-item>
-        <ion-item>
-            <ion-label>Duration</ion-label>
-            <ion-input [(ngModel)]="minutes" type="number" class="ion-text-right" placeholder="Minutes"></ion-input>
-        </ion-item>
+            <ion-item>
+                <ion-label>Start date</ion-label>
+                <ion-datetime placeholder="Select date" [(ngModel)]="startDate"
+                              [max]="today.format('YYYY-MM-DD')"></ion-datetime>
+            </ion-item>
+            <ion-item>
+                <ion-label>Start time</ion-label>
+                <ion-datetime placeholder="Select time" display-format="HH:mm" picker-format="HH:mm"
+                              [(ngModel)]="startTime"></ion-datetime>
+            </ion-item>
+            <ion-item>
+                <ion-label>Duration</ion-label>
+                <ion-input [(ngModel)]="minutes" type="number" class="ion-text-right" placeholder="Minutes"></ion-input>
+            </ion-item>
 
-        <ion-item>
-            <a (click)="routeToInfoSingle()">*more info on intensities</a>
-            <!--<ion-button expand="block">Add activity</ion-button>-->
-        </ion-item>
+            <ion-item>
+                <a (click)="routeToInfoSingle()">*more info on intensities</a>
+                <!--<ion-button expand="block">Add activity</ion-button>-->
+            </ion-item>
 
-        <section>
-            <ion-button (click)=editActivity() color="secondary" expand="block">Save Activity</ion-button>
-            <!--<ion-button expand="block">Add activity</ion-button>-->
-        </section>
+            <section>
+                <ion-button (click)=editActivity() color="secondary" expand="block">Save Activity</ion-button>
+                <!--<ion-button expand="block">Add activity</ion-button>-->
+            </section>
 
-        <div class="error-message" *ngIf='(todayA.getTime() - activity.endTime.getTime()) < 0'>
-            <ion-icon class="icon" name="close-circle-outline" size="small"></ion-icon>
-            <ion-label> You cannot edit activities for the future</ion-label>
-        </div>
-    </ion-list>
-
+            <div class="error-message" *ngIf='(today.valueOf() - activity.endTime.getTime()) < 0'>
+                <ion-icon class="icon" name="close-circle-outline" size="small"></ion-icon>
+                <ion-label> You cannot edit activities for the future</ion-label>
+            </div>
+        </ion-card-content>
+    </ion-card>
 </ion-content>

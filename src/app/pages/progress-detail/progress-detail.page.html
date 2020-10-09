@@ -81,8 +81,8 @@
                 <ion-icon class="ion-text-right" name="create" (click)='routeToEditGoalPage(dailyActive)'></ion-icon>
             </ion-card-title>
         </ion-card-header>
-        <ion-card-content>
-            <ion-list *ngIf="dailyActivePromise | async">
+        <ion-card-content *ngIf="goalObservable | async">
+            <ion-list>
                 <ion-item class="ion-justify-content-evenly">
                     <ion-label>
                         <h3>{{dailyActive.duration | titlecase}} </h3>
@@ -95,7 +95,7 @@
                 <ion-progress-bar color="primary" [value]="dailyActive.relative"></ion-progress-bar>
             </ion-list>
 
-            <ion-list *ngIf="weeklyActivePromise | async">
+            <ion-list>
                 <ion-item class="ion-justify-content-evenly">
                     <ion-label>
                         <h3>{{weeklyActive.duration | titlecase}} </h3>

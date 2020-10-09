@@ -322,7 +322,7 @@ exports.resetLeaderboard = functions
 
 exports.dailyCleanUp = functions
     .region('europe-west1')
-    .pubsub.schedule('13 10 * * *')
+    .pubsub.schedule('0 0 * * *')
     .timeZone('Europe/Berlin')
     .onRun((context: any) => {
         let goals: any;
@@ -448,7 +448,7 @@ function updatePublicUserData(users: any, publicUserData: any) {
 
 exports.setGoals = functions
     .region('europe-west1')
-    .pubsub.schedule('0 9 * * 5')
+    .pubsub.schedule('0 9 * * 1')
     .timeZone('Europe/Berlin')
     .onRun((context: any) => {
         return admin.database().ref('/users/').once('value')

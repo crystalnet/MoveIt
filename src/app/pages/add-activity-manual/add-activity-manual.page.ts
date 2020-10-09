@@ -6,6 +6,7 @@ import {LoadingController, ToastController} from '@ionic/angular';
 import {FormBuilder, FormGroup} from '@angular/forms';
 import {NavigationExtras, Router} from '@angular/router';
 import * as moment from 'moment';
+import {Moment} from 'moment';
 
 @Component({
     selector: 'app-add-activity-manual',
@@ -18,15 +19,12 @@ export class AddActivityManualPage implements OnInit {
     time: string;
     types: Array<string>;
     intensities: Array<string>;
-    addForm: FormGroup;
     errorMessage = '';
     successMessage = '';
-    todayA: Date = new Date();
-    today: string = new Date().toISOString();
     date: string = new Date().toISOString();
-    minDate: string = moment().startOf('day').subtract(2, 'day').toISOString(true);
+    today: Moment = moment();
+    minDate: Moment = moment().startOf('day').subtract(2, 'day');
     check = false;
-    validationMessage: string;
     error = false;
 
 
@@ -36,6 +34,7 @@ export class AddActivityManualPage implements OnInit {
         this.location = location;
         this.types = Activity.types;
         this.intensities = Activity.intensities;
+        console.log('ACTIVITIES');
     }
 
     goBack() {
@@ -50,24 +49,12 @@ export class AddActivityManualPage implements OnInit {
     }
 
     routeToInfoSingle() {
-
         const navigationExtras: NavigationExtras = {
             queryParams: {
                 infoId: 0
             }
         };
         this.router.navigate(['/menu/information'], navigationExtras);
-    }
-
-    convertDate() {
-        const date = this.date;
-        const time = this.time;
-
-        const t1: any = date.split('T');
-        const t2: any = time.split('T');
-        const t3: any = t1[0].concat('T', t2[1]);
-
-        this.activity.startTime = new Date(t3);
     }
 
     async presentAlert() {
@@ -84,15 +71,6 @@ export class AddActivityManualPage implements OnInit {
         }).then(toast => {
             toast.present();
         });
-        /*  const alert = await this.alertController.create({
-            header: 'Success',
-            message: 'Activity added successfully!',
-            buttons: ['OK'],
-          });
-
-          await alert.present();
-          let result = await alert.onDidDismiss();
-          console.log(result);*/
     }
 
     async addActivity() {
@@ -104,22 +82,20 @@ export class AddActivityManualPage implements OnInit {
             this.error = true;
             return;
         }
-        const date = this.date;
-        const time = this.time;
-        const t1: any = date.split('T');
-        const t2: any = time.split('T');
-        const t3: any = t1[0].concat('T', t2[1]);
 
-        this.activity.startTime = new Date(t3);
-        const newDateObj = new Date(this.activity.startTime.getTime() + this.minutes * 60000);
+        const t1: any = moment(this.date);
+        const t2: any = moment(this.time);
+        t1.set('hours', t2.get('hours')).set('minutes', t2.get('minutes'));
 
-        this.activity.endTime = new Date(newDateObj);
+        this.activity.startTime = t2.toDate();
+
+        t2.add(this.minutes, 'minutes');
+        this.activity.endTime = t2.toDate();
 
         this.activity.source = 'moveItApp';
-
         console.log(this.activity);
 
-        if ((this.todayA.getTime() - this.activity.startTime.getTime()) < 0) {
+        if ((new Date().getTime() - this.activity.startTime.getTime()) < 0) {
             this.error = true;
             return;
         }
@@ -134,6 +110,9 @@ export class AddActivityManualPage implements OnInit {
             (activity) => {
                 console.log(activity);
                 this.activity = new Activity();
+                this.time = '';
+                this.date = new Date().toISOString();
+                this.minutes = null;
                 this.presentAlert();
                 loading.dismiss();
                 this.router.navigateByUrl('/menu/progress');
@@ -144,6 +123,4 @@ export class AddActivityManualPage implements OnInit {
                 }
             );
     }
-
-
 }

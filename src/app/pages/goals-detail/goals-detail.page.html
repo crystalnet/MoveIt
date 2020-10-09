@@ -10,14 +10,14 @@
     </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content>
     <div *ngIf="goalPromise | async as goals">
         <ion-card>
             <ion-card-header>
-                <ion-card-title>Daily Goal</ion-card-title>
+                <ion-card-title class="ion-text-center">Daily Goal</ion-card-title>
             </ion-card-header>
             <ion-card-content>
-                <p>Here you can set your {{goals[0].duration}} goal!
+                <p>Set your goal for {{goals[0].duration}} active minutes!
                 </p>
                 <ion-item>
                     <ion-range min="0" max="120" pin color="primary" [(ngModel)]="goals[0].target">
@@ -26,7 +26,7 @@
                     </ion-range>
                 </ion-item>
                 <ion-item lines="none">
-                    <ion-label>Goal</ion-label>
+                    <ion-label>Goal (minutes)</ion-label>
                     <ion-input type="number" slot="end" class="ion-text-right"
                                [(ngModel)]="goals[0].target"></ion-input>
                 </ion-item>
@@ -35,10 +35,10 @@
 
         <ion-card>
             <ion-card-header>
-                <ion-card-title>Weekly Goal</ion-card-title>
+                <ion-card-title class="ion-text-center">Weekly Goal</ion-card-title>
             </ion-card-header>
             <ion-card-content>
-                <p>Here you can set your {{goals[1].duration}} goal!
+                <p>Set your goal for {{goals[1].duration}} active minutes! WHO recommends 300 min, but 150 min as a minimum.
                 </p>
 
                 <ion-item>
@@ -49,7 +49,7 @@
                 </ion-item>
 
                 <ion-item lines="none">
-                    <ion-label>Goal</ion-label>
+                    <ion-label>Goal (minutes)</ion-label>
                     <ion-input type="number" slot="end" class="ion-text-right"
                                [(ngModel)]="goals[1].target"></ion-input>
                 </ion-item>

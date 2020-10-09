@@ -65,7 +65,6 @@ export class Activity {
      * @param activity an activity
      */
     static fromFirebaseObject(id: string, activity: Activity) {// firebaseObject: FireBaseObject) {
-        // @ts-ignore TS2339
         return new Activity(
             id,
             activity.distance,

@@ -26,25 +26,32 @@ export class ActivityService {
         });
     }
 
-    writeActivitytoFirebase(activity: Activity, createPost: boolean = true, message?) {
+    writeToFirebase(activity: Activity, createPost: boolean = true, message?) {
         const promises = [];
         activity.id = activity.startTime.getTime().toString();
         promises.push(this.fireDatabase.database.ref('/activities/' + firebase.auth().currentUser.uid + '/' + activity.id)
             .set(activity.toFirebaseObject()));
 
-        const post = new Post();
-        post.id = activity.endTime.getTime().toString();
-        post.activity = activity.id;
-        post.type = 'activity';
-        post.title = activity.getDuration() + ' min ' + activity.type;
-        if (message) {
-            post.content = message;
-        } else {
-            post.content = 'Look, I did ' + activity.getDuration() + ' minutes of ' + activity.type;
+        if (createPost) {
+            const post = new Post();
+            post.id = activity.endTime.getTime().toString();
+            post.activity = activity.id;
+            post.type = 'activity';
+            post.title = activity.getDuration() + ' min ' + activity.type;
+            if (message) {
+                post.content = message;
+            } else {
+                post.content = 'Look, I did ' + activity.getDuration() + ' minutes of ' + activity.type;
+            }
+            promises.push(this.postService.createPost(post));
         }
-        promises.push(this.postService.createPost(post));
-
         return Promise.all(promises);
+    }
+
+    deleteFromFirebase(activity: Activity) {
+        activity.id = activity.startTime.getTime().toString();
+        return this.fireDatabase.database.ref('/activities/' + firebase.auth().currentUser.uid + '/' + activity.id)
+            .remove();
     }
 
     /**
@@ -56,7 +63,7 @@ export class ActivityService {
         return new Promise<any>((resolve, reject) => {
             const promises = [];
             const newActivities = [activity];
-            promises.push(this.writeActivitytoFirebase(activity));
+            promises.push(this.writeToFirebase(activity));
             promises.push(this.synchronizeApi(false).then(
                 (activities: Activity[]) => {
                     newActivities.push(...activities);
@@ -83,14 +90,20 @@ export class ActivityService {
      *
      * @param activityId the id of the activity to be edited
      * @param activity the updated/new activity
+     * @param oldActivity activity before it was edited
      */
-    editActivity(activityId, activity: Activity) {
+    editActivity(activityId, activity: Activity, oldActivity: Activity) {
         return new Promise<any>((resolve, reject) => {
-            this.fireDatabase.database.ref(this.activityLocation + firebase.auth().currentUser.uid).child(activityId)
-                .set(activity.toFirebaseObject()).then(
+            const promises = [];
+            promises.push(this.writeToFirebase(activity, false));
+            if (activity.startTime.getTime() !== oldActivity.startTime.getTime()) {
+                promises.push(this.deleteFromFirebase(oldActivity));
+            }
+
+            return Promise.all(promises).then(
                 () => {
                     // const message = 'I edited my activity, I did ' + activity.getDuration() + ' minutes of ' + activity.type;
-                    this.runUpdates([activity]).then(
+                    this.runUpdates([oldActivity, activity]).then(
                         () => resolve(activity),
                         err => reject(err)
                     );
@@ -100,9 +113,9 @@ export class ActivityService {
         });
     }
 
-    runUpdates(newActivities: Activity[]) {
+    runUpdates(changedActivities: Activity[]) {
         return new Promise<any>((resolve, reject) => {
-            const startTimes = newActivities.map((activity: Activity) => activity.startTime.getTime());
+            const startTimes = changedActivities.map((activity: Activity) => activity.startTime.getTime());
             const start = Math.min(...startTimes);
             const end = Math.max(...startTimes);
 
@@ -236,7 +249,7 @@ export class ActivityService {
             this.readFitnessApi().then((activities: Activity[]) => {
                     const promises = [];
                     for (const activity of activities) {
-                        promises.push(this.writeActivitytoFirebase(activity));
+                        promises.push(this.writeToFirebase(activity));
                     }
                     Promise.all(promises).then(
                         () => {

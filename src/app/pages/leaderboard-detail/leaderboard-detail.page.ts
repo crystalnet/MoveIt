@@ -77,14 +77,6 @@ export class LeaderboardDetailPage implements OnInit {
         this.userObservable = this.userService.getUser();
         this.userObservable.subscribe(user => this.currentUser = user);
 
-        // // Observable1
-        // this.activitiesObserve = this.goalService.getAllOtherAvailableGoals();
-        //
-        // // Observable1 in action
-        // this.activitiesObserve.subscribe(result => {
-        //     this.pushMinuteObjects(result);
-        // });
-
         if (this.rewards) {
             // Observable2
             this.trophiesObserve = this.trophyService.getListOfAllUserAndTherWonTrophies();
@@ -103,7 +95,12 @@ export class LeaderboardDetailPage implements OnInit {
         this.generateGoalProgressList();
     }
 
-    viewProfile(uid) {
+    viewProfile(uid?) {
+        if (!uid) {
+            this.router.navigateByUrl('/menu/profile/profile/detail');
+            return;
+        }
+
         const navigationExtras: NavigationExtras = {
             queryParams: {
                 special: JSON.stringify(uid)

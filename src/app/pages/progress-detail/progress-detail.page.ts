@@ -19,9 +19,8 @@ import * as moment from 'moment';
 
 })
 export class ProgressDetailPage implements OnInit {
-    dailyActivePromise: Promise<any>;
+    goalObservable: Observable<any>;
     dailyActive: Goal;
-    weeklyActivePromise: Promise<any>;
     weeklyActive: Goal;
 
     currentGoals: any;
@@ -57,8 +56,8 @@ export class ProgressDetailPage implements OnInit {
     constructor(private activityService: ActivityService, private goalService: GoalService, private location: Location,
                 private health: Health, private platform: Platform, private router: Router, private navCtrl: NavController) {
         const history = this.goalService.getGoalHistory();
-        const current = this.goalService.getGoals();
-        combineLatest([history, current]).subscribe((results) => {
+        this.goalObservable = this.goalService.getGoals();
+        combineLatest([history, this.goalObservable]).subscribe((results) => {
             console.log('ENTERED');
             this.goalHistory = results[0];
             this.currentGoals = results[1];
@@ -69,8 +68,16 @@ export class ProgressDetailPage implements OnInit {
 
         this.loadMoreActivities();
 
-        this.dailyActivePromise = this.goalService.getGoal('daily-active').then(res => this.dailyActive = res, err => console.log(err));
-        this.weeklyActivePromise = this.goalService.getGoal('weekly-active').then(res => this.weeklyActive = res, err => console.log(err));
+        this.goalObservable.subscribe(goals => {
+            for (const goal of goals) {
+                if (goal.name === 'weekly-active') {
+                    this.weeklyActive = goal;
+                }
+                if (goal.name === 'daily-active') {
+                    this.dailyActive = goal;
+                }
+            }
+        });
     }
 
     ionViewDidEnter() {
