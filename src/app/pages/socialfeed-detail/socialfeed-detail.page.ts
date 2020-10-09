@@ -38,7 +38,7 @@ export class SocialfeedDetailPage implements OnInit {
     ngOnInit() {
         const publicUserData = this.userService.getUsersPublicData();
         this.posts = this.postService.getAllPosts();
-        combineLatest(publicUserData, this.posts).subscribe((results) => {
+        combineLatest([publicUserData, this.posts]).subscribe((results) => {
             console.log('ENTERED');
             this.publicUserData = results[0];
             this.loadMorePosts();

@@ -18,8 +18,7 @@
                     <h2>What's up?</h2>
                 </ion-item>
                 <ion-item>
-                    <p class="small">Write your own post. You and ask others to meet for a run or another activity for
-                        example.
+                    <p class="small">Write your own post. You and ask others to meet for a run for example.
                     </p>
                 </ion-item>
 
@@ -48,6 +47,12 @@
                             {{ post.createdAt | date:'HH:mm on dd. MMM' }}
                         </p>
                     </ion-label>
+                    <ng-container *ngIf="post.likes.includes(user.id); else liked">
+                        <ion-icon name="heart" color="secondary" size="large" (click)='like(post.id)'></ion-icon>
+                    </ng-container>
+                    <ng-template #liked>
+                        <ion-icon name="heart-outline" color="primary" size="large" (click)='like(post.id)'></ion-icon>
+                    </ng-template>
                 </ion-item>
 
                 <ion-row *ngIf="(userObservable | async)" class="ion-justify-content-start">

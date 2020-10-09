@@ -81,11 +81,11 @@
         "ANDROID_FCM_VERSION": "19.0.0",
         "ANDROID_GRADLE_TOOLS_VERSION": "3.5.3",
         "ANDROID_GOOGLE_SERVICES_VERSION": "4.3.3",
-        "ANDROID_DEFAULT_NOTIFICATION_ICON": "@mipmap/ic_launcher"
+        "ANDROID_DEFAULT_NOTIFICATION_ICON": "resources/icon.png"
       },
       "cordova-plugin-health": {
-        "HEALTH_READ_PERMISSION": "App needs read access",
-        "HEALTH_WRITE_PERMISSION": "App needs write access",
+        "HEALTH_READ_PERMISSION": "MoveIt needs read access",
+        "HEALTH_WRITE_PERMISSION": "MoveIt needs write access",
         "GMS_VERSION": "19.0.0"
       }
     },

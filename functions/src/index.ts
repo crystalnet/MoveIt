@@ -30,7 +30,7 @@ exports.automaticNotifications = functions
             (snapshot: any) => {
                 const result = snapshot.val();
                 if (!result) {
-                    console.log('No results for this time: ', time.toISOString(), result);
+                    console.log('No results for this time: ', time.toString(), result);
                     return;
                 }
 
@@ -156,7 +156,7 @@ function likeNotification(uid: string, group: string, postId: string) {
             }
 
             const data = new NotificationData();
-            data.header = 'Your post received a new like';
+            data.header = 'You\'re activity is being liked!';
             data.text = 'Your post was liked by someone, go check it out!';
             data.target = '/menu/socialfeed/socialfeed/detail';
             data.type = 'like-socialfeed-notification';
@@ -186,7 +186,7 @@ function commentNotification(uid: string, group: string, postId: string) {
             }
 
             const data = new NotificationData();
-            data.header = 'Your post has a new comment';
+            data.header = 'You\'re activity received comments!';
             data.text = 'Your post was commented by someone, go check it out!';
             data.target = '/menu/socialfeed/socialfeed/detail';
             data.type = 'comment-socialfeed-Notification';
@@ -245,10 +245,10 @@ exports.sendNotificationTrophyWin = functions.database.ref('/wins/{userId}/{goal
 
             // we have everything we need
             // Build the message payload and send the message
-            console.log('Construction the notification message.');
+            console.log('Constructing the notification message.');
             const data = new NotificationData();
-            data.header = 'You reached your goal!';
-            data.text = 'Congratulations - you reached your goal!';
+            data.header = `${goalName.split('-')[0]} goal won!`;
+            data.text = `Congratulations - you achieved your ${goalName.split('-')[0]} goal!`;
             data.type = 'goal-win-notification'
 
             const notification = new UserNotification(winnerId, data);
@@ -263,7 +263,7 @@ exports.sendNotification = functions.https.onCall((data: any, context: any) => {
     const title = data.title || 'You reached your goal!';
     const body = data.body || 'Congratulations - you reached your goal!';
     const id = data.id || (new Date()).getTime();
-    const type = data.type || '';
+    const type = data.type || 'custom-notification';
     const target = data.target || '';
     const confirmButtonText = data.confirmButtonText || 'Nice';
     const rejectButtonText = data.rejectButtonText || 'Dismiss';
