@@ -20,16 +20,16 @@
         <ion-card-content>
             <ion-item>
                 <ion-label>Activity type</ion-label>
-                <ion-select [(ngModel)]="activity.type" placeholder="Select type">
-                    <ion-select-option *ngFor="let type of types">{{type | titlecase }}</ion-select-option>
+                <ion-select [(ngModel)]="type" placeholder="Select type">
+                    <ion-select-option *ngFor="let type of types">{{type}}</ion-select-option>
                 </ion-select>
             </ion-item>
 
             <ion-item>
                 <ion-label>Intensity*</ion-label>
-                <ion-select [(ngModel)]="activity.intensity" placeholder="Select intensity">
+                <ion-select [(ngModel)]="intensity" placeholder="Select intensity">
                     <ion-select-option
-                            *ngFor="let intensity of intensities">{{intensity | titlecase}}</ion-select-option>
+                            *ngFor="let intensity of intensities">{{intensity}}</ion-select-option>
                 </ion-select>
             </ion-item>
 

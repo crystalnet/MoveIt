@@ -50,7 +50,7 @@ exports.automaticNotifications = functions
                             // } else if (randomization < 1) {
                             data = generateSocialfeedNotification(uid);
                         } else {
-                            console.log('continuing to next key. current key ', k);
+                            console.log('randomization result: no notification. continuing to next key. current uid ', uid);
                             continue;
                         }
                     } catch (err) {
@@ -97,12 +97,12 @@ exports.automaticNotifications = functions
 
 
 function generateLeaderboardNotification(uid: string) {
-    return admin.database().ref('/leaderboard/absolute/weeklyActiveMinutes').once('value').then(
+    return admin.database().ref('/leaderboard/absolute/weekly-active').once('value').then(
         (snap: any) => {
             const result = snap.val();
             if (!result) {
-                console.log('no results for weeklyActiveMinutes');
-                throw new Error('no results for weeklyActiveMinutes');
+                console.log('no results for weekly-active');
+                throw new Error('no results for weekly-active');
             }
             const ranks = Object.keys(result).sort((a, b) => result[b] - result[a]);
             const userRank = ranks.indexOf(uid) + 1;
@@ -226,10 +226,10 @@ exports.sendNotificationTrophyWin = functions.database.ref('/wins/{userId}/{goal
     // console.log(context);
     // console.log("event: ");
     // console.log(event);
-    const winnerId = context.params.userId;
+    const uid = context.params.userId;
     const goalName = context.params.goal;
     const operation = context.eventType;
-    console.log('winnerId: ', winnerId);
+    console.log('uid: ', uid);
     console.log('goal: ', goalName);
 
     if (!goalName.includes('active') || operation.includes('delete')) {
@@ -237,24 +237,26 @@ exports.sendNotificationTrophyWin = functions.database.ref('/wins/{userId}/{goal
         return;
     }
 
-    //get the token of the user receiving the message
-    return admin.database().ref('/users/' + winnerId).once('value').then(
-        (snap: any) => {
-            const token = snap.child('token').val();
-            console.log('token: ', token);
+    const promises = [];
+    // we have everything we need
+    // Build the message payload and send the message
+    const data = new NotificationData();
+    data.header = `${goalName.split('-')[0]} goal won!`;
+    data.text = `Congratulations - you achieved your ${goalName.split('-')[0]} goal!`;
+    data.type = 'goal-win-notification';
 
-            // we have everything we need
-            // Build the message payload and send the message
-            console.log('Constructing the notification message.');
-            const data = new NotificationData();
-            data.header = `${goalName.split('-')[0]} goal won!`;
-            data.text = `Congratulations - you achieved your ${goalName.split('-')[0]} goal!`;
-            data.type = 'goal-win-notification'
+    const notification = new UserNotification(uid, data);
+    promises.push(notification.send());
 
-            const notification = new UserNotification(winnerId, data);
-            notification.send();
-        });
+    promises.push(incrementNWins(uid));
+    return Promise.all(promises);
 });
+
+function incrementNWins(uid: string) {
+    return admin.database().ref('/leaderboard/nWins/' + uid).transaction((res: any) => {
+        return res + 1;
+    }, (err: any) => console.log(err));
+}
 
 exports.sendNotification = functions.https.onCall((data: any, context: any) => {
     // Message text passed from the client.
@@ -514,7 +516,6 @@ class UserNotification {
     }
 
     getUserToken() {
-        console.log('retrieving token');
         return new Promise((resolve, reject) => {
             admin.database().ref('/users/' + this.uid + '/token').once('value').then(
                 (snapshot: any) => {
@@ -550,8 +551,7 @@ class UserNotification {
             time: this.data.id,
             response: 'not opened'
         };
-        admin.database().ref('/tracking/' + this.uid + '/reactions/' + this.data.id).set(dbNotification).then(
-            () => console.log('created db entry', dbNotification),
+        admin.database().ref('/tracking/' + this.uid + '/reactions/' + this.data.id).set(dbNotification).catch(
             (err: any) => console.log(err)
         );
     }
@@ -578,7 +578,7 @@ class UserNotification {
 
                     return admin.messaging().sendToDevice(token, this.payload)
                         .then(function(response: any) {
-                            console.log('Successfully sent message:', response);
+                            console.log('Successfully sent message');
                         })
                         .catch(function(error: any) {
                             console.log('Error sending message:', error);

@@ -18,10 +18,11 @@ export class EditActivityPage implements OnInit {
     minutes: number;
     startDate: string;
     startTime: string;
+    type: string;
+    intensity: string;
     types: Array<string>;
     intensities: Array<string>;
     today: Moment = moment();
-    intensity: string;
     oldActivity;
 
     constructor(private activityService: ActivityService, private location: Location, private router: Router,
@@ -29,6 +30,8 @@ export class EditActivityPage implements OnInit {
         this.activity = this.router.getCurrentNavigation().extras.state.activity; // TODO: display error message if empty
         this.oldActivity = {...this.activity};
 
+        this.type = this.activity.type;
+        this.intensity = this.activity.intensity;
         this.startDate = this.activity.startTime.toString();
         this.startTime = this.activity.startTime.toString();
         this.minutes = this.activity.getDuration();
@@ -76,6 +79,8 @@ export class EditActivityPage implements OnInit {
         this.activity.startTime = t2.toDate();
         t2.add(this.minutes, 'minutes');
         this.activity.endTime = t2.toDate();
+        this.activity.intensity = this.activity.intensity.toLowerCase();
+        this.activity.type = this.activity.type.toLowerCase();
 
 
         this.activity.source = 'moveItApp';

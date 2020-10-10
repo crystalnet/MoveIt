@@ -203,29 +203,15 @@ export class LeaderboardDetailPage implements OnInit {
     }
 
     generateGoalWinsList() {
-        const dailyObservable = this.goalService.getLeaderboardGoals('nWins', 'daily-active');
-        const weeklyObservable = this.goalService.getLeaderboardGoals('nWins', 'weekly-active');
-
-        combineLatest(dailyObservable, weeklyObservable)
-            .subscribe(result => {
-                const dailyList = result[0];
-                const weeklyList = result[1];
-                const combinedList = dailyList;
-
-                if (weeklyList && dailyList) {
-                    for (const user of Object.keys(weeklyList)) {
-                        if (user in Object.keys(combinedList)) {
-                            combinedList[user] += weeklyList[user];
-                        }
-                        combinedList[user] = weeklyList[user];
-                    }
-
-                    const testarray = Object.keys(combinedList)
-                        .map(uid => new LeaderboardObject(uid, combinedList[uid], this.publicUserData));
-                    this.goalWinsList = this.sortArrays(testarray);
-                    console.log(this.goalWinsList);
-                }
-            });
+        const nGoals = this.goalService.getLeaderboardGoals('nWins', '');
+        nGoals.subscribe(goalList => {
+            if (goalList) {
+                const testarray = Object.keys(goalList)
+                    .map(uid => new LeaderboardObject(uid, goalList[uid], this.publicUserData));
+                this.goalWinsList = this.sortArrays(testarray);
+                console.log(this.goalWinsList);
+            }
+        });
     }
 
     /**

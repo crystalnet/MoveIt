@@ -47,12 +47,12 @@ export class GoalService {
      */
     initializeUserGoals() {
         return new Promise<any>((resolve, reject) => {
+            this.fireDatabase.database.ref('/leaderboard/nWins/' + firebase.auth().currentUser.uid).set(0);
             for (const goal of Goal.defaultGoals) {
                 this.updateGoal(goal).then(
                     () => null,
                     err => reject(err)
                 );
-                this.fireDatabase.database.ref('/leaderboard/nWins/' + goal.name + '/' + firebase.auth().currentUser.uid).set(0);
                 this.fireDatabase.database.ref('/goalHistory/' + firebase.auth().currentUser.uid + '/' + goal.name).set({a: 'b'});
             }
             resolve('Successfully initialized goals');
@@ -304,37 +304,6 @@ export class GoalService {
         });
     }
 
-    updatePreviousGoals(activity: Activity) {
-        const activityTime = moment(activity.startTime);
-        const today = moment();
-        if (activityTime.isSameOrAfter(today, 'day')) {
-            // Activity is from today, so no need to update previous goals
-            return;
-        }
-
-        const time = moment().subtract(2, 'day').endOf('day');
-        while (time.isBefore(today, 'day')) {
-            const goalList = ['daily-active', 'weekly-active'];
-            if (activity.intensity === 'vigorous') {
-                goalList.push('daily-vigorous', 'weekly-vigorous');
-            } else {
-                goalList.push('daily-moderate', 'weekly-moderate');
-            }
-
-            for (const goalName of goalList) {
-                const path = '/goalHistory/' + firebase.auth().currentUser.uid + '/' + goalName + '/' + time.valueOf();
-                this.fireDatabase.object<Goal>(path).snapshotChanges() // TODO get right entry
-                    .pipe(first(), map(el => Goal.fromFirebaseObject(goalName, el.payload.val()))).subscribe(goal => {
-                    goal.current += activity.getDuration();
-                    goal.relative = goal.current / goal.target;
-                    return this.fireDatabase.database.ref(path).set(goal.toFirebaseObject());
-                });
-            }
-            time.add(1, 'day');
-        }
-
-    }
-
     /**
      * Calculate the progress of a given goal
      *
@@ -409,13 +378,11 @@ export class GoalService {
                         // If it doesn't exist, create a new array with the current win
                         wins = [time.valueOf()];
                     }
-                    this.fireDatabase.database.ref('/leaderboard/' + '/nWins/' + goal.name + '/' + firebase.auth().currentUser.uid)
-                        .set(wins.length).catch(err => console.log(err));
                     this.trackingService.logAction(new ActionLog('goal-won', goal.name, goal.target, goal.target));
-                    if (createPost) {
-                        this.fireDatabase.database.ref('/wins/' + firebase.auth().currentUser.uid + '/' + goal.name)
-                            .set(wins).then(
-                            (res) => {
+                    this.fireDatabase.database.ref('/wins/' + firebase.auth().currentUser.uid + '/' + goal.name)
+                        .set(wins).then(
+                        (res) => {
+                            if (createPost) {
                                 const post = new Post();
                                 post.title = goal.duration + ' ' + goal.type + ' goal achieved';
                                 post.content = 'Hooray, I\'ve achieved my ' + goal.duration + ' goal for ' + goal.type;
@@ -424,9 +391,11 @@ export class GoalService {
                                     () => resolve(res),
                                     err => reject(err)
                                 );
-                            },
-                            (err) => reject(err));
-                    }
+                            } else {
+                                resolve(res);
+                            }
+                        },
+                        (err) => reject(err));
                 },
                 (err) => reject(err));
         });

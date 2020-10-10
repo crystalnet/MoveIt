@@ -82,6 +82,9 @@ export class AddActivityTrackPage implements OnInit {
 
         this.activity.endTime = new Date(newDateObj);
         this.activity.source = 'moveItApp';
+        this.activity.intensity = this.activity.intensity.toLowerCase();
+        this.activity.type = this.activity.type.toLowerCase();
+
         console.log(this.activity);
         this.activityService.createActivity(this.activity).then(
             res => {
