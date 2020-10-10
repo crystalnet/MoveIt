@@ -11,17 +11,17 @@
 </ion-header>
 
 <ion-content>
-    <ion-card>
+    <ion-card *ngIf="(currentUser | async); let user">
         <ion-item>
             <ion-avatar slot="start">
-                <img src="{{ (currentUser | async)?.profilePictureUrl }}">
+                <img src="{{ user.profilePictureUrl }}">
                 <!--img [src]="post.image"-->
             </ion-avatar>
 
             <ion-label>
-                <h2>{{ (currentUser | async)?.name  }}</h2>
+                <h2>{{ user.name  }}</h2>
                 <!-- <h2 *ngIf="(currentUser | async); let user">{{ user.name }} Username</h2> -->
-                <p *ngIf="(currentUser | async); let user">{{ calculateAge(user.birthday) }} years old</p>
+                <p>{{ calculateAge(user.birthday) }} years old</p>
             </ion-label>
             <ion-label>
                 <!--<div class="fileUpload btn btn-primary">
@@ -39,14 +39,6 @@
                        (change)="uploadFile($event.target.files)"/>
             </ion-label>
         </ion-item>
-        <ion-item>
-            <div *ngIf="(currentUser | async); let user">
-                <ion-card-content>
-                    {{ user.bio }}
-                </ion-card-content>
-            </div>
-        </ion-item>
-
 
         <div *ngIf="percentage | async as pct">
             Progress: {{ pct | number }}%
@@ -81,6 +73,11 @@
                 >
             </div>
         </div>
+        
+        <ion-item>
+            <ion-label position="floating">Biography</ion-label>
+            <ion-textarea auto-grow="true" [(ngModel)]="user.bio" (ionBlur)="updateBio(user.bio)"></ion-textarea>
+        </ion-item>
     </ion-card>
 
 

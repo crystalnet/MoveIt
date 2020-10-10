@@ -116,6 +116,10 @@ export class ProfileDetailPage implements OnInit {
         );
     }
 
+    updateBio(bio) {
+        this.userService.updateBio(bio);
+    }
+
 
     uploadFile(event: FileList) {
         // The File object

@@ -11,25 +11,22 @@
 </ion-header>
 
 <ion-content>
-    <ion-card>
+    <ion-card *ngIf="(userObservable | async); let user">
         <ion-item>
             <ion-avatar slot="start">
-                <img src="{{ (userObservable | async)?.profilePictureUrl  }}">
+                <img src="{{user.profilePictureUrl  }}">
                 <!--img [src]="post.image"-->
             </ion-avatar>
 
             <ion-label>
-                <h2>{{ (userObservable | async)?.name  }}</h2>
-                <p *ngIf="(userObservable | async); let user">{{ calculateAge(user.birthday) }} years old</p>
+                <h2>{{ user.name  }}</h2>
+                <p >{{ calculateAge(user.birthday) }} years old</p>
 
             </ion-label>
         </ion-item>
         <ion-item>
-            <div *ngIf="(userObservable | async); let user">
-                <ion-card-content>
-                    {{ user.bio }}
-                </ion-card-content>
-            </div>
+            <ion-label position="floating">Biography</ion-label>
+            <ion-textarea auto-grow="true" [(ngModel)]="user.bio" disabled="true"></ion-textarea>
         </ion-item>
     </ion-card>
 
