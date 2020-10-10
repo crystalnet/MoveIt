@@ -54,10 +54,10 @@ export class RegistrationPage implements OnInit {
         this.validationsForm = this.formBuilder.group({
             email: new FormControl('', Validators.compose([
                 Validators.required,
-                Validators.pattern('^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$')
+                Validators.pattern('^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$'),
             ])),
             password: new FormControl('', Validators.compose([
-                Validators.minLength(5),
+                Validators.minLength(8),
                 Validators.required
             ])),
             name: new FormControl('', Validators.required),
@@ -71,7 +71,7 @@ export class RegistrationPage implements OnInit {
             time2: new FormControl('', Validators.required),
             time3: new FormControl('', Validators.required),
             time4: new FormControl('', Validators.required)
-        });
+        }, { updateOn: 'blur' });
         this.validationsForm.get('terms').setValue(false);
     }
 

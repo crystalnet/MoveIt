@@ -4,6 +4,8 @@ import {ActivityService} from '../../services/activity/activity.service';
 import {Location} from '@angular/common';
 import {LoadingController, ToastController} from '@ionic/angular';
 import {NavigationExtras, Router} from '@angular/router';
+import {ActionLog} from '../../model/actionLog';
+import {TrackingService} from '../../services/tracking/tracking.service';
 
 
 @Component({
@@ -35,7 +37,7 @@ export class AddActivityTrackPage implements OnInit {
 
 
     constructor(private loadingController: LoadingController, private activityService: ActivityService, private location: Location,
-                private toastController: ToastController, private router: Router) {
+                private toastController: ToastController, private router: Router, private trackingService: TrackingService) {
         this.activity = new Activity();
         this.location = location;
         this.types = Activity.types;
@@ -88,6 +90,7 @@ export class AddActivityTrackPage implements OnInit {
         console.log(this.activity);
         this.activityService.createActivity(this.activity).then(
             res => {
+                this.trackingService.logAction(new ActionLog('manual-activity-added', res.id));
                 console.log(res);
                 loading.dismiss();
                 this.presentAlert();

@@ -43,7 +43,7 @@ export class Activity {
         this.source = source || 'unknown';
     }
 
-    static types = ['basketball', 'biking', 'dancing', 'handball', 'football', 'running', 'swimming', 'volleyball', 'walking', 'other'];
+    static types = ['basketball', 'biking', 'climbing', 'dancing', 'handball', 'hiking', 'football', 'running', 'swimming', 'volleyball', 'walking', 'weight training', 'yoga', 'other'];
     static intensities = ['moderate', 'vigorous'];
     startDateIso: string;
     startTimeIso: string;
@@ -90,18 +90,15 @@ export class Activity {
         ApiObj.forEach((SingleEntry) => {
             console.log('Single Entry of Fitness API: ', SingleEntry);
             // still activity will be excluded
-            if (SingleEntry.value === 'still') {
-                return;
-            }
-
             // activities that are not defined by API will be excluded
-            if (SingleEntry.value === 'other') {
+            const dropActivities = ['other', 'in_vehicle', 'still', 'unknown', 'sleep', 'sleep_awake', 'sleep_deep', 'sleep_light', 'sleep-rem'];
+            if (dropActivities.includes(SingleEntry.value.toLowerCase())) {
                 return;
             }
 
             // activities shorter then 10 minutes will be disregarded
             const duration = Math.round((SingleEntry.endDate.getTime() - SingleEntry.startDate.getTime()) / 60000);
-            if (duration < 10 || duration > 600) {
+            if (duration < 10 || duration > 300) {
                 return;
             }
 
@@ -111,15 +108,19 @@ export class Activity {
                 SingleEntry.value = 'other'
             };  */
 
-            ActSingle = new Activity(
-                '',
-                {unit: 'm', value: SingleEntry.distance},
-                SingleEntry.endDate,
-                '',
-                SingleEntry.startDate,
-                SingleEntry.value,
-                SingleEntry.sourceBundleId,
-            );
+            ActSingle = new Activity();
+            ActSingle.distance = {unit: 'm', value: SingleEntry.distance};
+            ActSingle.endTime = SingleEntry.endDate;
+            ActSingle.startTime = SingleEntry.startDate;
+            ActSingle.type = SingleEntry.value.toLowerCase();
+            ActSingle.source = SingleEntry.sourceBundleId;
+            ActSingle.intensity = 'vigorous';
+
+            const moderateActivities = ['biking', 'gardening', 'golf', 'hiking', 'housework', 'meditation', 'stair_climbing', 'walking', 'walking_stroller', 'walking_treadmill'];
+            if (moderateActivities.includes(ActSingle.type)) {
+                ActSingle.intensity = 'vigorous';
+            }
+
             ActMulit.push(ActSingle);
         });
         return ActMulit;

@@ -87,6 +87,7 @@ export class User {
      *
      */
     toFirebaseObject() {
+        const offset = new Date().getTimezoneOffset();
         return {
             name: this.name,
             challengesActive: JSON.stringify(this.challengesActive),
@@ -98,7 +99,8 @@ export class User {
             occupation: this.occupation,
             times: this.times,
             profilePictureUrl: this.profilePictureUrl,
-            bio: this.bio
+            bio: this.bio,
+            offset
         };
     }
 

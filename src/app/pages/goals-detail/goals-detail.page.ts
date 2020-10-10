@@ -70,17 +70,17 @@ export class GoalsDetailPage implements OnInit {
 
     async presentAlert() {
         const alert = await this.alertController.create({
-            header: 'Success',
+            header: 'Goals changed',
             message: 'Were the previous goal too easy?',
             buttons: [
                 {
-                    text: 'YES', handler: () => {
-                        this.trackingService.logReaction('goal-adjustment-too-easy', 'yes');
+                    text: 'No', handler: () => {
+                        this.trackingService.logInAppNotification('goal-adjustment', 'not-tooEasy');
                     }
                 },
                 {
-                    text: 'No', handler: () => {
-                        this.trackingService.logReaction('goal-adjustment-too-easy', 'yes');
+                    text: 'Yes', handler: () => {
+                        this.trackingService.logInAppNotification('goal-adjustment', 'tooEasy');
                     }
                 }
             ],

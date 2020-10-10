@@ -7,15 +7,17 @@ import {Group} from '../../model/group';
 import {UserPublicData} from '../../model/userPublicData';
 import {flatMap, map} from 'rxjs/operators';
 import {Observable, of} from 'rxjs';
+import {TrackingService} from '../tracking/tracking.service';
+import {ActionLog} from '../../model/actionLog';
 
 @Injectable({
     providedIn: 'root'
 })
 export class UserService {
-    constructor(private db: AngularFireDatabase) {
+    constructor(private db: AngularFireDatabase, private trackingService: TrackingService) {
     }
 
-    // BK: returns the group the user is assigned to. Will be used in menu.page.ts
+    // returns the group the user is assigned to. Will be used in menu.page.ts
     getUsergroup() {
         return this.db.object<string>('/users/' + firebase.auth().currentUser.uid + '/group').valueChanges();
     }
@@ -161,6 +163,7 @@ export class UserService {
      * @param profilePictureUrl url of pointing to the new profile picture
      */
     changeProfilePicture(userID: string, profilePictureUrl: string) {
+        this.trackingService.logAction(new ActionLog('profilePic-updated', 'profilePic', '', ''));
         const index = profilePictureUrl.lastIndexOf('.');
         const url = profilePictureUrl.slice(0, index) + '_64x64' + profilePictureUrl.slice(index);
         const promises = [];
@@ -175,6 +178,7 @@ export class UserService {
      * @param bio new bio
      */
     updateBio(bio) {
+        this.trackingService.logAction(new ActionLog('bio-updated', 'userBio', '', bio));
         return this.db.database.ref('/users/' + firebase.auth().currentUser.uid + '/bio').set(bio);
     }
 

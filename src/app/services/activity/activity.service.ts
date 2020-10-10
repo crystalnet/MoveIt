@@ -1,4 +1,4 @@
-import {Injectable, PlatformRef} from '@angular/core';
+import {Injectable} from '@angular/core';
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import {AngularFireDatabase} from '@angular/fire/database';
@@ -41,7 +41,8 @@ export class ActivityService {
             if (message) {
                 post.content = message;
             } else {
-                post.content = 'Look, I did ' + activity.getDuration() + ' minutes of ' + activity.type;
+                // post.content = 'Look, I did ' + activity.getDuration() + ' minutes of ' + activity.type;
+                post.content = '';
             }
             promises.push(this.postService.createPost(post));
         }

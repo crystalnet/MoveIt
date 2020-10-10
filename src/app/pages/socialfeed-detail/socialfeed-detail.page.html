@@ -38,8 +38,8 @@
                         <img src="{{post.profilePictureUrl }}" (click)="viewProfile(post.user)">
                         <!--img [src]="post.image"-->
                     </ion-avatar>
-                    <ion-label id="{{post.id}}">
-                        <h2 (click)="viewProfile(post.user)">{{ post.title | titlecase}}</h2>
+                    <ion-label id="{{post.id}}" class="ion-text-wrap">
+                        <h2 (click)="viewProfile(post.user)">{{ post.title }}</h2>
                         <p (click)="viewProfile(post.user)">
                             by {{ post.username }} at
                             <!--ion-icon name="time"></ion-icon-->

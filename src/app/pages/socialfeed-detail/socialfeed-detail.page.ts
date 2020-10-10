@@ -135,13 +135,6 @@ export class SocialfeedDetailPage implements OnInit {
             res => console.log(res),
             err => console.log(err)
         );
-        this.postService.getPost(liked).then(
-            res => {
-                this.post = res;
-            },
-            err => console.log(err)
-        );
-        console.log(this.post);
     }
 
     unlike(unliked) {

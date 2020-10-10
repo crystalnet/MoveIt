@@ -7,6 +7,8 @@ import {Router, NavigationExtras} from '@angular/router';
 import {ToastController} from '@ionic/angular';
 import * as moment from 'moment';
 import {Moment} from 'moment';
+import {TrackingService} from '../../services/tracking/tracking.service';
+import {ActionLog} from '../../model/actionLog';
 
 @Component({
     selector: 'app-edit-activity',
@@ -26,7 +28,7 @@ export class EditActivityPage implements OnInit {
     oldActivity;
 
     constructor(private activityService: ActivityService, private location: Location, private router: Router,
-                private toastController: ToastController) {
+                private toastController: ToastController, private trackingService: TrackingService) {
         this.activity = this.router.getCurrentNavigation().extras.state.activity; // TODO: display error message if empty
         this.oldActivity = {...this.activity};
 
@@ -82,7 +84,6 @@ export class EditActivityPage implements OnInit {
         this.activity.intensity = this.activity.intensity.toLowerCase();
         this.activity.type = this.activity.type.toLowerCase();
 
-
         this.activity.source = 'moveItApp';
         console.log(this.activity);
 
@@ -90,6 +91,7 @@ export class EditActivityPage implements OnInit {
             res => {
                 console.log(res);
                 this.presentAlert();
+                this.trackingService.logAction(new ActionLog('activity-edited', res.id));
                 this.router.navigateByUrl('/menu/progress');
             },
             err => console.log(err)

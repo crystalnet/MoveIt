@@ -58,14 +58,16 @@ export class TrackingService {
             .push(actionLog.toFirebaseObject());
     }
 
-    logReaction(notification: string, response: string) {
-        const reaction = new Reaction(notification, response);
-        this.fireDatabase.database.ref('/tracking/' + firebase.auth().currentUser.uid + '/reactions').push(reaction.toFirebaseObject());
+    logInAppNotification(notificationType: string, response: string) {
+        this.logReaction('inApp-notification', notificationType, response);
     }
 
-    setReaction(id: string, type: string, response: string) {
-        const reaction = new Reaction(type, response);
-        return this.fireDatabase.database.ref('/tracking/' + firebase.auth().currentUser.uid + '/reactions/' + id)
-            .set(reaction.toFirebaseObject());
+    logPushNotification(notificationId: string, notificationType: string, response: string) {
+        this.logReaction('push-notification', notificationType, response, notificationId);
+    }
+
+    logReaction(type: string, notificationType: string, response: string, notificationId?: string) {
+        const reaction = new Reaction(type, notificationType, response, notificationId);
+        this.fireDatabase.database.ref('/tracking/' + firebase.auth().currentUser.uid + '/reactions').push(reaction.toFirebaseObject());
     }
 }

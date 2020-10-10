@@ -47,7 +47,7 @@ export class SetGoalsPage implements OnInit {
             buttons: [
                 {
                     text: 'Let\'s go', handler: () => {
-                        this.trackingService.logReaction('goal-adjustment-initial', '');
+                        this.trackingService.logInAppNotification('goal-adjustment-initial', '');
                     }
                 }
             ],

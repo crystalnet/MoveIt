@@ -87,8 +87,7 @@ export class InitialSetupPage implements OnInit {
             buttons: [
                 {
                     text: 'Let\'s go', handler: () => {
-                        this.trackingService.logReaction('account-setup-initial', '');
-                        this.trackingService.logReaction('goal-adjustment-initial', '');
+                        this.trackingService.logInAppNotification('account-setup-initial', '');
                     }
                 }
             ],

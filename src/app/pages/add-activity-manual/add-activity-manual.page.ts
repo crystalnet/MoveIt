@@ -3,10 +3,12 @@ import {Activity} from '../../model/activity';
 import {ActivityService} from '../../services/activity/activity.service';
 import {Location} from '@angular/common';
 import {LoadingController, ToastController} from '@ionic/angular';
-import {FormBuilder, FormGroup} from '@angular/forms';
+import {FormBuilder} from '@angular/forms';
 import {NavigationExtras, Router} from '@angular/router';
 import * as moment from 'moment';
 import {Moment} from 'moment';
+import {ActionLog} from '../../model/actionLog';
+import {TrackingService} from '../../services/tracking/tracking.service';
 
 @Component({
     selector: 'app-add-activity-manual',
@@ -29,7 +31,8 @@ export class AddActivityManualPage implements OnInit {
 
 
     constructor(private activityService: ActivityService, private location: Location, public toastController: ToastController,
-                private formBuilder: FormBuilder, private router: Router, private loadingController: LoadingController) {
+                private formBuilder: FormBuilder, private router: Router, private loadingController: LoadingController,
+                private trackingService: TrackingService) {
         this.activity = new Activity();
         this.location = location;
         this.types = Activity.types;
@@ -112,17 +115,18 @@ export class AddActivityManualPage implements OnInit {
         this.activityService.createActivity(this.activity).then(
             (activity) => {
                 console.log(activity);
+                this.trackingService.logAction(new ActionLog('manual-activity-added', activity.id));
+                this.presentAlert();
+                loading.dismiss();
                 this.activity = new Activity();
                 this.time = '';
                 this.date = new Date().toISOString();
                 this.minutes = null;
-                this.presentAlert();
-                loading.dismiss();
                 this.router.navigateByUrl('/menu/progress');
             })
             .catch(err => {
-                loading.dismiss();
-                console.error(err);
+                    loading.dismiss();
+                    console.error(err);
                 }
             );
     }

@@ -1,5 +1,7 @@
 interface FirebaseObject {
-    notification: string;
+    type: string;
+    notificationId: string;
+    notificationType: string;
     time: number;
     response: string;
 }
@@ -12,15 +14,19 @@ export class Reaction {
      * Each parameter is optional. If it's not present, a default value is used
      *
      */
-    constructor(notification?: string, response?: string, time?: Date) {
+    constructor(type?: string, notificationType?: string, response?: string, notificationId?: string, time?: Date) {
         // Each parameter is optional, if it's not there, set the default value
-        this.notification = notification || '';
+        this.type = type || '';
+        this.notificationId = notificationId || '';
+        this.notificationType = notificationType || '';
         this.time = time || new Date();
         this.response = response || '';
     }
 
     static actions = ['adjust-goal'];
-    notification: string;
+    type: string;
+    notificationId: string;
+    notificationType: string;
     time: Date;
     response: string;
 
@@ -33,7 +39,9 @@ export class Reaction {
      */
     static fromFirebaseObject(firebaseObject: FirebaseObject) {
         return new Reaction(
-            firebaseObject.notification,
+            firebaseObject.type,
+            firebaseObject.notificationId,
+            firebaseObject.notificationType,
             firebaseObject.response,
             new Date(firebaseObject.time)
         );
@@ -47,7 +55,9 @@ export class Reaction {
      */
     toFirebaseObject() {
         return {
-            notification: this.notification,
+            type: this.type,
+            notificationId: this.notificationId,
+            notificationType: this.notificationType,
             time: this.time.getTime(),
             response: this.response
         };

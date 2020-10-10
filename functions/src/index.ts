@@ -143,7 +143,7 @@ function likeNotification(uid: string, group: string, postId: string) {
     return admin.database().ref('/posts/groups/' + group + '/' + postId + '/likes').once('value').then((snap: any) => {
             const result = snap.val();
 
-            const botUserId = 'DyvMnL4Tv0OwOrWL9U2pyJJ8oKV2';
+            const botUserId = 'mJS7f7DPWgdhi0gKz2RmrvZkiAq1@';
             if (!result || Array.isArray(result)) {
                 admin.database().ref('/posts/groups/' + group + '/' + postId + '/likes').set([botUserId]);
             } else {
@@ -156,7 +156,7 @@ function likeNotification(uid: string, group: string, postId: string) {
             }
 
             const data = new NotificationData();
-            data.header = 'You\'re activity is being liked!';
+            data.header = 'Your activity is being liked!';
             data.text = 'Your post was liked by someone, go check it out!';
             data.target = '/menu/socialfeed/socialfeed/detail';
             data.type = 'like-socialfeed-notification';
@@ -169,7 +169,7 @@ function commentNotification(uid: string, group: string, postId: string) {
     return admin.database().ref('/posts/groups/' + group + '/' + postId + '/comments').once('value').then((snap: any) => {
             const result = snap.val();
 
-            const botUserId = 'DyvMnL4Tv0OwOrWL9U2pyJJ8oKV2';
+            const botUserId = 'mJS7f7DPWgdhi0gKz2RmrvZkiAq1@';
             const botUserName = 'Kon Sti';
             const comment = {
                 createdAt: moment().tz('Europe/Berlin').valueOf().toString(),
@@ -186,7 +186,7 @@ function commentNotification(uid: string, group: string, postId: string) {
             }
 
             const data = new NotificationData();
-            data.header = 'You\'re activity received comments!';
+            data.header = 'Your activity received comments!';
             data.text = 'Your post was commented by someone, go check it out!';
             data.target = '/menu/socialfeed/socialfeed/detail';
             data.type = 'comment-socialfeed-Notification';
@@ -199,20 +199,37 @@ exports.progressNotification = functions.database.ref('/leaderboard/relative/wee
     .onWrite((event: any, context: any) => {
         const before = event.before.val();
         const after = event.after.val();
+        console.log('triggered with new val ', after, ' old val', before);
         if (before && after && before < after) {
             const data = new NotificationData();
-            if (before < 0.25 && after >= 0.25) {
-                data.header = 'You reached 25% of your goal!';
-            } else if (before < 0.5 && after >= 0.5) {
-                data.header = 'You reached 50% of your goal!';
-            } else if (before < 0.75 && after >= 0.75) {
-                data.header = 'You reached 75% of your goal!';
+
+            const randomization = Math.random();
+            if (randomization < 0.5) {
+                if (before < 0.25 && after >= 0.25) {
+                    data.header = 'You reached 25% of your goal!';
+                } else if (before < 0.5 && after >= 0.5) {
+                    data.header = 'You reached 50% of your goal!';
+                } else if (before < 0.75 && after >= 0.75) {
+                    data.header = 'You reached 75% of your goal!';
+                } else {
+                    return;
+                }
+                data.text = 'Well done! You\'re making good progress.';
+                data.type = 'optimistic-progress-notification';
             } else {
-                return;
+                if (before < 0.25 && after >= 0.25) {
+                    data.header = 'You have 75% of your goal left!';
+                } else if (before < 0.5 && after >= 0.5) {
+                    data.header = 'You have 50% of your goal left!';
+                } else if (before < 0.75 && after >= 0.75) {
+                    data.header = 'You have 25% of your goal left!';
+                } else {
+                    return;
+                }
+                data.text = 'Work harder! Increase your effort to reach your goal.';
+                data.type = 'pessimistic-progress-notification';
             }
-            data.text = 'TO BE FILLED';
             data.target = '/menu/progress/progress/detail';
-            data.type = 'progress-notification';
             const notification = new UserNotification(context.params.userId, data);
             return notification.send();
         } else {

@@ -14,7 +14,7 @@ export class ActionLog {
      * Each parameter is optional. If it's not present, a default value is used
      *
      */
-    constructor(action?: string, object?: string, oldValue?: number, newValue?: number, time?: Date) {
+    constructor(action?: string, object?: string, oldValue?: any, newValue?: any, time?: Date) {
         // Each parameter is optional, if it's not there, set the default value
         this.action = action || '';
         this.object = object || '';
@@ -26,8 +26,8 @@ export class ActionLog {
     static actions = ['adjust-goal'];
     action: string;
     object: string;
-    oldValue: number;
-    newValue: number;
+    oldValue: any;
+    newValue: any;
     timestamp: Date;
 
     /**

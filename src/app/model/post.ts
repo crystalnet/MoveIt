@@ -30,7 +30,7 @@ export class Post {
         this.activity = activity || '';
         this.comments = comments || [];
         this.title = title || 'New post';
-        this.content = content || 'Lorem ipsum dolor sit amet';
+        this.content = content || '';
         this.type = content || 'default';
         this.createdAt = createdAt || new Date();
         this.likes = likes || [];

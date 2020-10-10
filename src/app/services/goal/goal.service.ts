@@ -384,9 +384,9 @@ export class GoalService {
                         (res) => {
                             if (createPost) {
                                 const post = new Post();
-                                post.title = goal.duration + ' ' + goal.type + ' goal achieved';
-                                post.content = 'Hooray, I\'ve achieved my ' + goal.duration + ' goal for ' + goal.type;
-                                post.type = 'goalAchievement';
+                                post.title = goal.duration.charAt(0).toUpperCase() + goal.duration.slice(1) + ' goal achieved';
+                                post.content = 'Hooray, I\'ve achieved my ' + goal.duration + ' goal of ' + goal.target + ' minutes';
+                                post.type = 'goal-won';
                                 this.postService.createPost(post).then(
                                     () => resolve(res),
                                     err => reject(err)

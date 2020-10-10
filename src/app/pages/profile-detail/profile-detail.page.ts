@@ -13,6 +13,7 @@ import * as firebase from 'firebase';
 import 'firebase/auth';
 
 import {UserService} from '../../services/user/user.service';
+import {TrackingService} from '../../services/tracking/tracking.service';
 
 export interface MyData {
     name: string;
