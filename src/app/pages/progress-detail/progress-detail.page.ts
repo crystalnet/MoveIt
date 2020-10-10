@@ -31,7 +31,7 @@ export class ProgressDetailPage implements OnInit {
 
     activities: Observable<Activity[]>;
     // Array which contains the displayed activities
-    displayedActivities: Observable<Activity[]>;
+    displayedActivities: Activity[];
     duration = 'day';
 
 
@@ -85,10 +85,13 @@ export class ProgressDetailPage implements OnInit {
 
     loadMoreActivities(event?) {
         this.nActivities += 5;
-        this.displayedActivities = this.activityService.getAllUserActivities(this.nActivities);
-        if (event) {
-            event.target.complete();
-        }
+        this.activities = this.activityService.getAllUserActivities(this.nActivities);
+        this.activities.subscribe((activities) => {
+            this.displayedActivities = activities;
+            if (event) {
+                event.target.complete();
+            }
+        });
     }
 
     updateProgress() {

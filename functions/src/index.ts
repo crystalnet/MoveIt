@@ -210,6 +210,7 @@ exports.progressNotification = functions.database.ref('/leaderboard/relative/wee
             } else {
                 return;
             }
+            data.text = 'TO BE FILLED';
             data.target = '/menu/progress/progress/detail';
             data.type = 'progress-notification';
             const notification = new UserNotification(context.params.userId, data);
@@ -241,8 +242,9 @@ exports.sendNotificationTrophyWin = functions.database.ref('/wins/{userId}/{goal
     // we have everything we need
     // Build the message payload and send the message
     const data = new NotificationData();
-    data.header = `${goalName.split('-')[0]} goal won!`;
-    data.text = `Congratulations - you achieved your ${goalName.split('-')[0]} goal!`;
+    const name = goalName.split('-')[0];
+    data.header = `${name.charAt(0).toUpperCase() + name.slice(1)} goal won!`;
+    data.text = `Congratulations, you achieved your ${name} goal!`;
     data.type = 'goal-win-notification';
 
     const notification = new UserNotification(uid, data);

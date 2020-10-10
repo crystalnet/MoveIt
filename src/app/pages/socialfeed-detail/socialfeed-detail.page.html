@@ -11,29 +11,28 @@
 </ion-header>
 
 <ion-content class="">
-    <div>
-        <ion-list>
-            <ion-card>
-                <ion-item lines="none">
-                    <h2>What's up?</h2>
-                </ion-item>
+    <ion-list>
+        <ion-card>
+            <ion-item lines="none">
+                <h2>What's up?</h2>
+            </ion-item>
+            <ion-item>
+                <p class="small">Write your own post. You and ask others to meet for a run for example.
+                </p>
+            </ion-item>
+
+            <form>
                 <ion-item>
-                    <p class="small">Write your own post. You and ask others to meet for a run for example.
-                    </p>
+                    <ion-input name="post" type="text" [(ngModel)]="postText"
+                               placeholder="Your post message">
+                    </ion-input>
+                    <ion-icon name="send" id="icons" class="ion-float-right" (click)="newPost(postText)"></ion-icon>
                 </ion-item>
+            </form>
+        </ion-card>
 
-                <form>
-                    <ion-item>
-                        <ion-input name="post" type="text" [(ngModel)]="postText"
-                                   placeholder="Your post message">
-                        </ion-input>
-                        <ion-icon name="send" id="icons" class="ion-float-right" (click)="newPost(postText)"></ion-icon>
-                    </ion-item>
-                </form>
-            </ion-card>
-
-
-            <ion-card *ngFor="let post of (displayedPosts | async)">
+        <div>
+            <ion-card *ngFor="let post of displayedPosts">
                 <ion-item>
                     <ion-avatar slot="start">
                         <img src="{{post.profilePictureUrl }}" (click)="viewProfile(post.user)">
@@ -118,11 +117,11 @@
                     </form>
                 </ion-row>
             </ion-card>
-        </ion-list>
-        <ion-infinite-scroll (ionInfinite)="loadMorePosts($event)">
-            <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more activities...">
-            </ion-infinite-scroll-content>
-        </ion-infinite-scroll>
-    </div>
+            <ion-infinite-scroll (ionInfinite)="loadMorePosts($event)">
+                <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more activities...">
+                </ion-infinite-scroll-content>
+            </ion-infinite-scroll>
+        </div>
+    </ion-list>
 </ion-content>
 

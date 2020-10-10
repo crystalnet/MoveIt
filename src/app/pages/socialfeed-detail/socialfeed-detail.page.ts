@@ -22,10 +22,10 @@ export class SocialfeedDetailPage implements OnInit {
     commentText = [];
     now = new Date();
     post: Post;
+    displayedPosts: any[];
     user: User;
     publicUserData: any;
     userObservable: Observable<any>;
-    displayedPosts: Observable<any[]>;
     nPosts = 0;
 
 
@@ -52,7 +52,7 @@ export class SocialfeedDetailPage implements OnInit {
     loadMorePosts(event?) {
         this.nPosts += 5;
         this.posts = this.postService.getAllPosts(this.nPosts);
-        this.displayedPosts = this.posts.pipe(map(posts => posts.map(post => {
+        this.posts.pipe(map(posts => posts.map(post => {
             const pseudoPost = {
                 username: this.publicUserData[post.user].name,
                 profilePictureUrl: this.publicUserData[post.user].profilePictureUrl,
@@ -61,10 +61,12 @@ export class SocialfeedDetailPage implements OnInit {
             };
             pseudoPost.usernames = pseudoPost.comments.map(comment => comment.user);
             return pseudoPost;
-        })));
-        if (event) {
-            event.target.complete();
-        }
+        }))).subscribe(posts => {
+            this.displayedPosts = posts;
+            if (event) {
+                event.target.complete();
+            }
+        });
     }
 
     goBack() {
