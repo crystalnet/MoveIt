@@ -48,6 +48,7 @@ export class MenuPage implements OnInit, OnDestroy {
     // ];
     pages = [];
     selectedPath = '';
+    lastNotification: number;
 
     ngOnInit() {
         this.trackingService.startRecordingViewTime('menu');
@@ -130,7 +131,7 @@ export class MenuPage implements OnInit, OnDestroy {
     }
 
     async handleNotification(payload) {
-        if (!payload) {
+        if (!payload || payload.id === this.lastNotification) {
             return;
         }
 
@@ -140,7 +141,7 @@ export class MenuPage implements OnInit, OnDestroy {
         } else {
             console.log('FCM: Received in foreground ' + payload);
         }
-        console.log(payload);
+        this.lastNotification = payload.id;
         const alert = await this.alertController.create({
             header: payload.header,
             message: payload.text,
@@ -148,19 +149,13 @@ export class MenuPage implements OnInit, OnDestroy {
                 {
                     text: payload.rejectButtonText,
                     handler: () => {
-                        this.trackingService.setReaction(payload.id, payload.type, 'negative').then(
-                            res => console.log(res),
-                            err => console.log(err)
-                        );
+                        this.trackingService.logPushNotification(payload.id, payload.type, 'negative');
                         console.log('FCM: Notification dismissed');
                     }
                 }, {
                     text: payload.confirmButtonText,
                     handler: () => {
-                        this.trackingService.setReaction(payload.id, payload.type, 'positive').then(
-                            res => console.log(res),
-                            err => console.log(err)
-                        );
+                        this.trackingService.logPushNotification(payload.id, payload.type, 'positive');
                         if (payload.target) {
                             this.navCtrl.navigateForward(payload.target);
                         }
