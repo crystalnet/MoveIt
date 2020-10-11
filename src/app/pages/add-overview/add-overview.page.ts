@@ -34,7 +34,7 @@ export class AddOverviewPage implements OnInit {
         const loading = await this.loadingController.create({
             cssClass: 'my-custom-class',
             message: 'Synchronizing...',
-            duration: 2000
+            duration: 10000
         });
         await loading.present();
 
