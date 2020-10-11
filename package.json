@@ -27,6 +27,7 @@
     "@ionic/angular": "^5.0.0",
     "@ionic/storage": "^2.3.1",
     "chart.js": "^2.9.3",
+    "cordova-android": "8.1.0",
     "cordova-plugin-fcm-with-dependecy-updated": "^7.3.1",
     "cordova-plugin-ionic-webview": "^5.0.0",
     "cordova-sqlite-storage": "^5.0.1",
@@ -49,7 +50,6 @@
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "^12.11.1",
     "codelyzer": "^6.0.0",
-    "cordova-android": "^9.0.0",
     "cordova-plugin-device": "^2.0.2",
     "cordova-plugin-ionic-keyboard": "^2.2.0",
     "cordova-plugin-splashscreen": "^5.0.2",
@@ -80,8 +80,7 @@
       "cordova-plugin-fcm-with-dependecy-updated": {
         "ANDROID_FCM_VERSION": "19.0.0",
         "ANDROID_GRADLE_TOOLS_VERSION": "3.5.3",
-        "ANDROID_GOOGLE_SERVICES_VERSION": "4.3.3",
-        "ANDROID_DEFAULT_NOTIFICATION_ICON": "resources/icon.png"
+        "ANDROID_GOOGLE_SERVICES_VERSION": "4.3.3"
       },
       "cordova-plugin-health": {
         "HEALTH_READ_PERMISSION": "MoveIt needs read access",
