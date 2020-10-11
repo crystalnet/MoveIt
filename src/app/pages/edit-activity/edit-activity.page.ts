@@ -78,9 +78,9 @@ export class EditActivityPage implements OnInit {
         const t2: any = moment(this.startTime).tz('Europe/Berlin');
         t1.set('hours', t2.get('hours')).set('minutes', t2.get('minutes'));
 
-        this.activity.startTime = t2.toDate();
-        t2.add(this.minutes, 'minutes');
-        this.activity.endTime = t2.toDate();
+        this.activity.startTime = t1.toDate();
+        t1.add(this.minutes, 'minutes');
+        this.activity.endTime = t1.toDate();
         this.activity.intensity = this.activity.intensity.toLowerCase();
         this.activity.type = this.activity.type.toLowerCase();
 
