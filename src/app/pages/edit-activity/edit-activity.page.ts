@@ -5,8 +5,8 @@ import {Location} from '@angular/common';
 
 import {Router, NavigationExtras} from '@angular/router';
 import {ToastController} from '@ionic/angular';
-import * as moment from 'moment';
-import {Moment} from 'moment';
+import * as moment from 'moment-timezone';
+import {Moment} from 'moment-timezone';
 import {TrackingService} from '../../services/tracking/tracking.service';
 import {ActionLog} from '../../model/actionLog';
 
@@ -24,7 +24,7 @@ export class EditActivityPage implements OnInit {
     intensity: string;
     types: Array<string>;
     intensities: Array<string>;
-    today: Moment = moment();
+    today: Moment = moment().tz('Europe/Berlin');
     oldActivity;
 
     constructor(private activityService: ActivityService, private location: Location, private router: Router,
@@ -74,8 +74,8 @@ export class EditActivityPage implements OnInit {
      * An updated activity object and the id of the activity to be updated must be provided
      */
     editActivity() {
-        const t1: any = moment(this.startDate);
-        const t2: any = moment(this.startTime);
+        const t1: any = moment(this.startDate).tz('Europe/Berlin');
+        const t2: any = moment(this.startTime).tz('Europe/Berlin');
         t1.set('hours', t2.get('hours')).set('minutes', t2.get('minutes'));
 
         this.activity.startTime = t2.toDate();

@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {Location} from '@angular/common';
 
 
-import {combineLatest, Observable} from 'rxjs';
+import {Observable} from 'rxjs';
 
 import {GoalService} from '../../services/goal/goal.service';
 

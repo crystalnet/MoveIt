@@ -10,7 +10,7 @@ import {GoalService} from '../goal/goal.service';
 import {RewardsService} from '../rewards/rewards.service';
 import {Health} from '@ionic-native/health/ngx';
 import {Storage} from '@ionic/storage';
-import * as moment from 'moment';
+import * as moment from 'moment-timezone';
 import {Platform} from '@ionic/angular';
 
 @Injectable({
@@ -22,7 +22,7 @@ export class ActivityService {
     constructor(private fireDatabase: AngularFireDatabase, private postService: PostService, private goalService: GoalService,
                 private rewardsService: RewardsService, private health: Health, private storage: Storage, private platform: Platform) {
         platform.resume.subscribe(() => {
-            this.synchronizeApi().then(() => console.log('DIGEST SYNCHRONIZATION'));
+            this.synchronizeApi(true).then(() => console.log('DIGEST SYNCHRONIZATION'));
         });
     }
 
@@ -65,7 +65,7 @@ export class ActivityService {
             const promises = [];
             const newActivities = [activity];
             promises.push(this.writeToFirebase(activity));
-            promises.push(this.synchronizeApi(false).then(
+            promises.push(this.synchronizeApi(false, false).then(
                 (activities: Activity[]) => {
                     newActivities.push(...activities);
                     // Returns the activity with the new id
@@ -120,8 +120,8 @@ export class ActivityService {
             const start = Math.min(...startTimes);
             const end = Math.max(...startTimes);
 
-            const startDate = moment(start).startOf('day');
-            const endDate = moment(end).endOf('week').endOf('day').add(1, 'day');
+            const startDate = moment(start).tz('Europe/Berlin').startOf('day');
+            const endDate = moment(end).tz('Europe/Berlin').endOf('week').endOf('day').add(1, 'day');
 
             const activities = this.getUserActivities(startDate.valueOf(), endDate.valueOf()).pipe(first());
             activities.subscribe(
@@ -215,8 +215,8 @@ export class ActivityService {
                                     if (lastDate != null) {
                                         startDate = new Date(new Date(lastDate).getTime() + 1); // last time read + 1 ms
                                     } else {
-                                        // 14 days ago by default if data has not been read yet
-                                        startDate = new Date(new Date().getTime() - 14 * 24 * 60 * 60 * 1000);
+                                        // 7 days ago by default if data has not been read yet
+                                        startDate = new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000);
                                     }
                                     const endDate = new Date(); // now
 
@@ -245,31 +245,37 @@ export class ActivityService {
     }
 
 
-    synchronizeApi(runUpdates = true) {
+    synchronizeApi(digest= false, runUpdates = true) {
         return new Promise<any>((resolve, reject) => {
-            this.readFitnessApi().then((activities: Activity[]) => {
-                    const promises = [];
-                    for (const activity of activities) {
-                        promises.push(this.writeToFirebase(activity));
-                    }
-                    Promise.all(promises).then(
-                        () => {
-                            this.updateLastDate();
-                            if (runUpdates) {
-                                this.runUpdates(activities).then(
-                                    () => {
-                                        resolve();
-                                    },
-                                    err => reject(err)
-                                );
-                            } else {
-                                resolve(activities);
-                            }
-                        },
-                        err => reject(err)
-                    );
-                },
-                err => reject(err));
+            this.storage.get('healthAuthorized').then((authorized) => {
+                if (digest && !authorized) {
+                    resolve('no digest before initial authorization');
+                    return;
+                }
+                this.readFitnessApi().then((activities: Activity[]) => {
+                        const promises = [];
+                        for (const activity of activities) {
+                            promises.push(this.writeToFirebase(activity));
+                        }
+                        Promise.all(promises).then(
+                            () => {
+                                this.updateLastDate();
+                                if (runUpdates) {
+                                    this.runUpdates(activities).then(
+                                        () => {
+                                            resolve();
+                                        },
+                                        err => reject(err)
+                                    );
+                                } else {
+                                    resolve(activities);
+                                }
+                            },
+                            err => reject(err)
+                        );
+                    },
+                    err => reject(err));
+            });
         });
     }
 
@@ -278,6 +284,7 @@ export class ActivityService {
     }
 
     updateLastDate(date: Date = new Date()) {
+        this.storage.set('healthAuthorized', true);
         return this.storage.set('lastDate', date);
     }
 

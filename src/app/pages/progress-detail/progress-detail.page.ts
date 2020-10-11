@@ -9,7 +9,7 @@ import {Health} from '@ionic-native/health/ngx';
 import {IonSlides, NavController, Platform} from '@ionic/angular';
 import {Router} from '@angular/router';
 import {Chart} from 'chart.js';
-import * as moment from 'moment';
+import * as moment from 'moment-timezone';
 
 @Component({
     selector: 'app-progress-detail',
@@ -118,10 +118,10 @@ export class ProgressDetailPage implements OnInit {
         const weeklyProgress = [];
         const intensities = ['active'];
         const duration = Goal.durations[1]; // 'weekly'
-        const start = moment().startOf('week').endOf('day').add(1, 'day');
+        const start = moment().tz('Europe/Berlin').startOf('week').endOf('day').add(1, 'day');
         start.subtract(n * 7, 'day');
         const current = start.clone();
-        const today = (moment().get('day') + 7 - 1) % 7;
+        const today = (moment().tz('Europe/Berlin').get('day') + 7 - 1) % 7;
 
         // Prepare weekly activities with days -6 days until today as indices and initialize with empty array
         for (const intensity of intensities) {
@@ -133,7 +133,7 @@ export class ProgressDetailPage implements OnInit {
                     value = null;
                 } else if (n === 0 && dayOfWeek === today) {
                     value = this.currentGoals.filter(el => el.name === `${duration}-${intensity}`)[0].relative;
-                } else if (this.goalHistory.hasOwnProperty(current.valueOf())) {
+                } else if (this.goalHistory && this.goalHistory.hasOwnProperty(current.valueOf())) {
                     value = this.goalHistory[current.valueOf()][`${duration}-${intensity}`].relative;
                 }
                 weeklyProgress[intensity][dayOfWeek] = value;
@@ -156,10 +156,10 @@ export class ProgressDetailPage implements OnInit {
         const weeklyActivities = [];
         const intensities = Goal.intensities; // ['moderate','vigorous']
         const duration = Goal.durations[0]; // 'daily'
-        const start = moment().startOf('week').endOf('day').add(1, 'day');
+        const start = moment().tz('Europe/Berlin').startOf('week').endOf('day').add(1, 'day');
         start.subtract(n * 7, 'day');
         const current = start.clone();
-        const today = (moment().get('day') + 7 - 1) % 7;
+        const today = (moment().tz('Europe/Berlin').get('day') + 7 - 1) % 7;
 
         // Prepare weekly activities with days -6 days until today as indices and initialize with empty array
         current.set(start.toObject());
@@ -167,14 +167,14 @@ export class ProgressDetailPage implements OnInit {
             weeklyActivities[intensity] = new Array(7);
         }
         for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
-            if (this.goalHistory.hasOwnProperty(current.valueOf())) {
+            if (this.goalHistory && this.goalHistory.hasOwnProperty(current.valueOf())) {
                 for (const intensity of intensities) {
                     let value = 0;
                     if (n === 0 && dayOfWeek > today) {
                         value = null;
                     } else if (n === 0 && dayOfWeek === today) {
                         value = this.currentGoals.filter(el => el.name === `${duration}-${intensity}`)[0].current;
-                    } else if (this.goalHistory.hasOwnProperty(current.valueOf())) {
+                    } else if (this.goalHistory && this.goalHistory.hasOwnProperty(current.valueOf())) {
                         value = this.goalHistory[current.valueOf()][`${duration}-${intensity}`].current;
                     }
                     weeklyActivities[intensity][dayOfWeek] = value;

@@ -5,8 +5,8 @@ import {Location} from '@angular/common';
 import {LoadingController, ToastController} from '@ionic/angular';
 import {FormBuilder} from '@angular/forms';
 import {NavigationExtras, Router} from '@angular/router';
-import * as moment from 'moment';
-import {Moment} from 'moment';
+import * as moment from 'moment-timezone';
+import {Moment} from 'moment-timezone';
 import {ActionLog} from '../../model/actionLog';
 import {TrackingService} from '../../services/tracking/tracking.service';
 
@@ -24,8 +24,8 @@ export class AddActivityManualPage implements OnInit {
     errorMessage = '';
     successMessage = '';
     date: string = new Date().toISOString();
-    today: Moment = moment();
-    minDate: Moment = moment().startOf('day').subtract(2, 'day');
+    today: Moment = moment().tz('Europe/Berlin');
+    minDate: Moment = moment().tz('Europe/Berlin').startOf('day').subtract(2, 'day');
     check = false;
     error = false;
 
@@ -86,8 +86,8 @@ export class AddActivityManualPage implements OnInit {
             return;
         }
 
-        const t1: any = moment(this.date);
-        const t2: any = moment(this.time);
+        const t1: any = moment(this.date).tz('Europe/Berlin');
+        const t2: any = moment(this.time).tz('Europe/Berlin');
         t1.set('hours', t2.get('hours')).set('minutes', t2.get('minutes'));
 
         this.activity.startTime = t2.toDate();

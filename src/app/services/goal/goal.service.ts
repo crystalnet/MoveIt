@@ -10,8 +10,8 @@ import {PostService} from '../post/post.service';
 import {Post} from '../../model/post';
 import {TrackingService} from '../tracking/tracking.service';
 import {ActionLog} from '../../model/actionLog';
-import * as moment from 'moment';
-import {Moment} from 'moment';
+import * as moment from 'moment-timezone';
+import {Moment} from 'moment-timezone';
 import {forkJoin} from 'rxjs';
 
 @Injectable({
@@ -203,7 +203,7 @@ export class GoalService {
             startDate.subtract(1, 'day');
             const observables = [];
             observables.push(this.getGoalHistoryTimeframe(startDate.endOf('day').valueOf(), endDate.endOf('day').valueOf()).pipe(first()));
-            if (endDate.isSameOrAfter(moment())) {
+            if (endDate.isSameOrAfter(moment().tz('Europe/Berlin'))) {
                 observables.push(this.getGoals().pipe(first()));
             }
 
@@ -216,7 +216,7 @@ export class GoalService {
                 // }
 
                 for (const activity of activities) {
-                    const time = moment(activity.startTime);
+                    const time = moment(activity.startTime).tz('Europe/Berlin');
                     const intensityGoals = [`daily-${activity.intensity}`, `weekly-${activity.intensity}`];
                     const activeGoals = ['daily-active', 'weekly-active'];
                     if (time.isSameOrAfter(startDate, 'day') && time.isSameOrBefore(endDate, 'day')) {
@@ -288,7 +288,7 @@ export class GoalService {
                     }
                     this.fireDatabase.database.ref('goalHistory/' + firebase.auth().currentUser.uid + '/' + key).set(goalHistory[key]);
 
-                    if (startDate.isSame(moment(), 'day')) {
+                    if (startDate.isSame(moment().tz('Europe/Berlin'), 'day')) {
                         const goals = result[1];
                         for (const goal of goals) {
                             goal.current = goalHistory[key][goal.name].current;
@@ -314,7 +314,7 @@ export class GoalService {
      *                      one week from that point in time.
      */
     calculateGoalProgress(goal: Goal, activities: Array<Activity>, referenceDate?: Moment) {
-        const endDate = referenceDate ? referenceDate : moment();
+        const endDate = referenceDate ? referenceDate : moment().tz('Europe/Berlin');
         // @ts-ignore
         const startDate = endDate.clone().startOf(goal.duration.slice(0, -2));
 
@@ -354,7 +354,7 @@ export class GoalService {
      * @param time reference time point
      * @param createPost whether to create a post
      */
-    winGoal(goal: Goal, time: Moment = moment(), createPost = true) {
+    winGoal(goal: Goal, time: Moment = moment().tz('Europe/Berlin'), createPost = true) {
         return new Promise<any>((resolve, reject) => {
             // Get the current list of wins
             this.fireDatabase.database.ref('/wins/' + firebase.auth().currentUser.uid + '/' + goal.name)
@@ -365,7 +365,7 @@ export class GoalService {
                     if (Array.isArray(wins)) {
                         // If the list exists, check if the goal was already won today
                         const unit = goal.duration === 'weekly' ? 'week' : 'day';
-                        const lastWin = wins.filter(win => moment(win).isSame(time, unit));
+                        const lastWin = wins.filter(win => moment(win).tz('Europe/Berlin').isSame(time, unit));
                         if (lastWin.length > 0) {
                             resolve(goal.name + ' goal was already won');
                             createPost = false;
@@ -412,12 +412,12 @@ export class GoalService {
      * @param fromDate earliest endTime of an activity
      * @param untilDate latest endTime of an activity
      */
-    filterActivities(activities: Array<Activity>, fromDate: Moment = moment(), untilDate: Moment = moment(), intensity?: string) {
+    filterActivities(activities: Array<Activity>, fromDate: Moment = moment().tz('Europe/Berlin'), untilDate: Moment = moment().tz('Europe/Berlin'), intensity?: string) {
         return activities.filter((activity: Activity) => {
             if (intensity && activity.intensity !== intensity) {
                 return false;
             }
-            const time = moment(activity.endTime);
+            const time = moment(activity.endTime).tz('Europe/Berlin');
             if (time.isBefore(fromDate, 'day')) {
                 return false;
             }
