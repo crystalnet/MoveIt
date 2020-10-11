@@ -52,7 +52,7 @@ export class MenuPage implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.trackingService.startRecordingViewTime('menu');
-        this.activityService.synchronizeApi(true).then(() => console.log('MENU DIGEST SYNCHRONIZATION'));
+        this.activityService.safeSynchronize().then(() => console.log('MENU DIGEST SYNCHRONIZATION'));
     }
 
     ngOnDestroy() {

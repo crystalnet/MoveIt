@@ -22,7 +22,7 @@ export class ActivityService {
     constructor(private fireDatabase: AngularFireDatabase, private postService: PostService, private goalService: GoalService,
                 private rewardsService: RewardsService, private health: Health, private storage: Storage, private platform: Platform) {
         platform.resume.subscribe(() => {
-            this.synchronizeApi(true).then(() => console.log('DIGEST SYNCHRONIZATION'));
+            this.safeSynchronize().then(() => console.log('DIGEST SYNCHRONIZATION'));
         });
     }
 
@@ -65,7 +65,7 @@ export class ActivityService {
             const promises = [];
             const newActivities = [activity];
             promises.push(this.writeToFirebase(activity));
-            promises.push(this.synchronizeApi(false, false).then(
+            promises.push(this.synchronizeApi(false).then(
                 (activities: Activity[]) => {
                     newActivities.push(...activities);
                     // Returns the activity with the new id
@@ -244,38 +244,42 @@ export class ActivityService {
         });
     }
 
+    safeSynchronize() {
+        return this.storage.get('healthAuthorized').then((authorized) => {
+            if (!authorized) {
+                console.log('no digest before initial authorization');
+                return Promise.resolve();
+            } else {
+                return this.synchronizeApi();
+            }
+        });
+    }
 
-    synchronizeApi(digest= false, runUpdates = true) {
+    synchronizeApi(runUpdates = true) {
         return new Promise<any>((resolve, reject) => {
-            this.storage.get('healthAuthorized').then((authorized) => {
-                if (digest && !authorized) {
-                    resolve('no digest before initial authorization');
-                    return;
-                }
-                this.readFitnessApi().then((activities: Activity[]) => {
-                        const promises = [];
-                        for (const activity of activities) {
-                            promises.push(this.writeToFirebase(activity));
-                        }
-                        Promise.all(promises).then(
-                            () => {
-                                this.updateLastDate();
-                                if (runUpdates) {
-                                    this.runUpdates(activities).then(
-                                        () => {
-                                            resolve();
-                                        },
-                                        err => reject(err)
-                                    );
-                                } else {
-                                    resolve(activities);
-                                }
-                            },
-                            err => reject(err)
-                        );
-                    },
-                    err => reject(err));
-            });
+            this.readFitnessApi().then((activities: Activity[]) => {
+                    const promises = [];
+                    for (const activity of activities) {
+                        promises.push(this.writeToFirebase(activity));
+                    }
+                    Promise.all(promises).then(
+                        () => {
+                            this.updateLastDate();
+                            if (runUpdates) {
+                                this.runUpdates(activities).then(
+                                    () => {
+                                        resolve();
+                                    },
+                                    err => reject(err)
+                                );
+                            } else {
+                                resolve(activities);
+                            }
+                        },
+                        err => reject(err)
+                    );
+                },
+                err => reject(err));
         });
     }
 
