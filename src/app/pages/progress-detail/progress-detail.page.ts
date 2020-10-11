@@ -119,6 +119,9 @@ export class ProgressDetailPage implements OnInit {
         const intensities = ['active'];
         const duration = Goal.durations[1]; // 'weekly'
         const start = moment().tz('Europe/Berlin').startOf('week').endOf('day').add(1, 'day');
+        if (start.get('day') === 0) {
+            start.add(7, 'day');
+        }
         start.subtract(n * 7, 'day');
         const current = start.clone();
         const today = (moment().tz('Europe/Berlin').get('day') + 7 - 1) % 7;
@@ -157,6 +160,9 @@ export class ProgressDetailPage implements OnInit {
         const intensities = Goal.intensities; // ['moderate','vigorous']
         const duration = Goal.durations[0]; // 'daily'
         const start = moment().tz('Europe/Berlin').startOf('week').endOf('day').add(1, 'day');
+        if (start.get('day') === 0) {
+            start.add(7, 'day');
+        }
         start.subtract(n * 7, 'day');
         const current = start.clone();
         const today = (moment().tz('Europe/Berlin').get('day') + 7 - 1) % 7;
