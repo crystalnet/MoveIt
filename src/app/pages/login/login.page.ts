@@ -50,7 +50,8 @@ export class LoginPage implements OnInit {
     async tryLogin(value) {
         const loading = await this.loadingController.create({
             cssClass: 'my-custom-class',
-            message: 'Loading...'
+            message: 'Loading...',
+            duration: 2000
         });
 
         this.authService.loginUser(value)

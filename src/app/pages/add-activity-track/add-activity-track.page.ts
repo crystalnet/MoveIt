@@ -75,7 +75,8 @@ export class AddActivityTrackPage implements OnInit {
 
         const loading = await this.loadingController.create({
             cssClass: 'my-custom-class',
-            message: 'Adding activity...'
+            message: 'Adding activity...',
+            duration: 2000
         });
         await loading.present();
 

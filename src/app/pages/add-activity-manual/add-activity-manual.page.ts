@@ -108,7 +108,8 @@ export class AddActivityManualPage implements OnInit {
 
         const loading = await this.loadingController.create({
             cssClass: 'my-custom-class',
-            message: 'Adding activity...'
+            message: 'Adding activity...',
+            duration: 3000
         });
         await loading.present();
 
