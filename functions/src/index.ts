@@ -37,6 +37,7 @@ exports.automaticNotifications = functions
                 const promises = [];
                 for (const k of Object.keys(result)) {
                     const uid = result[k as keyof typeof result];
+                    let success = false;
                     console.log('result for ', uid);
 
                     const randomization = Math.random();
@@ -46,9 +47,11 @@ exports.automaticNotifications = functions
                         if (randomization < 0.25) {
                             // if (randomization > 1) {
                             data = generateLeaderboardNotification(uid);
+                            success = true;
                         } else if (randomization < 0.5) {
                             // } else if (randomization < 1) {
                             data = generateSocialfeedNotification(uid);
+                            success = true;
                         } else {
                             console.log('randomization result: no notification. continuing to next key. current uid ', uid);
                             continue;
@@ -76,15 +79,17 @@ exports.automaticNotifications = functions
                         );
                         continue;
                     }
-                    console.log('preparing to send notification for ', k);
+                    if (success) {
+                        console.log('preparing to send notification for ', uid);
 
-                    promises.push(data.then(
-                        (res: NotificationData) => {
-                            const notification = new UserNotification(uid, res);
-                            return notification.send();
-                        },
-                        (err: any) => console.log(err)
-                    ));
+                        promises.push(data.then(
+                            (res: NotificationData) => {
+                                const notification = new UserNotification(uid, res);
+                                return notification.send();
+                            },
+                            (err: any) => console.log(err)
+                        ));
+                    }
                 }
                 return Promise.all(promises);
             },
@@ -108,8 +113,8 @@ function generateLeaderboardNotification(uid: string) {
             const userRank = ranks.indexOf(uid) + 1;
 
             const data = new NotificationData();
-            data.header = (userRank - 1).toString() + ' to go';
-            data.text = 'Your rank is ' + userRank.toString();
+            data.header = 'Your rank is ' + userRank.toString();
+            data.text = 'Check the leadboard to see how you compare to others!';
             data.target = 'menu/leaderboard/leaderboard/detail';
             data.type = 'leaderboard-notification';
             return data;
@@ -596,8 +601,8 @@ class UserNotification {
                     this.createDbEntry();
 
                     return admin.messaging().sendToDevice(token, this.payload)
-                        .then(function(response: any) {
-                            console.log('Successfully sent message');
+                        .then((response: any) => {
+                            console.log('Successfully sent message to ' + this.uid);
                         })
                         .catch(function(error: any) {
                             console.log('Error sending message:', error);
