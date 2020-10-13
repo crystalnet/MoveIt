@@ -23,6 +23,7 @@ import { Health } from '@ionic-native/health/ngx';
 import { IonicStorageModule } from '@ionic/storage';
 
 import { FCM } from 'cordova-plugin-fcm-with-dependecy-updated/ionic/ngx';
+import {AndroidPermissions} from '@ionic-native/android-permissions/ngx';
 
 const firebaseConfig = {
     apiKey: 'AIzaSyAeeexHFSp2HevDoOi7MdzCLdgET6QtMg4',
@@ -61,6 +62,7 @@ const firebaseConfig = {
         AuthenticateService,
         Health,
         FCM,
+        AndroidPermissions,
         {provide: RouteReuseStrategy, useClass: IonicRouteStrategy}
     ],
     bootstrap: [AppComponent]
