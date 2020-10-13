@@ -24,7 +24,7 @@
                 <p>Set your goal for {{goals[0].duration}} active minutes!
                 </p>
                 <ion-item>
-                    <ion-range min="0" max="120" pin color="primary" [(ngModel)]="goals[0].target">
+                    <ion-range min="0" max="120" pin color="primary" step="5" snaps="true" [(ngModel)]="goals[0].target">
                         <ion-icon slot="start" size="small" name="walk"></ion-icon>
                         <ion-icon slot="end" name="walk"></ion-icon>
                     </ion-range>
@@ -46,7 +46,7 @@
                 </p>
 
                 <ion-item>
-                    <ion-range min="0" max="600" pin color="secondary" [(ngModel)]="goals[1].target">
+                    <ion-range min="0" max="600" pin color="secondary" step="10" snaps="true" [(ngModel)]="goals[1].target">
                         <ion-icon slot="start" size="small" name="walk"></ion-icon>
                         <ion-icon slot="end" name="walk"></ion-icon>
                     </ion-range>
