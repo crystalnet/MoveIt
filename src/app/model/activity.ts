@@ -116,9 +116,9 @@ export class Activity {
             ActSingle.source = SingleEntry.sourceBundleId;
             ActSingle.intensity = 'vigorous';
 
-            const moderateActivities = ['biking', 'gardening', 'golf', 'hiking', 'housework', 'meditation', 'stair_climbing', 'walking', 'walking_stroller', 'walking_treadmill'];
+            const moderateActivities = ['biking', 'gardening', 'golf', 'hiking', 'housework', 'meditation', 'on_bicycle', 'on_foot', 'stair_climbing', 'tilting', 'walking', 'walking_stroller', 'walking_treadmill'];
             if (moderateActivities.includes(ActSingle.type)) {
-                ActSingle.intensity = 'vigorous';
+                ActSingle.intensity = 'moderate';
             }
 
             ActMulit.push(ActSingle);

@@ -215,7 +215,7 @@ export class ProgressDetailPage implements OnInit {
                         data: this.progressChartData[n].active,
                         backgroundColor: '#F61067', // array should have same number of elements as number of dataset
                         borderColor: '#F61067', // array should have same number of elements as number of dataset
-                        borderWidth: 1
+                        borderWidth: 1,
                     },
                     // {
                     //     label: 'vigorous',
@@ -228,6 +228,11 @@ export class ProgressDetailPage implements OnInit {
             },
             options: {
                 responsive: true,
+                elements: {
+                    lines: {
+                        cubicInterpolationMode: 'monotone'
+                    }
+                },
                 scales: {
                     xAxes: [{
                         scaleLabel: {
@@ -293,6 +298,11 @@ export class ProgressDetailPage implements OnInit {
                 ]
             },
             options: {
+                elements: {
+                    lines: {
+                        cubicInterpolationMode: 'monotone'
+                    }
+                },
                 scales: {
                     xAxes: [{
                         scaleLabel: {
