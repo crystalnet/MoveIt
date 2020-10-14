@@ -257,7 +257,7 @@ export class ActivityService {
                 return Promise.resolve();
             } else {
                 this.storage.get('lastDate').then((lastDate) => {
-                    if (new Date().getTime() - lastDate.getTime() > 10000) {
+                    if (new Date().getTime() - new Date(lastDate).getTime() > 10000) {
                         return this.synchronizeApi();
                     }
                 });
