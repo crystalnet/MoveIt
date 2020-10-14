@@ -256,7 +256,11 @@ export class ActivityService {
                 console.log('no digest before initial authorization');
                 return Promise.resolve();
             } else {
-                return this.synchronizeApi();
+                this.storage.get('lastDate').then((lastDate) => {
+                    if (new Date().getTime() - lastDate.getTime() > 10000) {
+                        return this.synchronizeApi();
+                    }
+                });
             }
         });
     }
