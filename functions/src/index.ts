@@ -68,7 +68,8 @@ exports.automaticNotifications = functions
                         }
 
                         const dbNotification = {
-                            notification: type,
+                            notificationType: type,
+                            type: 'push-notification',
                             time: time.valueOf().toString(),
                             response: 'not send',
                             error: err
@@ -571,7 +572,8 @@ class UserNotification {
 
     createDbEntry() {
         const dbNotification = {
-            notification: this.data.type,
+            type: 'push-notification',
+            notificationType: this.data.type,
             time: this.data.id,
             response: 'not opened'
         };

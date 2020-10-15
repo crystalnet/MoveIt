@@ -6,6 +6,7 @@ import {ViewLog} from '../../model/viewLog';
 import {ActionLog} from '../../model/actionLog';
 import {Reaction} from '../../model/reaction';
 import {Platform} from '@ionic/angular';
+import moment = require('moment');
 
 @Injectable({
     providedIn: 'root'
@@ -66,8 +67,9 @@ export class TrackingService {
         this.logReaction('push-notification', notificationType, response, notificationId);
     }
 
-    logReaction(type: string, notificationType: string, response: string, notificationId?: string) {
-        const reaction = new Reaction(type, notificationType, response, notificationId);
-        this.fireDatabase.database.ref('/tracking/' + firebase.auth().currentUser.uid + '/reactions').push(reaction.toFirebaseObject());
+    logReaction(type: string, notificationType: string, response: string, notificationId: any = moment().tz('Europe/Berlin').valueOf()) {
+        const reaction = new Reaction(type, notificationType, response, notificationId.toString());
+        this.fireDatabase.database
+            .ref('/tracking/' + firebase.auth().currentUser.uid + '/reactions/' +  notificationId).set(reaction.toFirebaseObject());
     }
 }
