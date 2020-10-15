@@ -6,7 +6,7 @@ import {ViewLog} from '../../model/viewLog';
 import {ActionLog} from '../../model/actionLog';
 import {Reaction} from '../../model/reaction';
 import {Platform} from '@ionic/angular';
-import moment = require('moment');
+import * as moment from 'moment';
 
 @Injectable({
     providedIn: 'root'

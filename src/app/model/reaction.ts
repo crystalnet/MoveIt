@@ -56,7 +56,6 @@ export class Reaction {
     toFirebaseObject() {
         return {
             type: this.type,
-            notificationId: this.notificationId,
             notificationType: this.notificationType,
             time: this.time.getTime(),
             response: this.response

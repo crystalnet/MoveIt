@@ -35,7 +35,7 @@ export class AdminDashboardNotificationsPage implements OnInit {
     }
 
     sendNotification() {
-        this.notificationService.sendUserNotification(this.user, this.title2, this.body2, 'manualNotification', this.target2,
+        this.notificationService.sendUserNotification(this.user, this.title2, this.body2, 'manual-notification', this.target2,
             this.confirmButtonText, this.rejectButtonText)
             .then(
                 res => console.log(res),
