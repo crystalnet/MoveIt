@@ -53,8 +53,7 @@ exports.automaticNotifications = functions
                             data = generateSocialfeedNotification(uid);
                             success = true;
                         } else {
-                            console.log('randomization result: no notification. continuing to next key. current uid ', uid);
-                            continue;
+                            throw new Error('randomization result: no notification. continuing to next key. current uid ' + uid);
                         }
                     } catch (err) {
                         console.log('received error' + err);

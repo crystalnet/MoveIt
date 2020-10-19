@@ -12,7 +12,6 @@ import {Health} from '@ionic-native/health/ngx';
 import {Storage} from '@ionic/storage';
 import * as moment from 'moment-timezone';
 import {Platform} from '@ionic/angular';
-import {AndroidPermissions} from '@ionic-native/android-permissions/ngx';
 
 @Injectable({
     providedIn: 'root'
@@ -21,8 +20,7 @@ export class ActivityService {
     activityLocation = '/activities/';
 
     constructor(private fireDatabase: AngularFireDatabase, private postService: PostService, private goalService: GoalService,
-                private rewardsService: RewardsService, private health: Health, private storage: Storage, private platform: Platform,
-                private androidPermissions: AndroidPermissions) {
+                private rewardsService: RewardsService, private health: Health, private storage: Storage, private platform: Platform) {
         platform.resume.subscribe(() => {
             this.safeSynchronize().then(() => console.log('DIGEST SYNCHRONIZATION'));
         });
@@ -199,52 +197,46 @@ export class ActivityService {
             this.health.isAvailable()
                 .then((available: boolean) => {
                     console.log('HEALTH IS AVAILABLE :' + available);
-                    this.androidPermissions.requestPermission('android.permission.ACTIVITY_RECOGNITION')
-                        .then(result => {
-                            console.log(result.hasPermission);
+                    this.health.requestAuthorization([
+                        /* 'distance', 'nutrition', //read and write permissions
+                        {
+                            read: ['steps'], //read only permission
+                            write: ['height', 'weight'] //write only permission
+                        } */
+                        'activity', 'distance'
+                    ]).then(res => {
+                            console.log(res);
+                            // permission successful
+                            // get a the date when API is last time read
+                            return this.storage.get('lastDate').then((lastDate: Date) => {
+                                    console.log('last time read at: ', lastDate);
+                                    let startDate: Date;
 
-                            this.health.requestAuthorization([
-                                /* 'distance', 'nutrition', //read and write permissions
-                                {
-                                    read: ['steps'], //read only permission
-                                    write: ['height', 'weight'] //write only permission
-                                } */
-                                'activity', 'distance'
-                            ]).then(res => {
-                                    console.log(res);
-                                    // permission successful
-                                    // get a the date when API is last time read
-                                    return this.storage.get('lastDate').then((lastDate: Date) => {
-                                            console.log('last time read at: ', lastDate);
-                                            let startDate: Date;
+                                    if (lastDate != null) {
+                                        startDate = new Date(new Date(lastDate).getTime() + 1); // last time read + 1 ms
+                                    } else {
+                                        // 7 days ago by default if data has not been read yet
+                                        startDate = new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000);
+                                    }
+                                    const endDate = new Date(); // now
 
-                                            if (lastDate != null) {
-                                                startDate = new Date(new Date(lastDate).getTime() + 1); // last time read + 1 ms
-                                            } else {
-                                                // 7 days ago by default if data has not been read yet
-                                                startDate = new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000);
-                                            }
-                                            const endDate = new Date(); // now
-
-                                            // read API
-                                            return this.health.query({
-                                                startDate,
-                                                endDate,
-                                                dataType: 'activity',
-                                            }).then((value: []) => {
-                                                console.log('Value of Health Data loaded: ', value);
-                                                this.updateLastDate(endDate);
-                                                resolve(Activity.fromFitApi(value));
-                                            }).catch((e: any) => {
-                                                console.log('HealthData ERROR:---' + e);
-                                                reject(e);
-                                            });
-                                        },
-                                        err => reject(err));
-                                }
-                            ).catch(e => console.log(e));
-                        })
-                        .catch(console.error);
+                                    // read API
+                                    return this.health.query({
+                                        startDate,
+                                        endDate,
+                                        dataType: 'activity',
+                                    }).then((value: []) => {
+                                        console.log('Value of Health Data loaded: ', value);
+                                        this.updateLastDate(endDate);
+                                        resolve(Activity.fromFitApi(value));
+                                    }).catch((e: any) => {
+                                        console.log('HealthData ERROR:---' + e);
+                                        reject(e);
+                                    });
+                                },
+                                err => reject(err));
+                        }
+                    ).catch(e => console.log(e));
                 })
                 .catch(e => console.log(e));
         });

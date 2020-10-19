@@ -120,7 +120,7 @@ export class ProgressDetailPage implements OnInit {
         const duration = Goal.durations[1]; // 'weekly'
         const start = moment().tz('Europe/Berlin');
         if (start.get('day') === 0) {
-            start.add(7, 'day');
+            start.subtract(7, 'day');
         }
         start.startOf('week').endOf('day').add(1, 'day');
         start.subtract(n * 7, 'day');
@@ -162,7 +162,7 @@ export class ProgressDetailPage implements OnInit {
         const duration = Goal.durations[0]; // 'daily'
         const start = moment().tz('Europe/Berlin');
         if (start.get('day') === 0) {
-            start.add(7, 'day');
+            start.subtract(7, 'day');
         }
         start.startOf('week').endOf('day').add(1, 'day');
         start.subtract(n * 7, 'day');
@@ -170,7 +170,7 @@ export class ProgressDetailPage implements OnInit {
         const today = (moment().tz('Europe/Berlin').get('day') + 7 - 1) % 7;
 
         // Prepare weekly activities with days -6 days until today as indices and initialize with empty array
-        current.set(start.toObject());
+        // current.set(start.toObject());
         for (const intensity of intensities) {
             weeklyActivities[intensity] = new Array(7);
         }
