@@ -81,8 +81,8 @@ export class EditActivityPage implements OnInit {
         this.activity.startTime = t1.toDate();
         t1.add(this.minutes, 'minutes');
         this.activity.endTime = t1.toDate();
-        this.activity.intensity = this.activity.intensity.toLowerCase();
-        this.activity.type = this.activity.type.toLowerCase();
+        this.activity.intensity = this.intensity.toLowerCase();
+        this.activity.type = this.type.toLowerCase();
 
         this.activity.source = 'moveItApp';
         console.log(this.activity);

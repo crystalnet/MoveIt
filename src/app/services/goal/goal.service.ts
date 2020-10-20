@@ -382,7 +382,7 @@ export class GoalService {
                     this.fireDatabase.database.ref('/wins/' + firebase.auth().currentUser.uid + '/' + goal.name)
                         .set(wins).then(
                         (res) => {
-                            if (createPost) {
+                            if (createPost && goal.type === 'active') {
                                 const post = new Post();
                                 post.title = goal.duration.charAt(0).toUpperCase() + goal.duration.slice(1) + ' goal achieved';
                                 post.content = 'Hooray, I\'ve achieved my ' + goal.duration + ' goal of ' + goal.target + ' minutes';
