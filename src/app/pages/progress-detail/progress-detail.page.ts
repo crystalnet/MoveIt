@@ -216,6 +216,7 @@ export class ProgressDetailPage implements OnInit {
                         backgroundColor: '#F61067', // array should have same number of elements as number of dataset
                         borderColor: '#F61067', // array should have same number of elements as number of dataset
                         borderWidth: 1,
+                        cubicInterpolationMode: 'monotone'
                     },
                     // {
                     //     label: 'vigorous',
@@ -228,11 +229,6 @@ export class ProgressDetailPage implements OnInit {
             },
             options: {
                 responsive: true,
-                elements: {
-                    lines: {
-                        cubicInterpolationMode: 'monotone'
-                    }
-                },
                 scales: {
                     xAxes: [{
                         scaleLabel: {
@@ -286,23 +282,20 @@ export class ProgressDetailPage implements OnInit {
                         data: this.activitiesChartData[n].moderate,
                         backgroundColor: '#F61067', // array should have same number of elements as number of dataset
                         borderColor: '#F61067', // array should have same number of elements as number of dataset
-                        borderWidth: 1
+                        borderWidth: 1,
+                        cubicInterpolationMode: 'monotone'
                     },
                     {
                         label: 'vigorous',
                         data: this.activitiesChartData[n].vigorous,
                         backgroundColor: '#6DECAF', // array should have same number of elements as number of dataset
                         borderColor: '#6DECAF', // array should have same number of elements as number of dataset
-                        borderWidth: 1
+                        borderWidth: 1,
+                        cubicInterpolationMode: 'monotone'
                     }
                 ]
             },
             options: {
-                elements: {
-                    lines: {
-                        cubicInterpolationMode: 'monotone'
-                    }
-                },
                 scales: {
                     xAxes: [{
                         scaleLabel: {
