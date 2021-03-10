@@ -108,7 +108,19 @@ export class User {
         return {
             name: this.name,
             age: this.getAge(),
+            gender: this.gender,
             profilePictureUrl: this.profilePictureUrl,
+            group: this.group
         };
     }
+    toFakeUserData() {
+        return {
+            name: this.name,
+            age: this.getAge(),
+            gender: this.gender,
+            profilePictureUrl: this.profilePictureUrl,
+            group: this.group
+        };
+    }
+
 }

@@ -128,6 +128,14 @@ export class AdminDashboardAppconfigPage implements OnInit {
     editUserconfig(userID, groupID) {
         this.userService.changeUserGroup(userID, groupID).then(
             res => {
+                this.userService.changePublicUserGroup(userID, groupID).then(
+                    // tslint:disable-next-line:no-shadowed-variable
+                    res => {
+                        this.userService.changeFakeUserGroup(userID, groupID).then(
+                            r => console.log(r)
+                        );
+                    }
+                    );
                 console.log(res);
                 this.presentToast();
             },

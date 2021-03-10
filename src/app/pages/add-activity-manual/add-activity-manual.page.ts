@@ -130,5 +130,6 @@ export class AddActivityManualPage implements OnInit {
                     console.error(err);
                 }
             );
+        console.log(this.minutes);
     }
 }

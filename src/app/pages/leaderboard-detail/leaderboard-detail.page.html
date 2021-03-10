@@ -20,7 +20,19 @@
                 <ion-segment-button value="goalProgress" *ngIf="!rewards">
                     Progress
                 </ion-segment-button>
-                <ion-segment-button value="activeMinutes">
+                <ion-segment-button value="activeMinutes" *ngIf="userGroupDefault">
+                    Activity
+                </ion-segment-button>
+                <ion-segment-button value="activeMinutesOne" *ngIf="userGroup">
+                    Activity
+                </ion-segment-button>
+                <ion-segment-button value="activeMinutesTwo" *ngIf="userGroupTwo">
+                    Activity
+                </ion-segment-button>
+                <ion-segment-button value="activeMinutesThree" *ngIf="userGroupThree">
+                    Activity
+                </ion-segment-button>
+                <ion-segment-button value="activeMinutesFour" *ngIf="userGroupFour">
                     Activity
                 </ion-segment-button>
                 <ion-segment-button value="goalWins" *ngIf="!rewards">
@@ -140,6 +152,163 @@
                         </ng-template>
                     </ion-item>
                 </ion-list>
+
+                <ion-list *ngSwitchCase="'activeMinutesOne'" lines="full"
+                          class="ion-align-self-baseline ion-justify-content-evenly">
+                    <ion-list-header>
+                        Weekly Active Minutes
+                    </ion-list-header>
+                    <ion-item *ngFor="let user of activitiesModerateOne ; let counter = index" [attr.data-index]="counter"
+                              class="ion-align-self-baseline ion-justify-content-evenly">
+
+                        <ng-container *ngIf="user.uid == currentUser.id; else running"
+                                      class="ion-align-self-baseline ion-justify-content-evenly ion-nowrap">
+                            <p slot="start" class="self ion-text-nowrap">{{counter + 1}}</p>
+                            <ion-avatar slot="start">
+                                <img src="{{ user.pictureProfileUrl }}" (click)="viewProfile()">
+                            </ion-avatar>
+                            <ion-label class="ion-text-nowrap" (click)="viewProfile()">
+                                <h2 class="self"> You </h2>
+                                <h3>{{ user.age }} years old</h3>
+                            </ion-label>
+                            <ion-label class="ion-text-right">
+                                <p class="self">{{user.value}} min</p>
+                            </ion-label>
+                        </ng-container>
+                        <ng-template #running class="ion-align-self-baseline ion-justify-content-evenly ion-nowrap">
+                            <p slot="start" class="ion-text-nowrap">{{counter + 1}}</p>
+                            <ion-avatar slot="start">
+                                <img src="{{ user.pictureProfileUrl }}"
+                                     (click)="viewProfile(user.uid)">
+                            </ion-avatar>
+                            <ion-label (click)="viewProfile(user.uid)" class="ion-text-nowrap">
+                                <h2>{{user.username}}</h2>
+                                <h3>{{ user.age }} years old</h3>
+                            </ion-label>
+                            <ion-label class="ion-text-right">
+                                <p>{{user.value}} min</p>
+                            </ion-label>
+                        </ng-template>
+                    </ion-item>
+                </ion-list>
+
+                <ion-list *ngSwitchCase="'activeMinutesTwo'" lines="full"
+                          class="ion-align-self-baseline ion-justify-content-evenly">
+                    <ion-list-header>
+                        Weekly Active Minutes
+                    </ion-list-header>
+                    <ion-item *ngFor="let user of activitiesModerateTwo ; let counter = index" [attr.data-index]="counter"
+                              class="ion-align-self-baseline ion-justify-content-evenly">
+
+                        <ng-container *ngIf="user.uid == currentUser.id; else running"
+                                      class="ion-align-self-baseline ion-justify-content-evenly ion-nowrap">
+                            <p slot="start" class="self ion-text-nowrap">{{counter + 1}}</p>
+                            <ion-avatar slot="start">
+                                <img src="{{ user.pictureProfileUrl }}" (click)="viewProfile()">
+                            </ion-avatar>
+                            <ion-label class="ion-text-nowrap" (click)="viewProfile()">
+                                <h2 class="self"> You </h2>
+                                <h3>{{ user.age }} years old</h3>
+                            </ion-label>
+                            <ion-label class="ion-text-right">
+                                <p class="self">{{user.value}} min</p>
+                            </ion-label>
+                        </ng-container>
+                        <ng-template #running class="ion-align-self-baseline ion-justify-content-evenly ion-nowrap">
+                            <p slot="start" class="ion-text-nowrap">{{counter + 1}}</p>
+                            <ion-avatar slot="start">
+                                <img src="{{ user.pictureProfileUrl }}"
+                                     (click)="viewProfile(user.uid)">
+                            </ion-avatar>
+                            <ion-label (click)="viewProfile(user.uid)" class="ion-text-nowrap">
+                                <h2>{{user.username}}</h2>
+                                <h3>{{ user.age }} years old</h3>
+                            </ion-label>
+                            <ion-label class="ion-text-right">
+                                <p>{{user.value}} min</p>
+                            </ion-label>
+                        </ng-template>
+                    </ion-item>
+                </ion-list>
+
+                <ion-list *ngSwitchCase="'activeMinutesThree'" lines="full"
+                          class="ion-align-self-baseline ion-justify-content-evenly">
+                    <ion-list-header>
+                        Weekly Active Minutes
+                    </ion-list-header>
+                    <ion-item *ngFor="let user of activitiesModerateThree ; let counter = index" [attr.data-index]="counter"
+                              class="ion-align-self-baseline ion-justify-content-evenly">
+
+                        <ng-container *ngIf="user.uid == currentUser.id; else running"
+                                      class="ion-align-self-baseline ion-justify-content-evenly ion-nowrap">
+                            <p slot="start" class="self ion-text-nowrap">{{counter + 1}}</p>
+                            <ion-avatar slot="start">
+                                <img src="{{ user.pictureProfileUrl }}" (click)="viewProfile()">
+                            </ion-avatar>
+                            <ion-label class="ion-text-nowrap" (click)="viewProfile()">
+                                <h2 class="self"> You </h2>
+                                <h3>{{ user.age }} years old</h3>
+                            </ion-label>
+                            <ion-label class="ion-text-right">
+                                <p class="self">{{user.value}} min</p>
+                            </ion-label>
+                        </ng-container>
+                        <ng-template #running class="ion-align-self-baseline ion-justify-content-evenly ion-nowrap">
+                            <p slot="start" class="ion-text-nowrap">{{counter + 1}}</p>
+                            <ion-avatar slot="start">
+                                <img src="{{ user.pictureProfileUrl }}"
+                                     (click)="viewProfile(user.uid)">
+                            </ion-avatar>
+                            <ion-label (click)="viewProfile(user.uid)" class="ion-text-nowrap">
+                                <h2>{{user.username}}</h2>
+                                <h3>{{ user.age }} years old</h3>
+                            </ion-label>
+                            <ion-label class="ion-text-right">
+                                <p>{{user.value}} min</p>
+                            </ion-label>
+                        </ng-template>
+                    </ion-item>
+                </ion-list>
+
+                <ion-list *ngSwitchCase="'activeMinutesFour'" lines="full"
+                          class="ion-align-self-baseline ion-justify-content-evenly">
+                    <ion-list-header>
+                        Weekly Active Minutes
+                    </ion-list-header>
+                    <ion-item *ngFor="let user of activitiesModerateFour ; let counter = index" [attr.data-index]="counter"
+                              class="ion-align-self-baseline ion-justify-content-evenly">
+
+                        <ng-container *ngIf="user.uid == currentUser.id; else running"
+                                      class="ion-align-self-baseline ion-justify-content-evenly ion-nowrap">
+                            <p slot="start" class="self ion-text-nowrap">{{counter + 1}}</p>
+                            <ion-avatar slot="start">
+                                <img src="{{ user.pictureProfileUrl }}" (click)="viewProfile()">
+                            </ion-avatar>
+                            <ion-label class="ion-text-nowrap" (click)="viewProfile()">
+                                <h2 class="self"> You </h2>
+                                <h3>{{ user.age }} years old</h3>
+                            </ion-label>
+                            <ion-label class="ion-text-right">
+                                <p class="self">{{user.value}} min</p>
+                            </ion-label>
+                        </ng-container>
+                        <ng-template #running class="ion-align-self-baseline ion-justify-content-evenly ion-nowrap">
+                            <p slot="start" class="ion-text-nowrap">{{counter + 1}}</p>
+                            <ion-avatar slot="start">
+                                <img src="{{ user.pictureProfileUrl }}"
+                                     (click)="viewProfile(user.uid)">
+                            </ion-avatar>
+                            <ion-label (click)="viewProfile(user.uid)" class="ion-text-nowrap">
+                                <h2>{{user.username}}</h2>
+                                <h3>{{ user.age }} years old</h3>
+                            </ion-label>
+                            <ion-label class="ion-text-right">
+                                <p>{{user.value}} min</p>
+                            </ion-label>
+                        </ng-template>
+                    </ion-item>
+                </ion-list>
+
 
 
                 <ion-list *ngSwitchCase="'goalWins'" lines="full"

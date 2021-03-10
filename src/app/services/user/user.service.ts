@@ -22,6 +22,17 @@ export class UserService {
         return this.db.object<string>('/users/' + firebase.auth().currentUser.uid + '/group').valueChanges();
     }
 
+    getUserBirthday() {
+        return this.db.object<string>('/users/' + firebase.auth().currentUser.uid + '/age').valueChanges();
+    }
+
+    getUserAge() {
+        return this.db.object<string>('/publicUserData/' + firebase.auth().currentUser.uid + '/age').valueChanges();
+    }
+    getUserGender() {
+        return this.db.object<string>('/publicUserData/' + firebase.auth().currentUser.uid + '/gender').valueChanges();
+    }
+
     getGroupconfig(groupId) {
         return this.db.object<string>('/groups/' + groupId + '/featureVector').valueChanges();
     }
@@ -120,6 +131,12 @@ export class UserService {
         return ref.valueChanges();
     }
 
+    getUsersFakeData() {
+        const ref = this.db.object<any>('/fakeUserData/');
+        // Retrieve an array, but with its metadata. This is necessary to have the key available
+        return ref.valueChanges();
+    }
+
     getOTPs() {
         const ref = this.db.list<any>('/otps/');
         // Retrieve an array, but with its metadata. This is necessary to have the key available
@@ -146,6 +163,15 @@ export class UserService {
     changeUserGroup(userID: string, groupID: string) {
         return this.db.database.ref('/users/' + userID + '/group').set(groupID);
     }
+
+    changePublicUserGroup(userID: string, groupID: string) {
+        return this.db.database.ref('/publicUserData/' + userID + '/group').set(groupID);
+    }
+
+    changeFakeUserGroup(userID: string, groupID: string) {
+        return this.db.database.ref('/fakeUserData/' + userID + '/group').set(groupID);
+    }
+
 
     /**
      * Change the token of the user for FCM

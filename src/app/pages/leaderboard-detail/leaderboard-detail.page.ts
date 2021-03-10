@@ -23,6 +23,7 @@ import {ChallengeService} from '../../services/challenges/challenge.service';
 import {UserService} from '../../services/user/user.service';
 
 import {NavigationExtras, Router} from '@angular/router';
+import * as firebase from 'firebase';
 
 
 @Component({
@@ -38,8 +39,20 @@ export class LeaderboardDetailPage implements OnInit {
     group: Observable<string>;
     config: Observable<string>;
 
+    age: Observable<any>;
+    userAge: any;
+    gender: Observable<any>;
+    userGender: any;
+    userLeaderboardValueObserve: Observable<any>;
+    userLeaderboardValue: any;
+    valueDif: any;
+    valueDif2: any;
     trophies: any;
     activitiesModerate: Array<LeaderboardObject>;
+    activitiesModerateOne: Array<LeaderboardObject>;
+    activitiesModerateTwo: Array<LeaderboardObject>;
+    activitiesModerateThree: Array<LeaderboardObject>;
+    activitiesModerateFour: Array<LeaderboardObject>;
     activitiesObserve: Observable<GoalArray[]>;
 
     trophiesList: Array<LeaderboardObject>;
@@ -54,10 +67,19 @@ export class LeaderboardDetailPage implements OnInit {
     publicUserDataObservable: Observable<any>;
     publicUserData: any;
 
+    fakeUserDataObservable: Observable<any>;
+    fakeUserData: any;
+
     tempUsername: string;
 
     currentUser: User;
     userObservable: Observable<any>;
+    userGroup = false;
+    userGroupTwo = false;
+    userGroupThree = false;
+    userGroupFour = false;
+    userGroupDefault = false;
+
 
     constructor(private router: Router, private challService: ChallengeService, private goalService: GoalService,
                 private trophyService: TrophyService, private userService: UserService, private location: Location) {
@@ -70,13 +92,28 @@ export class LeaderboardDetailPage implements OnInit {
         this.publicUserDataObservable = this.userService.getUsersPublicData();
         this.publicUserDataObservable.subscribe(data => this.publicUserData = data);
 
+        this.fakeUserDataObservable = this.userService.getUsersFakeData();
+        this.fakeUserDataObservable.subscribe(data => this.fakeUserData = data);
+
         // set chart active if rewards group is assigned to group
-        this.group = this.userService.getUsergroup();
+        // gets user group id from current user and subscribes with the id to update group
+        this.group = this.userService.getUsergroup(); // get user group id for current user
         this.group.subscribe(group => this.updateGroup(group));
+
+        this.userLeaderboardValueObserve = this.goalService.getUserLeaderboardValue();
+        this.userLeaderboardValueObserve.subscribe(value => this.getValue(value));
+
+        this.age = this.userService.getUserAge();
+        this.age.subscribe(age => this.getAge(age));
+
+        this.gender = this.userService.getUserGender();
+        this.gender.subscribe(gender => this.userGender = gender);
 
         this.userObservable = this.userService.getUser();
         this.userObservable.subscribe(user => this.currentUser = user);
+        this.userObservable.subscribe(user => this.getGender(user));
 
+        // if rewards is true get trophies and challenges for leaderboard
         if (this.rewards) {
             // Observable2
             this.trophiesObserve = this.trophyService.getListOfAllUserAndTherWonTrophies();
@@ -91,6 +128,10 @@ export class LeaderboardDetailPage implements OnInit {
         }
 
         this.generateActiveMinutesList();
+        this.generateActiveMinutesListOne();
+        this.generateActiveMinutesListTwo();
+        this.generateActiveMinutesListThree();
+        this.generateActiveMinutesListFour();
         this.generateGoalWinsList();
         this.generateGoalProgressList();
     }
@@ -108,12 +149,53 @@ export class LeaderboardDetailPage implements OnInit {
         };
         this.router.navigate(['/menu/profile/profile/view'], navigationExtras);
     }
-
+    // passed group id and returns feature vector to config
     updateGroup(group) {
-        this.config = this.userService.getGroupconfig(group);
+        this.config = this.userService.getGroupconfig(group); // gets feature vector
         this.config.subscribe(config => this.setPages(config));
+        if (group === '-MRswf3GJ21lpbBDtX3u'){
+            this.userGroup = true;
+            this.userGroupTwo = false;
+            this.userGroupThree = false;
+            this.userGroupFour = false;
+            this.ranking = 'activeMinutesOne';
+        } else if (group === '-MV0EDdoLe_YwNuDyNLm'){
+            this.userGroupTwo = true;
+            this.userGroup = false;
+            this.userGroupThree = false;
+            this.userGroupFour = false;
+            this.ranking = 'activeMinutesTwo';
+        } else if (group === '-MV0EUE_DIEXALMM1MW5'){
+            this.userGroupThree = true;
+            this.userGroup = false;
+            this.userGroupTwo = false;
+            this.userGroupFour = false;
+            this.ranking = 'activeMinutesThree';
+        } else if (group === '-MV0Ef1ynIXmBZUVRsXw'){
+            this.userGroupFour = true;
+            this.userGroup = false;
+            this.userGroupTwo = false;
+            this.userGroupThree = false;
+            this.ranking = 'activeMinutesFour';
+        } else {
+            this.userGroupDefault = true;
+        }
     }
 
+    getValue(value) {
+        this.userLeaderboardValue = value;
+        console.log(this.userLeaderboardValue);
+    }
+
+    getGender(user) {
+        this.userGender = user.gender;
+        console.log(this.userGender);
+    }
+
+    getAge(age) {
+        this.userAge = age;
+    }
+    // set rewards to true if config for rewards is available
     setPages(config) {
         const array = JSON.parse(config);
         if (array.indexOf('Rewards') > -1) {
@@ -185,7 +267,137 @@ export class LeaderboardDetailPage implements OnInit {
                 const testarray = Object.keys(result)
                     .map(uid => new LeaderboardObject(uid, result[uid], this.publicUserData));
                 this.activitiesModerate = this.sortArrays(testarray);
+                console.log(this.activitiesModerate);
+            });
+    }
+
+    generateActiveMinutesListOne() {
+        this.goalService.getLeaderboardGoals('absolute', 'weekly-active')
+            .subscribe(result => {
+                if (!result) {
+                    this.activitiesModerateOne = [];
+                    return;
+                }
+                this.valueDif = this.userLeaderboardValue * 1.6;
+                console.log(this.valueDif);
+                console.log(result);
+                const testarray = Object.keys(result)
+                    .map(uid => new LeaderboardObject(uid, result[uid], this.fakeUserData));
                 console.log(testarray);
+                let array1 = testarray.filter(user => Math.abs(this.userAge - user.age) >= 10 && user.gender !== this.userGender &&
+                    user.value >= this.valueDif);
+
+                console.log(array1);
+                if (array1.length > 4) {
+                    array1.length = 4;
+                }
+                let array2 = testarray.filter(user => Math.abs(this.userAge - user.age) >= 10 && user.gender !== this.userGender &&
+                    user.value < this.userLeaderboardValue && user.uid.includes('fakeuser'));
+                console.log(array2);
+                this.activitiesModerateOne = array1.concat(array2);
+                if(this.activitiesModerateOne.length > 9) {
+                    this.activitiesModerateOne.length = 9;
+                }
+                this.activitiesModerateOne.push(new LeaderboardObject(firebase.auth().currentUser.uid, result[firebase.auth().currentUser.uid], this.publicUserData));
+                this.activitiesModerateOne = this.sortArrays(this.activitiesModerateOne);
+            });
+    }
+
+    generateActiveMinutesListTwo() {
+        this.goalService.getLeaderboardGoals('absolute', 'weekly-active')
+            .subscribe(result => {
+                if (!result) {
+                    this.activitiesModerateTwo = [];
+                    return;
+                }
+                this.valueDif = this.userLeaderboardValue * 1.6;
+                console.log(this.valueDif);
+                console.log(result);
+                const testarray = Object.keys(result)
+                    .map(uid => new LeaderboardObject(uid, result[uid], this.fakeUserData));
+                console.log(testarray);
+                let array1 = testarray.filter(user => Math.abs(this.userAge - user.age) <= 5 && user.gender === this.userGender &&
+                    user.value >= this.valueDif);
+
+                console.log(array1);
+                if (array1.length > 4) {
+                    array1.length = 4;
+                }
+                let array2 = testarray.filter(user => Math.abs(this.userAge - user.age) <= 5 && user.gender === this.userGender &&
+                    user.value < this.userLeaderboardValue && user.uid.includes('fakeuser'));
+                console.log(array2);
+                this.activitiesModerateTwo = array1.concat(array2);
+                if(this.activitiesModerateTwo.length > 9) {
+                    this.activitiesModerateTwo.length = 9;
+                }
+                this.activitiesModerateTwo.push(new LeaderboardObject(firebase.auth().currentUser.uid, result[firebase.auth().currentUser.uid], this.publicUserData));
+                this.activitiesModerateTwo = this.sortArrays(this.activitiesModerateTwo);
+            });
+    }
+
+    generateActiveMinutesListThree() {
+        this.goalService.getLeaderboardGoals('absolute', 'weekly-active')
+            .subscribe(result => {
+                if (!result) {
+                    this.activitiesModerateThree = [];
+                    return;
+                }
+                this.valueDif = this.userLeaderboardValue * 1.2;
+                this.valueDif2 = this.userLeaderboardValue * 0.8;
+                console.log(this.valueDif);
+                console.log(result);
+                const testarray = Object.keys(result)
+                    .map(uid => new LeaderboardObject(uid, result[uid], this.fakeUserData));
+                console.log(testarray);
+                let array1 = testarray.filter(user => Math.abs(this.userAge - user.age) >= 10 && user.gender !== this.userGender &&
+                    user.value <= this.valueDif && user.value > this.userLeaderboardValue);
+
+                console.log(array1);
+                if (array1.length > 4) {
+                    array1.length = 4;
+                }
+                let array2 = testarray.filter(user => Math.abs(this.userAge - user.age) >= 10 && user.gender !== this.userGender &&
+                    user.value < this.userLeaderboardValue && user.value > this.valueDif2 && user.uid.includes('fakeuser'));
+                console.log(array2);
+                this.activitiesModerateThree = array1.concat(array2);
+                if(this.activitiesModerateThree.length > 9) {
+                    this.activitiesModerateThree.length = 9;
+                }
+                this.activitiesModerateThree.push(new LeaderboardObject(firebase.auth().currentUser.uid, result[firebase.auth().currentUser.uid], this.publicUserData));
+                this.activitiesModerateThree = this.sortArrays(this.activitiesModerateThree);
+            });
+    }
+
+    generateActiveMinutesListFour() {
+        this.goalService.getLeaderboardGoals('absolute', 'weekly-active')
+            .subscribe(result => {
+                if (!result) {
+                    this.activitiesModerateFour = [];
+                    return;
+                }
+                this.valueDif = this.userLeaderboardValue * 1.2;
+                this.valueDif2 = this.userLeaderboardValue * 0.8;
+                console.log(this.valueDif);
+                console.log(result);
+                const testarray = Object.keys(result)
+                    .map(uid => new LeaderboardObject(uid, result[uid], this.fakeUserData));
+                console.log(testarray);
+                let array1 = testarray.filter(user => Math.abs(this.userAge - user.age) <= 5 && user.gender === this.userGender &&
+                    user.value <= this.valueDif && user.value > this.userLeaderboardValue);
+
+                console.log(array1);
+                if (array1.length > 4) {
+                    array1.length = 4;
+                }
+                let array2 = testarray.filter(user => Math.abs(this.userAge - user.age) <= 5 && user.gender === this.userGender &&
+                    user.value < this.userLeaderboardValue && user.value > this.valueDif2 && user.uid.includes('fakeuser'));
+                console.log(array2);
+                this.activitiesModerateFour = array1.concat(array2);
+                if(this.activitiesModerateFour.length > 9) {
+                    this.activitiesModerateFour.length = 9;
+                }
+                this.activitiesModerateFour.push(new LeaderboardObject(firebase.auth().currentUser.uid, result[firebase.auth().currentUser.uid], this.publicUserData));
+                this.activitiesModerateFour = this.sortArrays(this.activitiesModerateFour);
             });
     }
 

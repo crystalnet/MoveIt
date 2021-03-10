@@ -149,6 +149,10 @@ export class GoalService {
         return this.fireDatabase.object('/leaderboard/' + metric + '/' + goal).snapshotChanges().pipe(
             map(result => result.payload.val()));
     }
+    getUserLeaderboardValue() {
+        return this.fireDatabase.object('/leaderboard/absolute/weekly-active/' +
+            firebase.auth().currentUser.uid).valueChanges();
+    }
 
     getGoalHistory(userId: string = firebase.auth().currentUser.uid) {
         const ref = this.fireDatabase.object('/goalHistory/' + userId);
