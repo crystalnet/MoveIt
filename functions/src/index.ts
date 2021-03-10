@@ -194,7 +194,36 @@ function commentNotification(uid: string, group: string, postId: string) {
             data.header = 'Your activity received comments!';
             data.text = 'Your post was commented by someone, go check it out!';
             data.target = '/menu/socialfeed/socialfeed/detail';
-            data.type = 'comment-socialfeed-Notification';
+            data.type = 'comment-socialfeed-notification';
+            return data;
+        },
+        (err: any) => console.log(err));
+}
+
+function dailyProgressNotification(uid: string, group: string, postId: string) {
+    return admin.database().ref('/leaderboard/relative/daily-active/' + uid).once('value').then((snap: any) => {
+            const progress = snap.val();
+
+            const data = new NotificationData();
+            data.header = 'Your made progress!';
+            data.text = 'Daily goal progress: ' + progress.toString();
+            data.target = '/menu/progress/progress/detail';
+            data.type = 'daily-progress-notification';
+            return data;
+        },
+        (err: any) => console.log(err));
+}
+
+
+function weeklyProgressNotification(uid: string, group: string, postId: string) {
+    return admin.database().ref('/leaderboard/relative/weekly-active/' + uid).once('value').then((snap: any) => {
+            const progress = snap.val();
+
+            const data = new NotificationData();
+            data.header = 'Your made progress!';
+            data.text = 'Weekly goal progress: ' + progress.toString();
+            data.target = '/menu/progress/progress/detail';
+            data.type = 'weekly-progress-notification';
             return data;
         },
         (err: any) => console.log(err));
@@ -202,6 +231,10 @@ function commentNotification(uid: string, group: string, postId: string) {
 
 exports.progressNotification = functions.database.ref('/leaderboard/relative/weekly-active/{userId}')
     .onWrite((event: any, context: any) => {
+
+        // NOT ACTIVE
+        return;
+
         const before = event.before.val();
         const after = event.after.val();
         console.log('triggered with new val ', after, ' old val', before);
