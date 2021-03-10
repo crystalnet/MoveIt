@@ -25,8 +25,10 @@ exports.automaticNotifications = functions
         const time = moment().tz('Europe/Berlin');
         console.log('System Time: ', time.toLocaleString());
         time.subtract('minutes', time.get('minutes') % 15); // Round down to last quarter hour (00, 15, 30 or 45)
-        console.log('checking path ' + '/times/' + time.get('hours') + '/' + time.get('minutes'));
-        return admin.database().ref('/times/' + time.get('hours') + '/' + time.get('minutes')).once('value').then(
+        console.log('checking path ' + '/times/.../' + time.get('hours') + '/' + time.get('minutes'));
+
+        const returns = [];
+        returns.push(admin.database().ref('/times/social/' + time.get('hours') + '/' + time.get('minutes')).once('value').then(
             (snapshot: any) => {
                 const result = snapshot.val();
                 if (!result) {
@@ -97,7 +99,77 @@ exports.automaticNotifications = functions
                 console.log(err);
                 return;
             }
-        );
+        ));
+
+        returns.push(admin.database().ref('/times/progress/' + time.get('hours') + '/' + time.get('minutes')).once('value').then(
+            (snapshot: any) => {
+                const result = snapshot.val();
+                if (!result) {
+                    console.log('No results for this time: ', time.toString(), result);
+                    return;
+                }
+
+                const promises = [];
+                for (const k of Object.keys(result)) {
+                    const uid = result[k as keyof typeof result];
+                    let success = false;
+                    console.log('result for ', uid);
+
+                    const randomization = Math.random();
+                    console.log('randomization is ' + randomization);
+                    let data = Promise.resolve(new NotificationData());
+                    try {
+                        if (randomization < 0.5) {
+                            // if (randomization > 1) {
+                            data = dailyProgressNotification(uid);
+                            success = true;
+                        } else {
+                            data = weeklyProgressNotification(uid);
+                            success = true;
+                        }
+                    } catch (err) {
+                        console.log('received error' + err);
+
+                        let type = 'default';
+                        if (randomization < 0.25) {
+                            type = 'leaderboardNotification';
+                        } else if (randomization < 0.5) {
+                            // } else if (randomization < 1) {
+                            type = 'socialfeedNotification';
+                        }
+
+                        const dbNotification = {
+                            notificationType: type,
+                            type: 'push-notification',
+                            time: time.valueOf().toString(),
+                            response: 'not send',
+                            error: err
+                        };
+                        admin.database().ref('/tracking/' + uid + '/reactions/' + moment().tz('Europe/Berlin').valueOf().toString()).set(dbNotification).then(
+                            () => console.log('created db entry', dbNotification),
+                            (err: any) => console.log(err)
+                        );
+                        continue;
+                    }
+                    if (success) {
+                        console.log('preparing to send notification for ', uid);
+
+                        promises.push(data.then(
+                            (res: NotificationData) => {
+                                const notification = new UserNotification(uid, res);
+                                return notification.send();
+                            },
+                            (err: any) => console.log(err)
+                        ));
+                    }
+                }
+                return Promise.all(promises);
+            },
+            (err: any) => {
+                console.log(err);
+                return;
+            }
+        ));
     });
 
 
@@ -200,7 +272,7 @@ function commentNotification(uid: string, group: string, postId: string) {
         (err: any) => console.log(err));
 }
 
-function dailyProgressNotification(uid: string, group: string, postId: string) {
+function dailyProgressNotification(uid: string) {
     return admin.database().ref('/leaderboard/relative/daily-active/' + uid).once('value').then((snap: any) => {
             const progress = snap.val();
 
@@ -215,7 +287,7 @@ function dailyProgressNotification(uid: string, group: string, postId: string) {
 }
 
 
-function weeklyProgressNotification(uid: string, group: string, postId: string) {
+function weeklyProgressNotification(uid: string) {
     return admin.database().ref('/leaderboard/relative/weekly-active/' + uid).once('value').then((snap: any) => {
             const progress = snap.val();
 

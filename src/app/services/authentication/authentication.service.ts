@@ -83,9 +83,14 @@ export class AuthenticateService {
     }
 
     addUserTimesToSchedule(user: User) {
-        for (const t of user.times) {
+        for (const t of user.socialTimes) {
             const time = new Date(t);
-            this.db.database.ref('/times/' + time.getHours() + '/' + time.getMinutes()).push(user.id);
+            this.db.database.ref('/times/social/' + time.getHours() + '/' + time.getMinutes()).push(user.id);
+        }
+
+        for (const t of user.progressTimes) {
+            const time = new Date(t);
+            this.db.database.ref('/times/progress/' + time.getHours() + '/' + time.getMinutes()).push(user.id);
         }
     }
 

@@ -10,7 +10,8 @@ interface FireBaseObject {
     gender: string;
     degree: string;
     occupation: string;
-    times: Array<any>;
+    socialTimes: Array<any>;
+    progressTimes: Array<any>;
     profilePictureUrl: string;
     bio: string;
     token: string;
@@ -25,7 +26,8 @@ export class User {
      *
      */
     constructor(id?: string, name?: string, challengesActive?: Array<any>, group?: string, type?: string, birthday?: Date, gender?: string,
-                degree?: string, occupation?: string, times?: Array<any>, profilePictureUrl?: string, bio?: string) {
+                degree?: string, occupation?: string, socialTimes?: Array<any>, progressTimes?: Array<any>, profilePictureUrl?: string,
+                bio?: string) {
         // Each parameter is optional, if it's not there, set the default value
         this.id = id || '-1';
         this.name = name || 'No username';
@@ -36,7 +38,8 @@ export class User {
         this.gender = gender;
         this.degree = degree;
         this.occupation = gender;
-        this.times = [];
+        this.socialTimes = [];
+        this.progressTimes = [];
         this.profilePictureUrl = profilePictureUrl || '';
         this.bio = bio || 'Hey there, I\'m using MoveIt';
     }
@@ -50,7 +53,8 @@ export class User {
     gender: string;
     degree: string;
     occupation: string;
-    times: Array<any>;
+    socialTimes: Array<any>;
+    progressTimes: Array<any>;
     profilePictureUrl: string;
     bio: string;
     token: string;
@@ -66,7 +70,8 @@ export class User {
             firebaseObject.gender || '',
             firebaseObject.degree || '',
             firebaseObject.occupation || '',
-            firebaseObject.times || [],
+            firebaseObject.socialTimes || [],
+            firebaseObject.progressTimes || [],
             firebaseObject.profilePictureUrl || '',
             firebaseObject.bio || 'Hey there, I\'m using MoveIt'
         );
@@ -97,7 +102,8 @@ export class User {
             gender: this.gender,
             degree: this.degree,
             occupation: this.occupation,
-            times: this.times,
+            socialTimes: this.socialTimes,
+            progressTimes: this.progressTimes,
             profilePictureUrl: this.profilePictureUrl,
             bio: this.bio,
             offset

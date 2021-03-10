@@ -92,7 +92,8 @@ export class RegistrationPage implements OnInit {
         user.profilePictureUrl = 'https://firebasestorage.googleapis.com/v0/b/moveit-2019.appspot.com/o/profilePic%2FdefaultPic?alt=media&token=77281e2a-9855-4b8a-b8dc-74ee60092cc4';
         user.birthday = new Date(value.birthday);
         user.birthday.setHours(0, 0, 0, 0);
-        user.times = [value.time1, value.time2, value.time3, value.time4];
+        user.socialTimes = [value.time1, value.time2, value.time3];
+        user.progressTimes = [value.time4];
         this.authService.registerUser(value.code, value.email, value.password, user)
             .then(res => {
                 console.log(res);
