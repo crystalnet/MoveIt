@@ -243,7 +243,7 @@
 
                     <!-- 1. TIME -->
                     <ion-item>
-                        <p position="floating">Please select four times during the day, when you most likely have some time to go for a walk or to do some sports. The times must be at least 60 min apart.
+                        <p position="floating">Please select three times during the day, when you most likely have some time to go for a walk or to do some sports. The times must be at least 2 hours apart.
                         </p>
 
                         <ion-label position="floating">Please pick the first time.</ion-label>
@@ -300,6 +300,8 @@
 
                     <!-- 4. TIME -->
                     <ion-item>
+                        <p position="floating">Please select a time in the evening where you want to receive feedback on your performance. The time must be 2h after your previouisly indicated times.
+                        </p>
                         <ion-label position="floating">Please pick the fourth time.</ion-label>
                         <ion-datetime formControlName="time4" placeholder="Select Time" minuteValues="0,15,30,45"
                                       [displayFormat]="'HH:mm'"></ion-datetime>
