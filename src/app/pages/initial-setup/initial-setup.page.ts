@@ -83,7 +83,7 @@ export class InitialSetupPage implements OnInit {
     async presentAlert() {
         const alert = await this.alertController.create({
             header: 'You\'re all set!',
-            message: 'You\'re account has been set up successfully. You\'re now ready to start using the app',
+            message: 'Your account has been set up successfully. You\'re now ready to start using the app',
             buttons: [
                 {
                     text: 'Let\'s go', handler: () => {

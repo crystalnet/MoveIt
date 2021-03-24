@@ -50,7 +50,7 @@ exports.automaticNotifications = functions
                             // if (randomization > 1) {
                             data = generateLeaderboardNotification(uid);
                             success = true;
-                        } else if (randomization < 0.5) {
+                        } else if (randomization < 0.50) {
                             // } else if (randomization < 1) {
                             data = generateSocialfeedNotification(uid);
                             success = true;
@@ -62,10 +62,10 @@ exports.automaticNotifications = functions
 
                         let type = 'default';
                         if (randomization < 0.25) {
-                            type = 'leaderboardNotification';
+                            type = 'leaderboard-notification';
                         } else if (randomization < 0.5) {
                             // } else if (randomization < 1) {
-                            type = 'socialfeedNotification';
+                            type = 'socialfeed-notification';
                         }
 
                         const dbNotification = {
@@ -119,23 +119,25 @@ exports.automaticNotifications = functions
                     console.log('randomization is ' + randomization);
                     let data = Promise.resolve(new NotificationData());
                     try {
-                        if (randomization < 0.5) {
+                        if (randomization < 0.25) {
                             // if (randomization > 1) {
                             data = dailyProgressNotification(uid);
                             success = true;
-                        } else {
+                        } else if (randomization < 0.50) {
                             data = weeklyProgressNotification(uid);
                             success = true;
+                        } else {
+                            throw new Error('randomization result: no notification. continuing to next key. current uid ' + uid);
                         }
                     } catch (err) {
                         console.log('received error' + err);
 
                         let type = 'default';
                         if (randomization < 0.25) {
-                            type = 'leaderboardNotification';
+                            type = 'daily-progress-notification';
                         } else if (randomization < 0.5) {
                             // } else if (randomization < 1) {
-                            type = 'socialfeedNotification';
+                            type = 'weekly-progress-notification';
                         }
 
                         const dbNotification = {
@@ -277,8 +279,8 @@ function dailyProgressNotification(uid: string) {
             const progress = snap.val();
 
             const data = new NotificationData();
-            data.header = 'Your made progress!';
-            data.text = 'Daily goal progress: ' + progress.toString();
+            data.header = 'Daily Goal Progress';
+            data.text = 'You have reached ' + progress.toString() + '% of your daily goal with ' + (1-progress).toString() + '% more to go!s';
             data.target = '/menu/progress/progress/detail';
             data.type = 'daily-progress-notification';
             return data;
@@ -292,8 +294,8 @@ function weeklyProgressNotification(uid: string) {
             const progress = snap.val();
 
             const data = new NotificationData();
-            data.header = 'Your made progress!';
-            data.text = 'Weekly goal progress: ' + progress.toString();
+            data.header = 'Weekly Goal Progress';
+            data.text = 'You have reached ' + progress.toString() + '% of your weekly goal with ' + (1-progress).toString() + '% more to go!';
             data.target = '/menu/progress/progress/detail';
             data.type = 'weekly-progress-notification';
             return data;

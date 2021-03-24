@@ -24,7 +24,7 @@
                 <p>Set your goal for {{goals[0].duration}} active minutes!
                 </p>
                 <ion-item>
-                    <ion-range min="0" max="120" pin color="primary" step="5" snaps="true" [(ngModel)]="goals[0].target">
+                    <ion-range min="20" max="180" pin color="primary" step="10" snaps="true" [(ngModel)]="goals[0].target">
                         <ion-icon slot="start" size="small" name="walk"></ion-icon>
                         <ion-icon slot="end" name="walk"></ion-icon>
                     </ion-range>
@@ -42,11 +42,11 @@
                 <ion-card-title>Weekly Goal</ion-card-title>
             </ion-card-header>
             <ion-card-content>
-                <p>Set your goal for {{goals[1].duration}} active minutes! WHO recommends 300 min, but at least 150 min as a minimum.
+                <p>Set your goal for {{goals[1].duration}} active minutes! The World Health Organization recommends 300 min, but 150 min at least.
                 </p>
 
                 <ion-item>
-                    <ion-range min="0" max="600" pin color="secondary" step="10" snaps="true" [(ngModel)]="goals[1].target">
+                    <ion-range min="150" max="1000" pin color="secondary" step="50" snaps="true" [(ngModel)]="goals[1].target">
                         <ion-icon slot="start" size="small" name="walk"></ion-icon>
                         <ion-icon slot="end" name="walk"></ion-icon>
                     </ion-range>

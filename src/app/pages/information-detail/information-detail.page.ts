@@ -26,7 +26,7 @@ export class InformationDetailPage implements OnInit {
             {
                 title: 'Moderate vs. vigorous activity',
                 description: 'What does moderate or vigorous physical activity mean?',
-                content: 'Intensity refers to the rate at which the activity is being performed or the magnitude of the effort required to perform an activity or exercise. It can be thought of how hard a person works to do the activity. The intensity of different forms of physical activity varies between people. The intensity of physical activity depends on an individuals previous exercise experience and their relative level of fitness. Consequently, the examples given below are provided as a guide only and will vary between individuals.' +
+                content: 'Intensity refers to the rate at which the activity is being performed or the magnitude of the effort required to perform an activity or exercise. It can be thought of how hard a person works to do the activity. Vigorous intensity workouts count double for your active minutes. The intensity of different forms of physical activity varies between people. The intensity of physical activity depends on an individuals previous exercise experience and their relative level of fitness. Consequently, the examples given below are provided as a guide only and will vary between individuals.' +
                     'Examples of moderate activity: brisk walking, dancing, gardening, housework. Examples of vigorous activity: running, fast cycling, aerobics, competetive sports',
                 picture: 'stopwatch.png'
             },
