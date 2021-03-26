@@ -61,17 +61,17 @@ export class RegistrationPage implements OnInit {
                 Validators.required
             ])),
             name: new FormControl('', Validators.required),
-            birthday: new FormControl('', Validators.required),
-            gender: new FormControl('', Validators.required),
-            degree: new FormControl('', Validators.required),
-            occupation: new FormControl('', Validators.required),
+            birthday: new FormControl(''),
+            gender: new FormControl(''),
+            degree: new FormControl(''),
+            occupation: new FormControl(''),
             terms: new FormControl('', Validators.requiredTrue),
             code: new FormControl('', Validators.required),
             time1: new FormControl('', Validators.required),
             time2: new FormControl('', Validators.required),
             time3: new FormControl('', Validators.required),
             time4: new FormControl('', Validators.required)
-        }, { updateOn: 'blur' });
+        }, { updateOn: 'change' });
         this.validationsForm.get('terms').setValue(false);
     }
 
