@@ -295,7 +295,7 @@ function weeklyProgressNotification(uid: string) {
 
             const data = new NotificationData();
             data.header = 'Weekly Goal Progress';
-            data.text = 'You have reached ' + Math.round(progress*100).toString() + '% of your weekly goal with ' + Math.round((1-progress)*100) + '% more to go!';
+            data.text = 'You have reached ' + Math.max(100, Math.round(progress*100)).toString() + '% of your weekly goal with ' + Math.min(0, Math.round((1-progress)*100)).toString() + '% more to go!';
             data.target = '/menu/progress/progress/detail';
             data.type = 'weekly-progress-notification';
             return data;
