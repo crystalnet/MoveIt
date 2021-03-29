@@ -495,6 +495,9 @@ exports.dailyCleanUp = functions
             () => {
                 logGoalProgress(goalHistory, goals);
                 resetDailyGoals(goals, leaderboard);
+                if (moment().tz('Europe/Berlin').day() === 1) {
+                    resetWeeklyGoals(goals, leaderboard);
+                }
                 updatePublicUserData(users, publicUserData);
 
                 const returnPromises = [];
@@ -547,6 +550,36 @@ function resetDailyGoals(goals: any, leaderboard: any) {
     }
 
     const dailyGoals = ['daily-active', 'daily-moderate', 'daily-vigorous'];
+    const metrics = ['relative', 'absolute'];
+    for (const metric of metrics) {
+        for (const goal of dailyGoals) {
+            for (const user of Object.keys(leaderboard[metric][goal])) {
+                leaderboard[metric][goal][user] = 0;
+            }
+        }
+    }
+
+    // Objects are edited in place, therefore no return value is necessary
+    return;
+}
+
+function resetWeeklyGoals(goals: any, leaderboard: any) {
+    if (!goals || !leaderboard || !isObject(goals) || !isObject(leaderboard)) {
+        console.log('goals or leaderboard not set ', goals, leaderboard);
+        return;
+    }
+
+    for (const user of Object.keys(goals)) {
+        for (const goal of Object.keys(goals[user])) {
+            const element = goals[user][goal];
+            if (goal.split('-')[0] === 'weekly') {
+                element.relative = 0;
+                element.current = 0;
+            }
+        }
+    }
+
+    const dailyGoals = ['weekly-active', 'weekly-moderate', 'weekly-vigorous'];
     const metrics = ['relative', 'absolute'];
     for (const metric of metrics) {
         for (const goal of dailyGoals) {
