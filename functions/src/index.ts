@@ -280,7 +280,7 @@ function dailyProgressNotification(uid: string) {
 
             const data = new NotificationData();
             data.header = 'Daily Goal Progress';
-            data.text = 'You have reached ' + Math.max(100, Math.round(progress*100)).toString() + '% of your daily goal with ' + Math.min(0, Math.round((1-progress)*100)).toString() + '% more to go!s';
+            data.text = 'You have reached ' + Math.min(100, Math.round(progress*100)).toString() + '% of your daily goal with ' + Math.max(0, Math.round((1-progress)*100)).toString() + '% more to go!s';
             data.target = '/menu/progress/progress/detail';
             data.type = 'daily-progress-notification';
             return data;
@@ -295,7 +295,7 @@ function weeklyProgressNotification(uid: string) {
 
             const data = new NotificationData();
             data.header = 'Weekly Goal Progress';
-            data.text = 'You have reached ' + Math.max(100, Math.round(progress*100)).toString() + '% of your weekly goal with ' + Math.min(0, Math.round((1-progress)*100)).toString() + '% more to go!';
+            data.text = 'You have reached ' + Math.min(100, Math.round(progress*100)).toString() + '% of your weekly goal with ' + Math.max(0, Math.round((1-progress)*100)).toString() + '% more to go!';
             data.target = '/menu/progress/progress/detail';
             data.type = 'weekly-progress-notification';
             return data;
