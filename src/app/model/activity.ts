@@ -91,8 +91,8 @@ export class Activity {
             console.log('Single Entry of Fitness API: ', SingleEntry);
             // still activity will be excluded
             // activities that are not defined by API will be excluded
-            // const dropActivities = ['other', 'in_vehicle', 'still', 'unknown', 'sleep', 'sleep_awake', 'sleep_deep', 'sleep_light', 'sleep-rem'];
-            const dropActivities = [];
+            const dropActivities = [/*'other',*/ 'in_vehicle', 'still', 'unknown', 'sleep', 'sleep_awake', 'sleep_deep', 'sleep_light', 'sleep-rem'];
+            // const dropActivities = [];
             if (dropActivities.includes(SingleEntry.value.toLowerCase())) {
                 return;
             }
