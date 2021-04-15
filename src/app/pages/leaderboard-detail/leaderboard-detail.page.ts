@@ -126,14 +126,8 @@ export class LeaderboardDetailPage implements OnInit {
                 this.pushChallengeObjects(result3);
             });
         }
-
-        this.generateActiveMinutesList();
-        this.generateActiveMinutesListOne();
-        this.generateActiveMinutesListTwo();
-        this.generateActiveMinutesListThree();
-        this.generateActiveMinutesListFour();
-        this.generateGoalWinsList();
-        this.generateGoalProgressList();
+        // this.generateGoalWinsList();
+        // this.generateGoalProgressList();
     }
 
     viewProfile(uid?) {
@@ -159,26 +153,31 @@ export class LeaderboardDetailPage implements OnInit {
             this.userGroupThree = false;
             this.userGroupFour = false;
             this.ranking = 'activeMinutesOne';
+            this.generateActiveMinutesListOne();
         } else if (group === '-MV0EDdoLe_YwNuDyNLm'){
             this.userGroupTwo = true;
             this.userGroup = false;
             this.userGroupThree = false;
             this.userGroupFour = false;
             this.ranking = 'activeMinutesTwo';
+            this.generateActiveMinutesListTwo();
         } else if (group === '-MV0EUE_DIEXALMM1MW5'){
             this.userGroupThree = true;
             this.userGroup = false;
             this.userGroupTwo = false;
             this.userGroupFour = false;
             this.ranking = 'activeMinutesThree';
+            this.generateActiveMinutesListThree();
         } else if (group === '-MV0Ef1ynIXmBZUVRsXw'){
             this.userGroupFour = true;
             this.userGroup = false;
             this.userGroupTwo = false;
             this.userGroupThree = false;
             this.ranking = 'activeMinutesFour';
+            this.generateActiveMinutesListFour();
         } else {
             this.userGroupDefault = true;
+            this.generateActiveMinutesList();
         }
     }
 
@@ -285,14 +284,14 @@ export class LeaderboardDetailPage implements OnInit {
                     .map(uid => new LeaderboardObject(uid, result[uid], this.fakeUserData));
                 console.log(testarray);
                 let array1 = testarray.filter(user => Math.abs(this.userAge - user.age) >= 10 && user.gender !== this.userGender &&
-                    user.value >= this.valueDif);
+                    user.value >= this.valueDif && user.uid.includes('fakeuser'));
 
                 console.log(array1);
                 if (array1.length > 4) {
                     array1.length = 4;
                 }
                 let array2 = testarray.filter(user => Math.abs(this.userAge - user.age) >= 10 && user.gender !== this.userGender &&
-                    user.value < this.userLeaderboardValue && user.uid.includes('fakeuser'));
+                    user.value <= this.userLeaderboardValue && user.uid.includes('fakeuser') && array1.includes(user) === false);
                 console.log(array2);
                 this.activitiesModerateOne = array1.concat(array2);
                 if(this.activitiesModerateOne.length > 9) {
@@ -317,14 +316,14 @@ export class LeaderboardDetailPage implements OnInit {
                     .map(uid => new LeaderboardObject(uid, result[uid], this.fakeUserData));
                 console.log(testarray);
                 let array1 = testarray.filter(user => Math.abs(this.userAge - user.age) <= 5 && user.gender === this.userGender &&
-                    user.value >= this.valueDif);
+                    user.value >= this.valueDif && user.uid.includes('fakeuser'));
 
                 console.log(array1);
                 if (array1.length > 4) {
                     array1.length = 4;
                 }
                 let array2 = testarray.filter(user => Math.abs(this.userAge - user.age) <= 5 && user.gender === this.userGender &&
-                    user.value < this.userLeaderboardValue && user.uid.includes('fakeuser'));
+                    user.value <= this.userLeaderboardValue && user.uid.includes('fakeuser') && array1.includes(user) === false);
                 console.log(array2);
                 this.activitiesModerateTwo = array1.concat(array2);
                 if(this.activitiesModerateTwo.length > 9) {
@@ -334,7 +333,6 @@ export class LeaderboardDetailPage implements OnInit {
                 this.activitiesModerateTwo = this.sortArrays(this.activitiesModerateTwo);
             });
     }
-
     generateActiveMinutesListThree() {
         this.goalService.getLeaderboardGoals('absolute', 'weekly-active')
             .subscribe(result => {
@@ -349,15 +347,31 @@ export class LeaderboardDetailPage implements OnInit {
                 const testarray = Object.keys(result)
                     .map(uid => new LeaderboardObject(uid, result[uid], this.fakeUserData));
                 console.log(testarray);
-                let array1 = testarray.filter(user => Math.abs(this.userAge - user.age) >= 10 && user.gender !== this.userGender &&
-                    user.value <= this.valueDif && user.value > this.userLeaderboardValue);
+                testarray.map(user => user.value = this.userLeaderboardValue + Math.floor(Math.random() * 25) *  (Math.round(Math.random()) ? 1 : -1));
+                console.log(Math.floor(Math.random() * 25) + 1);
+                let array1;
+                if (this.userLeaderboardValue <= 50){
+                    array1 = testarray.filter(user => Math.abs(this.userAge - user.age) >= 10 && user.gender !== this.userGender &&
+                        user.value >= this.userLeaderboardValue && user.uid.includes('fakeuser'));
+                }
+                else {
+                    array1 = testarray.filter(user => Math.abs(this.userAge - user.age) >= 10 && user.gender !== this.userGender &&
+                    user.value <= this.valueDif && user.value >= this.userLeaderboardValue && user.uid.includes('fakeuser'));
+                }
 
                 console.log(array1);
                 if (array1.length > 4) {
                     array1.length = 4;
                 }
-                let array2 = testarray.filter(user => Math.abs(this.userAge - user.age) >= 10 && user.gender !== this.userGender &&
-                    user.value < this.userLeaderboardValue && user.value > this.valueDif2 && user.uid.includes('fakeuser'));
+                let array2;
+                if (this.userLeaderboardValue <= 50){
+                    array2 = testarray.filter(user => Math.abs(this.userAge - user.age) >= 10 && user.gender !== this.userGender &&
+                        user.value <= this.userLeaderboardValue && user.value >= 0 && user.uid.includes('fakeuser') && array1.includes(user) === false);
+                }
+                else {
+                    array2 = testarray.filter(user => Math.abs(this.userAge - user.age) >= 10 && user.gender !== this.userGender &&
+                    user.value <= this.userLeaderboardValue && user.value >= this.valueDif2 && user.uid.includes('fakeuser') && array1.includes(user) === false);
+                }
                 console.log(array2);
                 this.activitiesModerateThree = array1.concat(array2);
                 if(this.activitiesModerateThree.length > 9) {
@@ -382,15 +396,29 @@ export class LeaderboardDetailPage implements OnInit {
                 const testarray = Object.keys(result)
                     .map(uid => new LeaderboardObject(uid, result[uid], this.fakeUserData));
                 console.log(testarray);
-                let array1 = testarray.filter(user => Math.abs(this.userAge - user.age) <= 5 && user.gender === this.userGender &&
-                    user.value <= this.valueDif && user.value > this.userLeaderboardValue);
-
+                testarray.map(user => user.value = this.userLeaderboardValue + Math.floor(Math.random() * 25) *  (Math.round(Math.random()) ? 1 : -1));
+                let array1;
+                if (this.userLeaderboardValue <= 50){
+                    array1 = testarray.filter(user => Math.abs(this.userAge - user.age) <= 5 && user.gender === this.userGender
+                         && user.value >= this.userLeaderboardValue && user.uid.includes('fakeuser'));
+                }
+                else {
+                array1 = testarray.filter(user => Math.abs(this.userAge - user.age) <= 5 && user.gender === this.userGender &&
+                    user.value <= this.valueDif && user.value >= this.userLeaderboardValue && user.uid.includes('fakeuser'));
+                }
                 console.log(array1);
                 if (array1.length > 4) {
                     array1.length = 4;
                 }
-                let array2 = testarray.filter(user => Math.abs(this.userAge - user.age) <= 5 && user.gender === this.userGender &&
-                    user.value < this.userLeaderboardValue && user.value > this.valueDif2 && user.uid.includes('fakeuser'));
+                let array2;
+                if (this.userLeaderboardValue <= 50){
+                    array2 = testarray.filter(user => Math.abs(this.userAge - user.age) <= 5 && user.gender === this.userGender &&
+                        user.value <= this.userLeaderboardValue && user.value >= 0 && user.uid.includes('fakeuser') && array1.includes(user) === false);
+                }
+                else {
+                    array2 = testarray.filter(user => Math.abs(this.userAge - user.age) <= 5 && user.gender === this.userGender &&
+                        user.value <= this.userLeaderboardValue && user.value >= this.valueDif2 && user.uid.includes('fakeuser') && array1.includes(user) === false);
+                }
                 console.log(array2);
                 this.activitiesModerateFour = array1.concat(array2);
                 if(this.activitiesModerateFour.length > 9) {
@@ -401,30 +429,30 @@ export class LeaderboardDetailPage implements OnInit {
             });
     }
 
-    generateGoalProgressList() {
-        this.goalService.getLeaderboardGoals('relative', 'weekly-active')
-            .subscribe(result => {
-                if (!result) {
-                    return;
-                }
+    // generateGoalProgressList() {
+    //     this.goalService.getLeaderboardGoals('relative', 'weekly-active')
+    //         .subscribe(result => {
+    //             if (!result) {
+    //                 return;
+    //             }
+    //
+    //             const testarray = Object.keys(result).map(uid => new LeaderboardObject(uid, result[uid], this.publicUserData));
+    //             this.goalProgressList = this.sortArrays(testarray);
+    //             console.log(this.goalProgressList);
+    //         });
+    // }
 
-                const testarray = Object.keys(result).map(uid => new LeaderboardObject(uid, result[uid], this.publicUserData));
-                this.goalProgressList = this.sortArrays(testarray);
-                console.log(this.goalProgressList);
-            });
-    }
-
-    generateGoalWinsList() {
-        const nGoals = this.goalService.getLeaderboardGoals('nWins', '');
-        nGoals.subscribe(goalList => {
-            if (goalList) {
-                const testarray = Object.keys(goalList)
-                    .map(uid => new LeaderboardObject(uid, goalList[uid], this.publicUserData));
-                this.goalWinsList = this.sortArrays(testarray);
-                console.log(this.goalWinsList);
-            }
-        });
-    }
+    // generateGoalWinsList() {
+    //     const nGoals = this.goalService.getLeaderboardGoals('nWins', '');
+    //     nGoals.subscribe(goalList => {
+    //         if (goalList) {
+    //             const testarray = Object.keys(goalList)
+    //                 .map(uid => new LeaderboardObject(uid, goalList[uid], this.publicUserData));
+    //             this.goalWinsList = this.sortArrays(testarray);
+    //             console.log(this.goalWinsList);
+    //         }
+    //     });
+    // }
 
     /**
      * this method sorts all arrays for the leaderboard visualization
