@@ -27,13 +27,15 @@ import { FCM } from 'cordova-plugin-fcm-with-dependecy-updated/ionic/ngx';
 const firebaseConfig = {
     apiKey: 'AIzaSyAeeexHFSp2HevDoOi7MdzCLdgET6QtMg4',
     authDomain: 'moveit-2019.firebaseapp.com',
-    databaseURL: 'https://moveit-2019.firebaseio.com',
+    databaseURL: 'https://moveit-2019-f1087.firebaseio.com/',
     projectId: 'moveit-2019',
     storageBucket: 'moveit-2019.appspot.com',
     messagingSenderId: '743283522973',
     appId: '1:743283522973:web:43cd7c986b9811d8100374',
     measurementId: 'G-1N6YS1R28Y'
 };
+
+
 
 
 @NgModule({

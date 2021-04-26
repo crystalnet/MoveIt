@@ -347,7 +347,7 @@ export class LeaderboardDetailPage implements OnInit {
                 const testarray = Object.keys(result)
                     .map(uid => new LeaderboardObject(uid, result[uid], this.fakeUserData));
                 console.log(testarray);
-                testarray.map(user => user.value = this.userLeaderboardValue + Math.floor(Math.random() * 25) *  (Math.round(Math.random()) ? 1 : -1));
+                testarray.map(user => user.value = this.userLeaderboardValue + Math.floor(Math.random() * 35) *  (Math.round(Math.random()) ? 1 : -1));
                 console.log(Math.floor(Math.random() * 25) + 1);
                 let array1;
                 if (this.userLeaderboardValue <= 50){
