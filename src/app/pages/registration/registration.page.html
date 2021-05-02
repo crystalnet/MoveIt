@@ -243,7 +243,7 @@
 
                     <!-- 1. TIME -->
                     <ion-item>
-                        <p position="floating">Please select four times during the day, when you most likely have some time to go for a walk or to do some sports. The times must be at least 60 min apart.
+                        <p position="floating">Please select three times during the day, when you most likely have some time to go for a walk or to do some sports and one time in the evening to receive feedback on your performance. The times must be at least 2 hours apart.
                         </p>
 
                         <ion-label position="floating">Please pick the first time.</ion-label>
@@ -271,7 +271,7 @@
 
                     <!-- Validation -->
                     <div class="validation-errors">
-                        <ng-container *ngFor="let validation of validationMessages.time1">
+                        <ng-container *ngFor="let validation of validationMessages.time2">
                             <div class="error-message"
                                  *ngIf="validationsForm.get('time2').hasError(validation.type) && (validationsForm.get('time2').dirty || validationsForm.get('time2').touched)">
                                 <ion-icon class="icon" name="close-circle-outline" size="small"></ion-icon>
@@ -289,7 +289,7 @@
 
                     <!-- Validation -->
                     <div class="validation-errors">
-                        <ng-container *ngFor="let validation of validationMessages.time1">
+                        <ng-container *ngFor="let validation of validationMessages.time3">
                             <div class="error-message"
                                  *ngIf="validationsForm.get('time3').hasError(validation.type) && (validationsForm.get('time3').dirty || validationsForm.get('time3').touched)">
                                 <ion-icon class="icon" name="close-circle-outline" size="small"></ion-icon>
@@ -300,14 +300,16 @@
 
                     <!-- 4. TIME -->
                     <ion-item>
-                        <ion-label position="floating">Please pick the fourth time.</ion-label>
+                        <p position="floating">Please select a time in the evening where you want to receive feedback on your performance. The time must be 2h after your previouisly indicated times.
+                        </p>
+                        <ion-label position="floating">Please pick the time for feedback.</ion-label>
                         <ion-datetime formControlName="time4" placeholder="Select Time" minuteValues="0,15,30,45"
                                       [displayFormat]="'HH:mm'"></ion-datetime>
                     </ion-item>
 
                     <!-- Validation -->
                     <div class="validation-errors">
-                        <ng-container *ngFor="let validation of validationMessages.time1">
+                        <ng-container *ngFor="let validation of validationMessages.time4">
                             <div class="error-message"
                                  *ngIf="validationsForm.get('time4').hasError(validation.type) && (validationsForm.get('time4').dirty || validationsForm.get('time4').touched)">
                                 <ion-icon class="icon" name="close-circle-outline" size="small"></ion-icon>

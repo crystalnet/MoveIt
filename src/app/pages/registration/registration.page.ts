@@ -61,17 +61,17 @@ export class RegistrationPage implements OnInit {
                 Validators.required
             ])),
             name: new FormControl('', Validators.required),
-            birthday: new FormControl('', Validators.required),
-            gender: new FormControl('', Validators.required),
-            degree: new FormControl('', Validators.required),
-            occupation: new FormControl('', Validators.required),
+            birthday: new FormControl(''),
+            gender: new FormControl(''),
+            degree: new FormControl(''),
+            occupation: new FormControl(''),
             terms: new FormControl('', Validators.requiredTrue),
             code: new FormControl('', Validators.required),
             time1: new FormControl('', Validators.required),
             time2: new FormControl('', Validators.required),
             time3: new FormControl('', Validators.required),
             time4: new FormControl('', Validators.required)
-        }, { updateOn: 'blur' });
+        }, { updateOn: 'change' });
         this.validationsForm.get('terms').setValue(false);
     }
 
@@ -92,7 +92,8 @@ export class RegistrationPage implements OnInit {
         user.profilePictureUrl = 'https://firebasestorage.googleapis.com/v0/b/moveit-2019.appspot.com/o/profilePic%2FdefaultPic?alt=media&token=77281e2a-9855-4b8a-b8dc-74ee60092cc4';
         user.birthday = new Date(value.birthday);
         user.birthday.setHours(0, 0, 0, 0);
-        user.times = [value.time1, value.time2, value.time3, value.time4];
+        user.socialTimes = [value.time1, value.time2, value.time3];
+        user.progressTimes = [value.time4];
         this.authService.registerUser(value.code, value.email, value.password, user)
             .then(res => {
                 console.log(res);

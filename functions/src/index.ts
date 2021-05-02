@@ -25,8 +25,10 @@ exports.automaticNotifications = functions
         const time = moment().tz('Europe/Berlin');
         console.log('System Time: ', time.toLocaleString());
         time.subtract('minutes', time.get('minutes') % 15); // Round down to last quarter hour (00, 15, 30 or 45)
-        console.log('checking path ' + '/times/' + time.get('hours') + '/' + time.get('minutes'));
-        return admin.database().ref('/times/' + time.get('hours') + '/' + time.get('minutes')).once('value').then(
+        console.log('checking path ' + '/times/.../' + time.get('hours') + '/' + time.get('minutes'));
+
+        const returns = [];
+        returns.push(admin.database().ref('/times/social/' + time.get('hours') + '/' + time.get('minutes')).once('value').then(
             (snapshot: any) => {
                 const result = snapshot.val();
                 if (!result) {
@@ -48,7 +50,7 @@ exports.automaticNotifications = functions
                             // if (randomization > 1) {
                             data = generateLeaderboardNotification(uid);
                             success = true;
-                        } else if (randomization < 0.5) {
+                        } else if (randomization < 0.50) {
                             // } else if (randomization < 1) {
                             data = generateSocialfeedNotification(uid);
                             success = true;
@@ -60,10 +62,10 @@ exports.automaticNotifications = functions
 
                         let type = 'default';
                         if (randomization < 0.25) {
-                            type = 'leaderboardNotification';
+                            type = 'leaderboard-notification';
                         } else if (randomization < 0.5) {
                             // } else if (randomization < 1) {
-                            type = 'socialfeedNotification';
+                            type = 'socialfeed-notification';
                         }
 
                         const dbNotification = {
@@ -97,7 +99,79 @@ exports.automaticNotifications = functions
                 console.log(err);
                 return;
             }
-        );
+        ));
+
+        returns.push(admin.database().ref('/times/progress/' + time.get('hours') + '/' + time.get('minutes')).once('value').then(
+            (snapshot: any) => {
+                const result = snapshot.val();
+                if (!result) {
+                    console.log('No results for this time: ', time.toString(), result);
+                    return;
+                }
+
+                const promises = [];
+                for (const k of Object.keys(result)) {
+                    const uid = result[k as keyof typeof result];
+                    let success = false;
+                    console.log('result for ', uid);
+
+                    const randomization = Math.random();
+                    console.log('randomization is ' + randomization);
+                    let data = Promise.resolve(new NotificationData());
+                    try {
+                        if (randomization < 0.25) {
+                            // if (randomization > 1) {
+                            data = dailyProgressNotification(uid);
+                            success = true;
+                        } else if (randomization < 0.50) {
+                            data = weeklyProgressNotification(uid);
+                            success = true;
+                        } else {
+                            throw new Error('randomization result: no notification. continuing to next key. current uid ' + uid);
+                        }
+                    } catch (err) {
+                        console.log('received error' + err);
+
+                        let type = 'default';
+                        if (randomization < 0.25) {
+                            type = 'daily-progress-notification';
+                        } else if (randomization < 0.5) {
+                            // } else if (randomization < 1) {
+                            type = 'weekly-progress-notification';
+                        }
+
+                        const dbNotification = {
+                            notificationType: type,
+                            type: 'push-notification',
+                            time: time.valueOf().toString(),
+                            response: 'not send',
+                            error: err
+                        };
+                        admin.database().ref('/tracking/' + uid + '/reactions/' + moment().tz('Europe/Berlin').valueOf().toString()).set(dbNotification).then(
+                            () => console.log('created db entry', dbNotification),
+                            (err: any) => console.log(err)
+                        );
+                        continue;
+                    }
+                    if (success) {
+                        console.log('preparing to send notification for ', uid);
+
+                        promises.push(data.then(
+                            (res: NotificationData) => {
+                                const notification = new UserNotification(uid, res);
+                                return notification.send();
+                            },
+                            (err: any) => console.log(err)
+                        ));
+                    }
+                }
+                return Promise.all(promises);
+            },
+            (err: any) => {
+                console.log(err);
+                return;
+            }
+        ));
     });
 
 
@@ -194,7 +268,36 @@ function commentNotification(uid: string, group: string, postId: string) {
             data.header = 'Your activity received comments!';
             data.text = 'Your post was commented by someone, go check it out!';
             data.target = '/menu/socialfeed/socialfeed/detail';
-            data.type = 'comment-socialfeed-Notification';
+            data.type = 'comment-socialfeed-notification';
+            return data;
+        },
+        (err: any) => console.log(err));
+}
+
+function dailyProgressNotification(uid: string) {
+    return admin.database().ref('/leaderboard/relative/daily-active/' + uid).once('value').then((snap: any) => {
+            const progress = snap.val();
+
+            const data = new NotificationData();
+            data.header = 'Daily Goal Progress';
+            data.text = 'You have reached ' + Math.min(100, Math.round(progress*100)).toString() + '% of your daily goal with ' + Math.max(0, Math.round((1-progress)*100)).toString() + '% more to go!s';
+            data.target = '/menu/progress/progress/detail';
+            data.type = 'daily-progress-notification';
+            return data;
+        },
+        (err: any) => console.log(err));
+}
+
+
+function weeklyProgressNotification(uid: string) {
+    return admin.database().ref('/leaderboard/relative/weekly-active/' + uid).once('value').then((snap: any) => {
+            const progress = snap.val();
+
+            const data = new NotificationData();
+            data.header = 'Weekly Goal Progress';
+            data.text = 'You have reached ' + Math.min(100, Math.round(progress*100)).toString() + '% of your weekly goal with ' + Math.max(0, Math.round((1-progress)*100)).toString() + '% more to go!';
+            data.target = '/menu/progress/progress/detail';
+            data.type = 'weekly-progress-notification';
             return data;
         },
         (err: any) => console.log(err));
@@ -202,6 +305,10 @@ function commentNotification(uid: string, group: string, postId: string) {
 
 exports.progressNotification = functions.database.ref('/leaderboard/relative/weekly-active/{userId}')
     .onWrite((event: any, context: any) => {
+
+        // NOT ACTIVE
+        return;
+
         const before = event.before.val();
         const after = event.after.val();
         console.log('triggered with new val ', after, ' old val', before);
@@ -388,6 +495,9 @@ exports.dailyCleanUp = functions
             () => {
                 logGoalProgress(goalHistory, goals);
                 resetDailyGoals(goals, leaderboard);
+                if (moment().tz('Europe/Berlin').day() === 1) {
+                    resetWeeklyGoals(goals, leaderboard);
+                }
                 updatePublicUserData(users, publicUserData);
 
                 const returnPromises = [];
@@ -440,6 +550,36 @@ function resetDailyGoals(goals: any, leaderboard: any) {
     }
 
     const dailyGoals = ['daily-active', 'daily-moderate', 'daily-vigorous'];
+    const metrics = ['relative', 'absolute'];
+    for (const metric of metrics) {
+        for (const goal of dailyGoals) {
+            for (const user of Object.keys(leaderboard[metric][goal])) {
+                leaderboard[metric][goal][user] = 0;
+            }
+        }
+    }
+
+    // Objects are edited in place, therefore no return value is necessary
+    return;
+}
+
+function resetWeeklyGoals(goals: any, leaderboard: any) {
+    if (!goals || !leaderboard || !isObject(goals) || !isObject(leaderboard)) {
+        console.log('goals or leaderboard not set ', goals, leaderboard);
+        return;
+    }
+
+    for (const user of Object.keys(goals)) {
+        for (const goal of Object.keys(goals[user])) {
+            const element = goals[user][goal];
+            if (goal.split('-')[0] === 'weekly') {
+                element.relative = 0;
+                element.current = 0;
+            }
+        }
+    }
+
+    const dailyGoals = ['weekly-active', 'weekly-moderate', 'weekly-vigorous'];
     const metrics = ['relative', 'absolute'];
     for (const metric of metrics) {
         for (const goal of dailyGoals) {

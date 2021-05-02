@@ -13,6 +13,7 @@ import {ActionLog} from '../../model/actionLog';
 import * as moment from 'moment-timezone';
 import {Moment} from 'moment-timezone';
 import {forkJoin} from 'rxjs';
+import {ActivityService} from '../activity/activity.service';
 
 @Injectable({
     providedIn: 'root'
@@ -117,10 +118,29 @@ export class GoalService {
             // Set the new target value
             goal.target = target;
 
-            this.updateGoal(goal).then(
-                res => resolve(res),
-                err => reject(err)
-            );
+            this.fireDatabase.database.ref('/goals/' + firebase.auth().currentUser.uid + '/' + goal.name).set(goal.toFirebaseObject());
+
+            // TODO fill correctly
+            const startDate = moment.tz('Europe/Berlin');
+            if (startDate.get('day') === 0) {
+                startDate.subtract(7, 'day');
+            }
+            startDate.startOf('week').endOf('day').add(1, 'day');
+            const endDate = moment.tz('Europe/Berlin').endOf('day');
+
+            const ref = this.fireDatabase
+                .list<Activity>(
+                    '/activities/' + firebase.auth().currentUser.uid,
+                    query => query.orderByKey().startAt(startDate.valueOf().toString()).endAt(endDate.valueOf().toString()));
+            const acts = ref.snapshotChanges().pipe(map(activities => activities.map(
+                activitySnapshot => Activity.fromFirebaseObject(activitySnapshot.key, activitySnapshot.payload.val())).reverse())).pipe(first());
+            acts.subscribe(
+                (result: Activity[]) => {
+                    this.updateGoals(startDate, endDate, result).then(
+                        res => resolve(res),
+                        err => reject(err)
+                    );
+                });
         });
     }
 
@@ -207,17 +227,20 @@ export class GoalService {
             startDate.subtract(1, 'day');
             const observables = [];
             observables.push(this.getGoalHistoryTimeframe(startDate.endOf('day').valueOf(), endDate.endOf('day').valueOf()).pipe(first()));
-            if (endDate.isSameOrAfter(moment().tz('Europe/Berlin'))) {
-                observables.push(this.getGoals().pipe(first()));
-            }
+            // if (endDate.isSameOrAfter(moment().tz('Europe/Berlin'))) {
+            observables.push(this.getGoals().pipe(first()));
+            // }
 
-            forkJoin(observables).subscribe((result: [any[], Goal[]?]) => {
+            forkJoin(observables).subscribe((result: [any[], Goal[]]) => {
                 console.log(result);
                 const goalHistory = result[0];
+                const userGoals = result[1];
                 const progress = {};
-                // for (const defaultGoal of Goal.defaultGoals) {
-                //     progress[defaultGoal.name] = {};
-                // }
+                const userDefaultGoals = [];
+                for (const defaultGoal of userGoals) {
+                    const goal = new Goal(defaultGoal.name, defaultGoal.duration, defaultGoal.type, defaultGoal.target, 0);
+                    userDefaultGoals.push(goal);
+                }
 
                 for (const activity of activities) {
                     const time = moment(activity.startTime).tz('Europe/Berlin');
@@ -227,7 +250,7 @@ export class GoalService {
                         const key = time.endOf('day').valueOf();
                         if (!(key in progress)) {
                             progress[key] = {};
-                            for (const defaultGoal of Goal.defaultGoals) {
+                            for (const defaultGoal of userDefaultGoals) {
                                 progress[key][defaultGoal.name] = 0;
                             }
                         }
@@ -244,7 +267,7 @@ export class GoalService {
                 let lastKey = startDate.endOf('day').valueOf().toString();
                 if (!(lastKey in goalHistory)) {
                     goalHistory[lastKey] = {};
-                    for (const defaultGoal of Goal.defaultGoals) {
+                    for (const defaultGoal of userDefaultGoals) {
                         goalHistory[lastKey][defaultGoal.name] = defaultGoal.toFirebaseObject();
                     }
                 }
@@ -254,7 +277,7 @@ export class GoalService {
 
                     if (!(key in goalHistory)) {
                         goalHistory[key] = {};
-                        for (const defaultGoal of Goal.defaultGoals) {
+                        for (const defaultGoal of userDefaultGoals) {
                             goalHistory[key][defaultGoal.name] = defaultGoal.toFirebaseObject();
                             if (lastKey && lastKey in goalHistory) {
                                 goalHistory[key][defaultGoal.name].target = goalHistory[lastKey][defaultGoal.name].target;
@@ -263,25 +286,28 @@ export class GoalService {
                     }
 
                     if (!(key in progress)) {
-                        for (const defaultGoal of Goal.defaultGoals) {
+                        for (const defaultGoal of userDefaultGoals) {
                             goalHistory[key][defaultGoal.name].current = 0;
                             goalHistory[key][defaultGoal.name].relative = 0;
 
                             if (defaultGoal.duration === 'weekly' && startDate.get('day') !== 1 && lastKey && lastKey in goalHistory) {
                                 const current = goalHistory[key][defaultGoal.name];
                                 current.current = goalHistory[lastKey][defaultGoal.name].current;
+                                current.target = defaultGoal.target;
                                 current.relative = current.current / current.target;
                             }
                         }
                     } else {
-                        for (const defaultGoal of Goal.defaultGoals) {
+                        for (const defaultGoal of userDefaultGoals) {
                             if (defaultGoal.duration === 'weekly' && startDate.get('day') !== 1 && lastKey in goalHistory) {
                                 const current = goalHistory[key][defaultGoal.name];
                                 current.current = progress[key][defaultGoal.name] + goalHistory[lastKey][defaultGoal.name].current;
+                                current.target = defaultGoal.target;
                                 current.relative = current.current / current.target;
                             } else {
                                 const current = goalHistory[key][defaultGoal.name];
                                 current.current = progress[key][defaultGoal.name];
+                                current.target = defaultGoal.target;
                                 current.relative = current.current / current.target;
                             }
                             if (goalHistory[key][defaultGoal.name].relative >= 1) {
