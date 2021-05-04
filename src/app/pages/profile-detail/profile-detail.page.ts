@@ -55,11 +55,12 @@ export class ProfileDetailPage implements OnInit {
         this.imageCollection = database.collection<MyData>('profilePic');
         this.images = this.imageCollection.valueChanges();
         this.username = this.userService.getUsername();
-        this.usertest = firebase.auth().currentUser.uid;
-        //  this.storage.ref(path)
-        this.usertestpath = `profilePic/${firebase.auth().currentUser.uid}`;
-        // this.router = router;
+
         this.currentUser = this.userService.getUser();
+        this.currentUser.subscribe(user => {
+            this.usertest = user.id;
+            this.usertestpath = `profilePic/${user.id}`;
+        });
 
         this.displayedActivities = this.activities.pipe(map(
             (data) => {

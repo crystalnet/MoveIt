@@ -297,7 +297,7 @@ export class LeaderboardDetailPage implements OnInit {
                 if(this.activitiesModerateOne.length > 9) {
                     this.activitiesModerateOne.length = 9;
                 }
-                this.activitiesModerateOne.push(new LeaderboardObject(firebase.auth().currentUser.uid, result[firebase.auth().currentUser.uid], this.publicUserData));
+                this.activitiesModerateOne.push(new LeaderboardObject(this.currentUser.id, result[this.currentUser.id], this.publicUserData));
                 this.activitiesModerateOne = this.sortArrays(this.activitiesModerateOne);
             });
     }
@@ -329,7 +329,7 @@ export class LeaderboardDetailPage implements OnInit {
                 if(this.activitiesModerateTwo.length > 9) {
                     this.activitiesModerateTwo.length = 9;
                 }
-                this.activitiesModerateTwo.push(new LeaderboardObject(firebase.auth().currentUser.uid, result[firebase.auth().currentUser.uid], this.publicUserData));
+                this.activitiesModerateTwo.push(new LeaderboardObject(this.currentUser.id, result[this.currentUser.id], this.publicUserData));
                 this.activitiesModerateTwo = this.sortArrays(this.activitiesModerateTwo);
             });
     }
@@ -377,7 +377,7 @@ export class LeaderboardDetailPage implements OnInit {
                 if(this.activitiesModerateThree.length > 9) {
                     this.activitiesModerateThree.length = 9;
                 }
-                this.activitiesModerateThree.push(new LeaderboardObject(firebase.auth().currentUser.uid, result[firebase.auth().currentUser.uid], this.publicUserData));
+                this.activitiesModerateThree.push(new LeaderboardObject(this.currentUser.id, result[this.currentUser.id], this.publicUserData));
                 this.activitiesModerateThree = this.sortArrays(this.activitiesModerateThree);
             });
     }
@@ -424,7 +424,7 @@ export class LeaderboardDetailPage implements OnInit {
                 if(this.activitiesModerateFour.length > 9) {
                     this.activitiesModerateFour.length = 9;
                 }
-                this.activitiesModerateFour.push(new LeaderboardObject(firebase.auth().currentUser.uid, result[firebase.auth().currentUser.uid], this.publicUserData));
+                this.activitiesModerateFour.push(new LeaderboardObject(this.currentUser.id, result[this.currentUser.id], this.publicUserData));
                 this.activitiesModerateFour = this.sortArrays(this.activitiesModerateFour);
             });
     }
