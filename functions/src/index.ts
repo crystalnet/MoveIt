@@ -46,11 +46,13 @@ exports.automaticNotifications = functions
                     console.log('randomization is ' + randomization);
                     let data = Promise.resolve(new NotificationData());
                     try {
-                        if (randomization < 0.25) {
+                        // if (randomization < 0.25) {
+                        if (randomization < 0.5) {
                             // if (randomization > 1) {
                             data = generateLeaderboardNotification(uid);
                             success = true;
-                        } else if (randomization < 0.50) {
+                        // } else if (randomization < 0.50) {
+                        } else if (randomization < 0) {
                             // } else if (randomization < 1) {
                             data = generateSocialfeedNotification(uid);
                             success = true;
@@ -61,9 +63,11 @@ exports.automaticNotifications = functions
                         console.log('received error' + err);
 
                         let type = 'default';
-                        if (randomization < 0.25) {
+                        // if (randomization < 0.25) {
+                        if (randomization < 0.5) {
                             type = 'leaderboard-notification';
-                        } else if (randomization < 0.5) {
+                        // } else if (randomization < 0.5) {
+                        } else if (randomization < 0) {
                             // } else if (randomization < 1) {
                             type = 'socialfeed-notification';
                         }
@@ -183,11 +187,12 @@ function generateLeaderboardNotification(uid: string) {
                 console.log('no results for weekly-active');
                 throw new Error('no results for weekly-active');
             }
-            const ranks = Object.keys(result).sort((a, b) => result[b] - result[a]);
-            const userRank = ranks.indexOf(uid) + 1;
+            // const ranks = Object.keys(result).sort((a, b) => result[b] - result[a]);
+            // const userRank = ranks.indexOf(uid) + 1;
 
             const data = new NotificationData();
-            data.header = 'Your rank is ' + userRank.toString();
+            // data.header = 'Your rank is ' + userRank.toString();
+            data.header = 'Check out the leaderboard';
             data.text = 'Check the leadboard to see how you compare to others!';
             data.target = 'menu/leaderboard/leaderboard/detail';
             data.type = 'leaderboard-notification';
