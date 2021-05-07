@@ -746,7 +746,7 @@ export class AdminDashboardExportPage implements OnInit {
                 }
             }
 
-            const previousDayKey = moment(timestamp).endOf('day').subtract(1, 'day').valueOf();
+            const previousDayKey = moment(parseInt(timestamp, 10)).endOf('day').subtract(1, 'day').valueOf();
             if (goalHistory[previousDayKey]) {
                 for (const goalId of Object.keys(goalHistory[previousDayKey])) {
                     const goal = goalHistory[previousDayKey][goalId];
